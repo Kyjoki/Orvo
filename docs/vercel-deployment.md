@@ -1,6 +1,8 @@
 # Vercel Production и Preview
 
-Действующий [Production](https://orvo-office.vercel.app) обновлён 19 октября 2026: deployment `dpl_8H2YwJ3RHsVT8zBnPB2HYWPePiKM`, target `production`, статус `READY`, код `1e88384`. Служебный immutable origin — `https://orvo-lqblt6riq-maksimcoj697-3405.vercel.app`. Домен закреплён за проектом как Production domain, без привязки к Preview-ветке. Экран входа общедоступен без Vercel SSO; сам офис доступен только владельцу по паролю и Google Authenticator.
+Действующий [Production](https://orvo-office.vercel.app) обновлён 19 октября 2026: deployment `dpl_4WzkrRNNrcJSQfsp5kGMZFCmqHix`, target `production`, статус `READY`, код `12c178d`. Служебный immutable origin — `https://orvo-qxfuwaesj-maksimcoj697-3405.vercel.app`. Домен закреплён за проектом как Production domain, без привязки к Preview-ветке. Экран входа общедоступен без Vercel SSO; сам офис доступен только владельцу по паролю и Google Authenticator.
+
+В этом выпуске добавлено подключение отдельного Telegram-бота. Миграция `010_telegram_connection.sql` применена к Production до переключения домена. Токен хранится только как серверный Production secret; пользователь привязывает личный чат командой `/start` со случайным кодом из настроек. После переключения проверены `/api/health` и отказ `/api/telegram` без входа. Адрес reconciler обновлён; [контрольный запуск](https://github.com/Kyjoki/Orvo/actions/runs/39289574147) завершился успешно. Привязка чата и получение тестового сообщения требуют действий владельца и пока не подтверждены. Источник сообщений WhatsApp не подключён.
 
 Предыдущий изолированный Preview сохранён: `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app` (`dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`). На момент его сборки UI был привязан к короткому адресу, поэтому старый UI может перенаправлять на Production. Глобальный `ORVO_PREVIEW_ORIGIN` снят: будущие Preview используют собственный immutable origin. Ресурсы и автоматизация двух окружений разделены.
 
