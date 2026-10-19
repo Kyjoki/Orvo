@@ -1,6 +1,8 @@
-# Vercel Preview
+# Vercel Production и Preview
 
-Действующий [Preview](https://orvo-office.vercel.app) имеет статус Vercel `READY`: deployment `dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`, target Preview. Его служебный immutable origin — `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app`. Cloud-сборки Next и eve прошли. Пользовательские страницы нового deployment перенаправляются на короткий alias. Первоначальные сценарии перечислены ниже, новые 2FA/backup/Queue проверки — в [hardening-test-report.md](hardening-test-report.md). Подробный прогресс — в [progress.md](progress.md).
+Действующий [Production](https://orvo-office.vercel.app) опубликован 19 октября 2026: deployment `dpl_2U68TSxqDEdzamoBKvtsJRotPu8u`, target `production`, статус `READY`, код `a2f8ca7`. Служебный immutable origin — `https://orvo-cgjd26ryw-maksimcoj697-3405.vercel.app`. Next/eve сборка заняла 42 секунды. Домен закреплён за проектом как Production domain, без привязки к Preview-ветке. Экран входа общедоступен без Vercel SSO; сам офис доступен только владельцу по паролю и Google Authenticator.
+
+Предыдущий изолированный Preview сохранён: `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app` (`dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`). На момент его сборки UI был привязан к короткому адресу, поэтому старый UI может перенаправлять на Production. Глобальный `ORVO_PREVIEW_ORIGIN` снят: будущие Preview используют собственный immutable origin. Ресурсы и автоматизация двух окружений разделены.
 
 ## Подтверждённая конфигурация
 
@@ -9,12 +11,14 @@
 | Ветка подготовки | `codex/vercel-readiness` |
 | Vercel | Проект `orvo`, ID `prj_9QjUU68PCCh8UpgApSxDMNcAfPlG` |
 | Команда / план | `maksimcoj697-3405`, Hobby |
-| База | Отдельная Neon Free `orvo-preview-db`, Франкфурт (`fra1`), подключена только к Preview |
-| Файлы | Private Blob `orvo-preview-files`, `fra1`, подключён только к Preview |
+| База Production | Отдельная Neon Free `orvo-production-db`, Франкфурт (`fra1`), только Production |
+| Файлы Production | Private Blob `orvo-production-files`, `fra1`, только Production |
+| Копии Production | Отдельный private Blob `orvo-production-backups`; его токен отсутствует в веб-приложении |
+| База / файлы Preview | Отдельные `orvo-preview-db` / private Blob `orvo-preview-files`, только Preview |
 | Приложение | Node.js 24.x, Next.js 16.4.2, eve 0.80.1, Next-centered `withEve` |
 | Сборка Vercel | `npm run build` → `next build`; интеграция формирует сервис приложения и eve runtime |
 | Сборка self-host | `npm run build:local` → `eve build && next build` |
-| Production | Действующий deployment не оставлен; отдельные ресурсы не подготовлены |
+| Production | `READY`, постоянный `orvo-office.vercel.app`, отдельное GitHub Environment `orvo-production-operations` |
 
 Владелец выбрал пустой облачный офис. Локальные БД, сотрудники, память, переписка и файлы не переносятся. Создание владельца не создаёт команду разработчиков: сотрудников внутри продукта владелец добавляет сам. Существующие локальные данные сохраняются.
 
@@ -24,11 +28,23 @@
 
 ## История первого deployment
 
-Первый запуск с `--target preview` Vercel фактически назначил Production. Чтобы исправить это, удалён именно `dpl_3uUBzrWNTkpbcQG8mkmEzXp84niu`. Проект, Neon и Blob сохранены. Сейчас действующего Production не оставлено; нельзя описывать историю как «Production никогда не публиковался». Текущий адрес выше относится к отдельному проверяемому Preview.
+Первый запуск с `--target preview` Vercel фактически назначил Production. Чтобы исправить это, удалён именно `dpl_3uUBzrWNTkpbcQG8mkmEzXp84niu`. Проект, Neon и Blob сохранены. После этапа проверок владелец отдельно разрешил полноценный Production-выпуск, описанный выше.
 
 ## Переменные и origin
 
-Необходимы `DATABASE_URL`, `BETTER_AUTH_SECRET`, `ORVO_RUNTIME_SECRET`, `BLOB_READ_WRITE_TOKEN` и ключ выбранного поставщика (`OPENAI_API_KEY` либо `AI_GATEWAY_API_KEY`). Подключения БД/Blob ограничены Preview. У Production должны быть собственные данные и секреты перед отдельным выпуском; перенос Preview-секретов туда не предполагается.
+Необходимы `DATABASE_URL`, `BETTER_AUTH_SECRET`, `ORVO_RUNTIME_SECRET`, `BLOB_READ_WRITE_TOKEN` и ключ выбранного поставщика (`OPENAI_API_KEY` либо `AI_GATEWAY_API_KEY`). DB/Blob подключены только к своему окружению. Production использует `BETTER_AUTH_URL=https://orvo-office.vercel.app`, `ORVO_REQUIRE_MFA=1`, `ORVO_TEST_MODE=0`, новые runtime/reconciler credentials и ключ архива. Совместимый `BETTER_AUTH_SECRET` сохранён для перенесённого TOTP; смена сломала бы его расшифровку. Перенос OpenAI-ключа в Production отдельно разрешён владельцем. Он не передаётся GitHub Actions.
+
+## Проверки первого Production-выпуска
+
+- В отдельную пустую базу восстановлена свежая зашифрованная копия Preview. Сверены 9 миграций, включённая MFA и совпадение отпечатка зашифрованной TOTP-записи. Сессии отозваны; исходные Preview-данные не изменялись. На момент переноса в личном офисе 0 агентов, задач и вложений.
+- Перед переключением прошли 15 групп HTTP/конфигурационных проверок; после переключения — ещё 6 публичных: вход без Vercel SSO, реальный режим, запрет чужих данных и CSRF, 403 на всех шести WAF probe paths, закрытые ops/runtime/Queue. Пароль владельца принят с обязательным Google Authenticator.
+- Один служебный wake пустого офиса отправлен в Queue региона `fra1` и принят consumer `/api/queues/runtime` с HTTP 200 в 14:20:11 UTC. Сотрудники, задачи и модельные запросы этим тестом не создавались. Это проверка транспорта/consumer, выполнение реальной модельной задачи в Production пока не проверено.
+- [CI релизного кода](https://github.com/Kyjoki/Orvo/actions/runs/39268135609), [Production reconciler](https://github.com/Kyjoki/Orvo/actions/runs/39268278293) и [первая Production-копия с проверкой целостности](https://github.com/Kyjoki/Orvo/actions/runs/39268136518) завершились success. CI включает TypeScript, 73 теста и сборку без модельных ключей.
+- Сканирование runtime error logs этого deployment за 14:03–14:23 UTC вернуло 0 записей. Это ограниченное окно наблюдения; внешний error tracking/оповещение о просроченной копии пока не подключены.
+
+После восстановления проверка модели намеренно сбрасывается. Серверный ключ настроен, доступ к каталогу и наличие GPT-6 Luna подтверждены без генерации. После входа владелец нажимает «Проверить подключение» в настройках и создаёт своих сотрудников. Полный пользовательский сценарий с реальной моделью в Production этим выпуском не объявляется проверенным.
+
+Для следующего релиза: подготовьте Production через `vercel deploy --prod --skip-domain`, проверьте именно его, затем `vercel promote <immutable-url>`. Обновите `ORVO_DEPLOYMENT_URL` в `orvo-production-operations` на новый immutable URL и проверьте reconciler. Не удаляйте прежний deployment с активными runtime-выполнениями. Изменения данных не откатываются переключением домена; DB restore выполняется только в изолированные ресурсы по инструкции восстановления.
 
 В Preview `appOrigin()` использует явно заданный точный HTTPS `ORVO_PREVIEW_ORIGIN`, иначе неизменяемый `https://VERCEL_URL`. `runtimeOrigin()` всегда использует текущий immutable deployment. Auth/CSRF доверяют только одному настроенному origin, а служебный вызов не уходит на Production или старую ветку. При заданном alias пользовательские страницы перенаправляются на него с сохранением пути и query; API, Queue и Eve продолжают работать на immutable origin. Произвольный branch alias автоматически не разрешается для входа.
 
@@ -48,7 +64,7 @@
 
 На Vercel процессный interval из instrumentation отключён. Команды публикуют wake в закрытый Vercel Queue consumer, SQL leases согласуют доставку, а принятое задание исполняется eve/Workflow. Отдельный GitHub reconciler восстанавливает разрыв между commit и публикацией; опрос состояния для доставки не нужен. Подробности и ограничения — в [launch-hardening.md](launch-hardening.md).
 
-Если первоначальная публикация сорвалась после фиксации БД, независимый `/ops/reconcile` повторно публикует pending outbox. Настроенный GitHub Environment привязан к точному Preview URL; после релиза URL обновляют отдельно. `after()` не используется как облачный scheduler.
+Если первоначальная публикация сорвалась после фиксации БД, независимый `/ops/reconcile` повторно публикует pending outbox. Окружения GitHub для Production и Preview привязаны каждое к своему точному immutable URL; после релиза обновляют URL соответствующего окружения. `after()` не используется как облачный scheduler.
 
 Вместо Hobby Cron используется резервный GitHub schedule каждые пять минут. Это не постоянный worker и не SLA: расписания GitHub могут задерживаться. Обычная доставка использует Vercel Queues; платный план ради scheduler не подключался.
 

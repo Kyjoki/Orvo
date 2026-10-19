@@ -8,7 +8,7 @@
 
 | Имя | Назначение |
 | --- | --- |
-| `DATABASE_URL` | PostgreSQL с TLS; для Preview подключена отдельная Neon Free |
+| `DATABASE_URL` | PostgreSQL с TLS; Production и Preview используют отдельные Neon Free проекты |
 | `BETTER_AUTH_SECRET` | Независимый случайный секрет сессий, минимум 32 символа |
 | `ORVO_RUNTIME_SECRET` | Отдельный служебный bearer, минимум 32 символа |
 | `BETTER_AUTH_URL` | Точный origin для собственного хоста/Production; Preview его игнорирует |
@@ -16,7 +16,7 @@
 | `ORVO_RUNTIME_URL` | Origin Next API на собственном хосте; на Vercel используется текущий `VERCEL_URL` |
 | `OPENAI_API_KEY` | Серверный ключ прямого OpenAI API |
 | `AI_GATEWAY_API_KEY` | Серверный ключ, если выбран Vercel AI Gateway |
-| `BLOB_READ_WRITE_TOKEN` | Серверный токен private Blob для Preview; не выдаётся браузеру |
+| `BLOB_READ_WRITE_TOKEN` | Серверный токен своего private Blob для Production или Preview; не выдаётся браузеру |
 | `ORVO_FILE_STORAGE` | `blob` для выбора Blob на отдельном хосте; на Vercel Blob выбирается автоматически |
 | `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET` | Альтернативное S3-совместимое хранилище вне Vercel |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Серверный доступ альтернативного S3 bucket |
@@ -29,11 +29,11 @@
 | `VERCEL_URL`, `VERCEL_ENV`, `VERCEL_OIDC_TOKEN` | Системное окружение Vercel; текущий host и доверенная служебная аутентификация |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Необязательный fallback для защиты front door; не заменяет bearer Orvo |
 
-Полная карта ресурсов, текущий READY Preview и история удалённого ошибочного Production deployment — [vercel-deployment.md](vercel-deployment.md). Действующий Production не оставлен; его отдельные ресурсы не подготовлены.
+Полная карта ресурсов, действующий Production на `https://orvo-office.vercel.app`, история Preview и результаты проверок — [vercel-deployment.md](vercel-deployment.md). Production имеет собственные DB/Blob, ключи очереди и резервного архива. Его GitHub workflows используют закрытое окружение `orvo-production-operations`, доступное только ветке `main`.
 
 ## Первичная настройка
 
-1. Подготовьте отдельную PostgreSQL и private Blob либо приватное S3-хранилище. Для выбранного Preview ресурсы уже созданы, повторно создавать их не требуется.
+1. Подготовьте отдельную PostgreSQL и private Blob либо приватное S3-хранилище. Для действующих Production и Preview ресурсы уже созданы, повторно создавать их не требуется.
 2. Задайте секреты только нужному окружению; отключите `ORVO_TEST_MODE` вне localhost.
 3. В доверенном административном окружении выполните миграции домена и Better Auth, затем однократный `owner:create`. README содержит пример скрытого ввода пароля. Скрипты npm читают локальный `.env.local`; для cloud bootstrap используйте целевые переменные процесса и эквивалентный вызов `node --import tsx scripts/migrate.ts` / `scripts/create-owner.ts`, без копирования локальной БД.
 4. Удалите bootstrap-пароль из рабочего окружения после создания владельца. Публичного initial-setup или регистрации нет.

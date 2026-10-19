@@ -1,6 +1,6 @@
 # Orvo
 
-Закрытый облачный Preview: [orvo-office.vercel.app](https://orvo-office.vercel.app). Вход владельца — пароль и Google Authenticator.
+Рабочая версия Production: [orvo-office.vercel.app](https://orvo-office.vercel.app). Личный офис одного владельца: вход по паролю и Google Authenticator, публичная регистрация закрыта. Результаты выпуска и эксплуатация — [Vercel](docs/vercel-deployment.md).
 
 Личный веб-офис ИИ-агентов для подготовки требований, архитектурных предложений, кода, тест-кейсов и документации по материалам владельца. React/TypeScript, Next.js, eve, PostgreSQL и OpenAI API / Vercel AI Gateway. Основа интерфейса — предоставленный HTML-макет: изометрический офис, тёмная и светлая темы, список агентов и мобильная навигация.
 

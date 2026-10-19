@@ -1,16 +1,24 @@
 # 2FA, резервные копии и фоновая очередь
 
-Проверено 19 октября 2026. Orvo остаётся личным офисом одного владельца с закрытой регистрацией. Preview и публичный Production — разные окружения.
+Проверено 19 октября 2026. Orvo остаётся личным офисом одного владельца с закрытой регистрацией. Production опубликован на `https://orvo-office.vercel.app`; Preview использует отдельные ресурсы. Результаты выпуска — [vercel-deployment.md](vercel-deployment.md).
 
-## Постоянный адрес Preview
+## Production
 
-Выбранный владельцем адрес — `https://orvo-office.vercel.app`. Переменная `ORVO_PREVIEW_ORIGIN` задана только в Vercel Preview и определяет единственный доверенный HTTPS origin для Better Auth и CSRF. Если её нет, Preview использует собственный immutable URL; production `BETTER_AUTH_URL` на Preview по-прежнему не переносится автоматически. В Production эта переменная игнорируется.
+Production domain закреплён за проектом, вход доступен без Vercel SSO, данные защищены паролем и обязательным Google Authenticator. `BETTER_AUTH_URL` задаёт точный доверенный origin, runtime всегда использует свой immutable deployment. DB и оба private Blob store изолированы от Preview; токен архивного store отсутствует в веб-приложении. Существующий TOTP перенесён с совместимым auth secret, старые сессии завершены.
+
+Отдельное main-only окружение GitHub `orvo-production-operations` содержит те же шесть видов служебных секретов из таблицы ниже, но с Production-значениями. Workflows `production-operations.yml` проверяет outbox раз в пять минут, `production-backups.yml` создаёт зашифрованную копию в 22:43 UTC (03:43 Asia/Qyzylorda) и хранит 14 дней. Первые реальные runs обоих процессов завершились success. Расписание GitHub может задерживаться.
+
+Служебный wake пустого офиса прошёл через Production Queue до HTTP 200. Реальные модельные задачи в Production пока не запускались. После миграции требуется проверка модели через настройки владельца. Обзор эксплуатационных ограничений в конце документа продолжает действовать.
+
+## История адреса Preview
+
+До Production-выпуска выбранный владельцем адрес `https://orvo-office.vercel.app` использовался как Preview alias через `ORVO_PREVIEW_ORIGIN`. Теперь этот адрес принадлежит Production, а глобальная Preview-переменная снята. Для нового независимого Preview можно явно задать его собственный точный HTTPS origin; без переменной используется immutable URL. Production `BETTER_AUTH_URL` на Preview не переносится автоматически. В Production `ORVO_PREVIEW_ORIGIN` игнорируется.
 
 UI страницы с длинного адреса новой сборки перенаправляются на alias с сохранением пути и параметров. API, `/ops`, `/eve` и Queue callbacks не перенаправляются. Внутренние RPC и секретные заголовки остаются привязаны к immutable origin. Host и forwarding headers не задают доверенные origins.
 
-После нового релиза проверьте READY, затем назначьте alias новой проверенной сборке через `vercel alias set <deployment-url> orvo-office.vercel.app --scope <team>`. Обновите GitHub Environment `ORVO_DEPLOYMENT_URL` на её immutable origin и проверьте reconciler. Наличие manual alias не означает его автоматическое обновление при каждом CLI deploy. Для независимых Preview с другим адресом требуется отдельная настройка `ORVO_PREVIEW_ORIGIN` в целевой ветке.
+Адрес `orvo-office.vercel.app` больше не назначается Preview-сборкам. Используйте другой изолированный Preview alias либо immutable URL и отдельное значение `ORVO_PREVIEW_ORIGIN` при необходимости. Для нового Preview обновляйте URL только в GitHub Environment `orvo-preview-operations`; Production имеет собственное окружение и релизный порядок.
 
-Переход на новый hostname требует повторного входа из-за host-only cookies. Существующие пароль, Google Authenticator и данные владельца сохраняются. Vercel Authentication также действует на alias; переход к публичному Production не выполнялся.
+Переход между hostname требует повторного входа из-за host-only cookies. При Production-миграции сессии дополнительно отозваны; пароль и Google Authenticator сохранены. Vercel Authentication продолжает защищать Preview, а Production domain открывает только экран входа Orvo.
 
 ## Двухфакторный вход
 
@@ -80,6 +88,6 @@ node --import tsx scripts/restore.ts --archive /private/orvo.orvobak --dry-run
 - Пятиминутный reconciler является резервом, обычная доставка идёт через Vercel Queue. Редкие неопределённые исходы требуют ручной сверки.
 - Скрипт рассчитан максимум на 500 готовых вложений по 10 MiB. Нужны место на runner и квота хранилища; увеличение объёма требует проверки лимитов.
 - Native restore history Neon не заменяет отдельные копии файлов и зашифрованный архив.
-- Production получает отдельные БД, файловое хранилище и серверные секреты. Перенос ключа модели в Production и публичное продвижение не выполняются автоматически.
+- Production использует отдельные БД, файловое хранилище и служебные секреты. Перенос ключа модели и первый публичный выпуск выполнены по отдельному разрешению владельца; последующие публикации требуют явного релизного действия.
 
 Первичные ограничения платформ: [Vercel Queues](https://vercel.com/docs/queues), [GitHub scheduled workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule), [Neon history window](https://neon.com/docs/postgres/backup-restore/history-window).
