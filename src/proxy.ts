@@ -1,8 +1,20 @@
 import { randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { contentSecurityPolicy } from './server/security-headers';
+import { appOrigin } from './server/app-origin';
 
 export function proxy(request: NextRequest) {
+  if(process.env.VERCEL && process.env.VERCEL_ENV==='preview' && process.env.ORVO_PREVIEW_ORIGIN){
+    const canonical=appOrigin();
+    if(request.nextUrl.origin!==canonical){
+      const destination=new URL(canonical);
+      destination.pathname=request.nextUrl.pathname;
+      destination.search=request.nextUrl.search;
+      const response=NextResponse.redirect(destination,307);
+      response.headers.set('Cache-Control','private, no-store');
+      return response;
+    }
+  }
   const nonce=randomBytes(24).toString('base64');
   const policy=contentSecurityPolicy(nonce,process.env.NODE_ENV==='development');
   const headers=new Headers(request.headers);

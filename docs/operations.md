@@ -11,7 +11,8 @@
 | `DATABASE_URL` | PostgreSQL с TLS; для Preview подключена отдельная Neon Free |
 | `BETTER_AUTH_SECRET` | Независимый случайный секрет сессий, минимум 32 символа |
 | `ORVO_RUNTIME_SECRET` | Отдельный служебный bearer, минимум 32 символа |
-| `BETTER_AUTH_URL` | Точный origin для собственного хоста/Production; Preview использует `https://VERCEL_URL` |
+| `BETTER_AUTH_URL` | Точный origin для собственного хоста/Production; Preview его игнорирует |
+| `ORVO_PREVIEW_ORIGIN` | Необязательный точный HTTPS origin входа в Preview; без него используется `https://VERCEL_URL`. Production его игнорирует |
 | `ORVO_RUNTIME_URL` | Origin Next API на собственном хосте; на Vercel используется текущий `VERCEL_URL` |
 | `OPENAI_API_KEY` | Серверный ключ прямого OpenAI API |
 | `AI_GATEWAY_API_KEY` | Серверный ключ, если выбран Vercel AI Gateway |

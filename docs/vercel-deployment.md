@@ -1,6 +1,6 @@
 # Vercel Preview
 
-Действующий [Preview](https://orvo-jh3adr8kj-maksimcoj697-3405.vercel.app) имеет статус Vercel `READY`: deployment `dpl_FWH2h9iopyAmdHr9UjtDWPyLQJj6`, target Preview. Cloud-сборки Next и eve прошли. Первоначальные сценарии перечислены ниже, новые 2FA/backup/Queue проверки — в [hardening-test-report.md](hardening-test-report.md). Подробный прогресс — в [progress.md](progress.md).
+Действующий [Preview](https://orvo-office.vercel.app) имеет статус Vercel `READY`: deployment `dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`, target Preview. Его служебный immutable origin — `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app`. Cloud-сборки Next и eve прошли. Пользовательские страницы нового deployment перенаправляются на короткий alias. Первоначальные сценарии перечислены ниже, новые 2FA/backup/Queue проверки — в [hardening-test-report.md](hardening-test-report.md). Подробный прогресс — в [progress.md](progress.md).
 
 ## Подтверждённая конфигурация
 
@@ -30,7 +30,7 @@
 
 Необходимы `DATABASE_URL`, `BETTER_AUTH_SECRET`, `ORVO_RUNTIME_SECRET`, `BLOB_READ_WRITE_TOKEN` и ключ выбранного поставщика (`OPENAI_API_KEY` либо `AI_GATEWAY_API_KEY`). Подключения БД/Blob ограничены Preview. У Production должны быть собственные данные и секреты перед отдельным выпуском; перенос Preview-секретов туда не предполагается.
 
-В Preview `appOrigin()` и `runtimeOrigin()` берут точный неизменяемый `https://VERCEL_URL`. Поэтому auth/CSRF не доверяют всем `*.vercel.app`, а служебный вызов не уходит на Production или старую ветку. Переход на другой deployment-host означает другой origin; нельзя считать branch alias автоматически разрешённым origin входа.
+В Preview `appOrigin()` использует явно заданный точный HTTPS `ORVO_PREVIEW_ORIGIN`, иначе неизменяемый `https://VERCEL_URL`. `runtimeOrigin()` всегда использует текущий immutable deployment. Auth/CSRF доверяют только одному настроенному origin, а служебный вызов не уходит на Production или старую ветку. При заданном alias пользовательские страницы перенаправляются на него с сохранением пути и query; API, Queue и Eve продолжают работать на immutable origin. Произвольный branch alias автоматически не разрешается для входа.
 
 Внутренний RPC посылает bearer Orvo и `x-vercel-trusted-oidc-idp-token` только текущему deployment origin. OIDC проходит front-door protection Vercel, bearer отдельно защищает данные и операции Orvo. Для окружений без OIDC предусмотрен серверный `VERCEL_AUTOMATION_BYPASS_SECRET`; его наличие не заявляется и он не заменяет собственную авторизацию приложения.
 

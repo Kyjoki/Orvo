@@ -20,6 +20,12 @@ Workflows находятся на `main`, имеют state `active`, закры�
 
 Владелец завершил подключение Google Authenticator: сервер подтвердил `twoFactorEnabled=true` и grant проверенной сессии. По его последующему запросу резервные коды удалены из UI и отключены на сервере. Миграция 009 отозвала прежние коды, сохранив TOTP. Повторные 71/71 тест, TypeScript и независимое ревью прошли; новая облачная сборка READY. Пять облачных групп проверок подтвердили health, 403 для проверки/создания резервных кодов, требование TOTP после пароля, работу reconciler и закрытый Queue ingress.
 
-Текущий Preview: `https://orvo-jh3adr8kj-maksimcoj697-3405.vercel.app` (`dpl_FWH2h9iopyAmdHr9UjtDWPyLQJj6`). Три старые версии (mvcjdbxyh, 5ou0pcjzm, mpjy0hsup) удалены по отдельному явному разрешению владельца; их прежние auth routes больше не доступны. Чистая копия [после удаления QA](https://github.com/Kyjoki/Orvo/actions/runs/39259377657) прошла.
+Preview на этапе отключения резервных кодов: `https://orvo-jh3adr8kj-maksimcoj697-3405.vercel.app` (`dpl_FWH2h9iopyAmdHr9UjtDWPyLQJj6`). Три старые версии (mvcjdbxyh, 5ou0pcjzm, mpjy0hsup) удалены по отдельному явному разрешению владельца; их прежние auth routes больше не доступны. Чистая копия [после удаления QA](https://github.com/Kyjoki/Orvo/actions/runs/39259377657) прошла.
 
 Остаются границы публичного запуска: отдельное окружение Production и финальная проверка его подключений. Внешнее оповещение о просроченной копии не подключено. В зависимостях остаются три moderate предупреждения `eve → just-bash → sprintf-js`, high/critical в предыдущем audit не было; shell-инструмент запрещён. Это не гарантия отсутствия уязвимостей.
+
+## Смена пользовательского адреса на orvo-office.vercel.app
+
+По выбору владельца успешно назначен alias `https://orvo-office.vercel.app`, затем переключён на READY `dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`. Служебный origin — `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app`.
+
+TypeScript и 73/73 теста прошли. Отдельный ревьюер проверил новую логику origin и перенаправления; блокеров нет. Девять облачных групп подтвердили Vercel Authentication, отсутствие redirect loop, nonce CSP, редирект UI с путём/query, запрет анонимных API и резервного входа, точную CSRF проверку, принятие пароля с обязательным TOTP, работающий reconciler, Eve health/runtime bearer gate и private Queue consumer. Новых платных модельных вызовов не было.

@@ -2,6 +2,16 @@
 
 Проверено 19 октября 2026. Orvo остаётся личным офисом одного владельца с закрытой регистрацией. Preview и публичный Production — разные окружения.
 
+## Постоянный адрес Preview
+
+Выбранный владельцем адрес — `https://orvo-office.vercel.app`. Переменная `ORVO_PREVIEW_ORIGIN` задана только в Vercel Preview и определяет единственный доверенный HTTPS origin для Better Auth и CSRF. Если её нет, Preview использует собственный immutable URL; production `BETTER_AUTH_URL` на Preview по-прежнему не переносится автоматически. В Production эта переменная игнорируется.
+
+UI страницы с длинного адреса новой сборки перенаправляются на alias с сохранением пути и параметров. API, `/ops`, `/eve` и Queue callbacks не перенаправляются. Внутренние RPC и секретные заголовки остаются привязаны к immutable origin. Host и forwarding headers не задают доверенные origins.
+
+После нового релиза проверьте READY, затем назначьте alias новой проверенной сборке через `vercel alias set <deployment-url> orvo-office.vercel.app --scope <team>`. Обновите GitHub Environment `ORVO_DEPLOYMENT_URL` на её immutable origin и проверьте reconciler. Наличие manual alias не означает его автоматическое обновление при каждом CLI deploy. Для независимых Preview с другим адресом требуется отдельная настройка `ORVO_PREVIEW_ORIGIN` в целевой ветке.
+
+Переход на новый hostname требует повторного входа из-за host-only cookies. Существующие пароль, Google Authenticator и данные владельца сохраняются. Vercel Authentication также действует на alias; переход к публичному Production не выполнялся.
+
 ## Двухфакторный вход
 
 - В облаке второй фактор обязателен по умолчанию; явно задаётся `ORVO_REQUIRE_MFA=1`.
