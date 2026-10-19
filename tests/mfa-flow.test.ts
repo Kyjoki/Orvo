@@ -1,6 +1,7 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { createOTP } from '@better-auth/utils/otp';
 import { base32 } from '@better-auth/utils/base32';
 
@@ -14,7 +15,7 @@ delete process.env.DATABASE_URL;
 delete process.env.ORVO_TEST_DB_DIR;
 delete process.env.VERCEL;
 
-const { migrate, getDatabase }=await import('../src/server/db');
+const { migrate, getDatabase, query }=await import('../src/server/db');
 const { getAuth }=await import('../src/server/auth');
 const { getMigrations }=await import('better-auth/db/migration');
 const { createOwner }=await import('../src/server/owner');
@@ -44,7 +45,7 @@ function ownerRequest(jar:Jar){return new Request('http://127.0.0.1:3000/api/sta
 async function manage(jar:Jar,body:Record<string,unknown>){return managePost(new Request('http://127.0.0.1:3000/api/security/manage',{method:'POST',headers:{origin:'http://127.0.0.1:3000','content-type':'application/json',cookie:cookie(jar)},body:JSON.stringify(body)}));}
 after(async()=>{const database=await getDatabase();if(database.kind==='pglite')await database.db.close();else await database.pool.end();});
 
-test('unconfirmed enrollment stays gated; verified session works; stale session and TOTP replay fail',async()=>{
+test('TOTP-only enrollment, stale sessions, replay, and legacy recovery-code revocation',async()=>{
   await migrate();const auth=await getAuth();await (await getMigrations(auth.options)).runMigrations();
   await createOwner(fixtureEmail,fixturePassword,'Fixture Owner');
   const jar:Jar=new Map();
@@ -61,8 +62,7 @@ test('unconfirmed enrollment stays gated; verified session works; stale session 
   assert.equal(enrollment.status,200);
   const enrollmentData=await enrollment.json();
   assert.equal(typeof enrollmentData.totpURI,'string');
-  assert.ok(Array.isArray(enrollmentData.backupCodes));
-  const backupCode=enrollmentData.backupCodes[0] as string;
+  assert.deepEqual(enrollmentData.backupCodes,[]);
   const secret=new URL(enrollmentData.totpURI).searchParams.get('secret')!;
   assert.equal((await (await statusGet(ownerRequest(jar))).json()).enabled,false);
   await assert.rejects(requireOwner(ownerRequest(jar)),(error:any)=>error.code==='MFA_REQUIRED');
@@ -84,24 +84,25 @@ test('unconfirmed enrollment stays gated; verified session works; stale session 
   const thirdJar:Jar=new Map();
   const thirdLogin=await post(thirdJar,'sign-in/email',{email:fixtureEmail,password:fixturePassword});
   assert.equal((await thirdLogin.json()).twoFactorRedirect,true);
-  const recovered=await post(thirdJar,'two-factor/verify-backup-code',{code:backupCode,trustDevice:true});
-  assert.equal(recovered.status,200);
-  assert.equal((await(await statusGet(ownerRequest(thirdJar))).json()).verifiedSession,true);
-  const fourthJar:Jar=new Map();
-  const fourthLogin=await post(fourthJar,'sign-in/email',{email:fixtureEmail,password:fixturePassword});
-  assert.equal((await fourthLogin.json()).twoFactorRedirect,true);
-  const reusedBackup=await post(fourthJar,'two-factor/verify-backup-code',{code:backupCode});
-  assert.equal(reusedBackup.ok,false);
-  assert.equal((await post(thirdJar,'two-factor/disable',{password:fixturePassword})).status,403);
+  assert.equal((await post(thirdJar,'two-factor/verify-backup-code',{code:'legacy-fixture-code'})).status,403);
+  assert.equal((await post(jar,'two-factor/generate-backup-codes',{password:fixturePassword})).status,403);
+  assert.equal((await manage(jar,{action:'regenerate',password:fixturePassword,code:'000000'})).status,400);
+  const storedBefore=(await query<{secret:string}>('SELECT secret FROM "twoFactor" LIMIT 1')).rows[0].secret;
+  await query('UPDATE "twoFactor" SET "backupCodes"=$1',['legacy-fixture-value']);
+  const sql=await readFile('migrations/009_revoke_backup_codes.sql','utf8');
+  const database=await getDatabase();
+  if(database.kind!=='pglite')throw new Error('Expected isolated PGlite fixture.');
+  await database.db.exec(sql);
+  const storedAfter=(await query<{secret:string;backupCodes:string}>('SELECT secret,"backupCodes" FROM "twoFactor" LIMIT 1')).rows[0];
+  assert.equal(storedAfter.backupCodes,'');
+  assert.equal(storedAfter.secret,storedBefore);
+  assert.equal((await post(thirdJar,'two-factor/verify-backup-code',{code:'legacy-fixture-code'})).status,403);
   const currentTime=Date.now;
   try{
     Date.now=()=>currentTime()+90_000;
     const freshCode=await createOTP(new TextDecoder().decode(base32.decode(secret))).totp();
-    const regenerated=await manage(thirdJar,{action:'regenerate',password:fixturePassword,code:freshCode});
-    assert.equal(regenerated.status,200,JSON.stringify(await regenerated.clone().json()));
-    const replacement=await regenerated.json();
-    assert.ok(Array.isArray(replacement.backupCodes)&&replacement.backupCodes.length>0);
-    assert.ok(!replacement.backupCodes.includes(backupCode));
+    assert.equal((await post(thirdJar,'two-factor/verify-totp',{code:freshCode})).status,200);
+    assert.equal((await(await statusGet(ownerRequest(thirdJar))).json()).verifiedSession,true);
   }finally{Date.now=currentTime;}
   process.env.VERCEL='1';
   try{

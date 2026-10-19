@@ -17,7 +17,7 @@ export async function POST(request:Request) {
     const {body}=await rebuildBoundedAuthPost(request);
     if(!body||typeof body!=='object'||Array.isArray(body))throw new DomainError('INVALID_JSON','Ожидается объект JSON.',400);
     const endpoint=new URL(request.url).pathname.split('/api/auth/')[1]||'';
-    if(!new Set(['sign-in/email','two-factor/enable','two-factor/verify-totp','two-factor/verify-backup-code','sign-out']).has(endpoint))
+    if(!new Set(['sign-in/email','two-factor/enable','two-factor/verify-totp','sign-out']).has(endpoint))
       throw new DomainError('AUTH_ENDPOINT_DISABLED','Этот метод авторизации недоступен.',403);
     if(endpoint==='two-factor/enable'){
       const {session}=await requireOwnerSession(request);
@@ -29,18 +29,17 @@ export async function POST(request:Request) {
       const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase().slice(0, 320) : '';
       await consumeRateLimit('login-email', email || 'invalid-email', 12, 15 * 60);
     }
-    if(endpoint==='two-factor/verify-totp'||endpoint==='two-factor/verify-backup-code'){
+    if(endpoint==='two-factor/verify-totp'){
       // A password-only session predating MFA remains active while it waits for step-up.
       // Better Auth's sign-in lockout does not cover that authenticated branch.
       const existing=await (await getAuth()).api.getSession({headers:request.headers});
       if(existing)await consumeRateLimit('mfa-user',existing.user.id,6,15*60);
       body.trustDevice=false;
-      if(endpoint==='two-factor/verify-backup-code')body.disableSession=false;
     }
     const headers=new Headers(request.headers);headers.delete('content-length');
     const forwarded=new Request(request.url,{method:'POST',headers,body:JSON.stringify(body),signal:request.signal});
     const response=normalizeAuthRateResponse(await (await getAuth()).handler(forwarded));
-    if(response.ok&&(endpoint==='two-factor/verify-totp'||endpoint==='two-factor/verify-backup-code')){
+    if(response.ok&&endpoint==='two-factor/verify-totp'){
       const cookies=new Map<string,string>();
       for(const part of (request.headers.get('cookie')||'').split(';')){const index=part.indexOf('=');if(index>0)cookies.set(part.slice(0,index).trim(),part.slice(index+1).trim());}
       for(const header of response.headers.getSetCookie()){
@@ -50,7 +49,7 @@ export async function POST(request:Request) {
       }
       const session=await (await getAuth()).api.getSession({headers:new Headers({cookie:[...cookies].map(([key,value])=>`${key}=${value}`).join('; ')})});
       if(!session)throw new DomainError('MFA_VERIFICATION_FAILED','Не удалось подтвердить второй фактор.',403);
-      try{await grantVerifiedSession(session.session.id,session.user.id,endpoint==='two-factor/verify-totp'?'totp':'backup',body.code);}
+      try{await grantVerifiedSession(session.session.id,session.user.id,body.code);}
       catch(error){await query('DELETE FROM "session" WHERE id=$1',[session.session.id]).catch(()=>{});throw error;}
     }
     return response;

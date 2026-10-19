@@ -13,16 +13,14 @@ export async function mfaStatus(session: { user: { id:string; twoFactorEnabled?:
   return {required,enabled,verifiedSession:!!grant,setupRequired:required&&!enabled,stepUpRequired:enabled&&!grant};
 }
 
-export async function grantVerifiedSession(sessionId:string,userId:string, factor:'totp'|'backup', code?:string) {
+export async function grantVerifiedSession(sessionId:string,userId:string, code:string) {
   if (!sessionId || !userId) throw new DomainError('MFA_VERIFICATION_FAILED','Не удалось подтвердить второй фактор.',403);
   const found=(await query<{id:string;userId:string;twoFactorEnabled:boolean}>(
     'SELECT s.id,s."userId",u."twoFactorEnabled" FROM "session" s JOIN "user" u ON u.id=s."userId" WHERE s.id=$1 AND s."userId"=$2 AND s."expiresAt">now()', [sessionId,userId]
   )).rows[0];
   if(!found?.twoFactorEnabled)throw new DomainError('MFA_VERIFICATION_FAILED','Не удалось подтвердить второй фактор.',403);
-  if(factor==='totp'){
-    if(!code||!/^[0-9]{6}$/.test(code))throw new DomainError('MFA_VERIFICATION_FAILED','Некорректный код подтверждения.',403);
-    await consumeTotpOnce(found.userId,code);
-  }
+  if(!/^[0-9]{6}$/.test(code))throw new DomainError('MFA_VERIFICATION_FAILED','Некорректный код подтверждения.',403);
+  await consumeTotpOnce(found.userId,code);
   await query('INSERT INTO mfa_session_grants(session_id,user_id) VALUES($1,$2) ON CONFLICT(session_id) DO NOTHING',[found.id,found.userId]);
   return found;
 }

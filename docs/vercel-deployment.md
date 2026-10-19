@@ -1,6 +1,6 @@
 # Vercel Preview
 
-Действующий [Preview](https://orvo-mpjy0hsup-maksimcoj697-3405.vercel.app) имеет статус Vercel `READY`: deployment `dpl_CDDyyDTTjaajgsz9Qef1nHbhDxcn`, target Preview. Cloud-сборки Next и eve прошли. Первоначальные сценарии перечислены ниже, новые 2FA/backup/Queue проверки — в [hardening-test-report.md](hardening-test-report.md). Подробный прогресс — в [progress.md](progress.md).
+Действующий [Preview](https://orvo-jh3adr8kj-maksimcoj697-3405.vercel.app) имеет статус Vercel `READY`: deployment `dpl_FWH2h9iopyAmdHr9UjtDWPyLQJj6`, target Preview. Cloud-сборки Next и eve прошли. Первоначальные сценарии перечислены ниже, новые 2FA/backup/Queue проверки — в [hardening-test-report.md](hardening-test-report.md). Подробный прогресс — в [progress.md](progress.md).
 
 ## Подтверждённая конфигурация
 
