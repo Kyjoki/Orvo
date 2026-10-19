@@ -1,6 +1,6 @@
 # Vercel Preview
 
-Действующий [Preview](https://orvo-5ou0pcjzm-maksimcoj697-3405.vercel.app) имеет статус Vercel `READY`: deployment `dpl_H1ARRSYz9tiK5CS671xScHCQFFyY`, target `preview`. Cloud-сборки Next и eve прошли. Подтверждённые сценарии и оставшиеся ограничения разделены ниже; это не гарантия проверки всего продукта. Подробные результаты — в [progress.md](progress.md).
+Действующий [Preview](https://orvo-mpjy0hsup-maksimcoj697-3405.vercel.app) имеет статус Vercel `READY`: deployment `dpl_CDDyyDTTjaajgsz9Qef1nHbhDxcn`, target Preview. Cloud-сборки Next и eve прошли. Первоначальные сценарии перечислены ниже, новые 2FA/backup/Queue проверки — в [hardening-test-report.md](hardening-test-report.md). Подробный прогресс — в [progress.md](progress.md).
 
 ## Подтверждённая конфигурация
 
@@ -46,11 +46,11 @@
 
 ## Durable выполнение и оставшийся разрыв
 
-На Vercel процессный interval из instrumentation отключён. Команды и чтение состояния регистрируют `after(() => drainRuntime(...))`: outbox переживает ответ HTTP, SQL lease согласует доставку, а принятое задание исполняется eve/Workflow.
+На Vercel процессный interval из instrumentation отключён. Команды публикуют wake в закрытый Vercel Queue consumer, SQL leases согласуют доставку, а принятое задание исполняется eve/Workflow. Отдельный GitHub reconciler восстанавливает разрыв между commit и публикацией; опрос состояния для доставки не нужен. Подробности и ограничения — в [launch-hardening.md](launch-hardening.md).
 
-Если доставка сорвалась и новых запросов больше нет, pending outbox может ждать следующего запроса. Это относится и к ещё не доставленным управляющим командам; нельзя обещать их самостоятельное выполнение в idle Preview. `after()` не является периодическим scheduler.
+Если первоначальная публикация сорвалась после фиксации БД, независимый `/ops/reconcile` повторно публикует pending outbox. Настроенный GitHub Environment привязан к точному Preview URL; после релиза URL обновляют отдельно. `after()` не используется как облачный scheduler.
 
-Hobby Cron запускается только в Production и не чаще раза в сутки; для своевременного пробуждения Preview он не подходит. Другой scheduler или платное изменение плана не настроены. До закрытия этого разрыва не обещайте автономный старт без запросов, постоянный worker или гарантированное время восстановления.
+Вместо Hobby Cron используется резервный GitHub schedule каждые пять минут. Это не постоянный worker и не SLA: расписания GitHub могут задерживаться. Обычная доставка использует Vercel Queues; платный план ради scheduler не подключался.
 
 ## Подтверждённые проверки
 
@@ -65,6 +65,6 @@ Hobby Cron запускается только в Production и не чаще р
 
 ## Оставшиеся проверки и ограничения
 
-Финальная проверка чистого браузера после QA-очистки завершена; подробности — в [vercel-test-report.md](vercel-test-report.md). Проверенный единичный Workflow не подтверждает все конкурентные решения, cloud restart, восстановление между сборками и idle outbox. Последний разрыв описан выше; scheduler не настроен. MFA не реализована, Production backups и выпуск не подготовлены. Новый Production требует отдельного решения о ресурсах, данных, секретах и проверках.
+Первоначальная проверка Preview описана в [vercel-test-report.md](vercel-test-report.md); последующие 2FA, копии и очередь проверены отдельно в [hardening-test-report.md](hardening-test-report.md). Подключение TOTP владельцем остаётся обязательным ручным шагом. Новый Production требует отдельных ресурсов, секретов и финальной проверки.
 
 Основа topology — установленные `node_modules/eve/docs/guides/frontend/nextjs.mdx` и `guides/deployment/vercel.mdx`. Платформенные ограничения сверяются с [Vercel Cron usage](https://vercel.com/docs/cron-jobs/usage-and-pricing); реализованные ограничения приложения — в [security.md](security.md).

@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "functions": {
+    "src/app/api/queues/runtime/route.ts": {
+      "experimentalTriggers": [{ "type": "queue/v2beta", "topic": "orvo-runtime" }]
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
+import { twoFactor } from 'better-auth/plugins';
 import { Kysely } from 'kysely';
 import { authDialect } from './auth-database';
 import { appOrigin } from './app-origin';
@@ -19,7 +20,7 @@ async function createAuth() {
     rateLimit:{enabled:true,window:60,max:30,storage:'database'},
     advanced:{useSecureCookies:new URL(origin).protocol==='https:' || process.env.NODE_ENV === 'production'},
     trustedOrigins:[origin],
-    plugins:[nextCookies()]
+    plugins:[twoFactor({issuer:'Orvo',skipVerificationOnEnable:false,backupCodeOptions:{storeBackupCodes:'encrypted'},accountLockout:{enabled:true,maxFailedAttempts:5,durationSeconds:900}}),nextCookies()]
   });
 }
 export function getAuth() { return instance ??= createAuth(); }

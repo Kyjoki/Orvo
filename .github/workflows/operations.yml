@@ -1,0 +1,30 @@
+name: Orvo Preview operations
+
+on:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orvo-preview-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    environment: orvo-preview-operations
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reconcile persisted runtime outbox
+        run: node scripts/reconcile.mjs
+        env:
+          ORVO_DEPLOYMENT_URL: ${{ vars.ORVO_DEPLOYMENT_URL }}
+          ORVO_RECONCILE_SECRET: ${{ secrets.ORVO_RECONCILE_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}

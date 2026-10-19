@@ -1,8 +1,9 @@
 import { headers } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import OrvoApp from '@/components/OrvoApp';
-import { getAuth } from '@/server/auth';
 import { appOrigin } from '@/server/app-origin';
+import { requireOwnerSession } from '@/server/http';
+import { mfaStatus } from '@/server/mfa';
 export const dynamic = 'force-dynamic';
 export default async function WorkspacePage({params}:{params:Promise<{path:string[]}>}) {
   const {path} = await params;
@@ -13,9 +14,13 @@ export default async function WorkspacePage({params}:{params:Promise<{path:strin
     // executes in a separate React realm. This endpoint validates the session.
     const result=await fetch(new URL('/api/session',appOrigin()),{headers:{cookie:requestHeaders.get('cookie')||''},cache:'no-store'});
     if(!result.ok)redirect('/login');
+    const state=await result.json();
+    if(state.mfa?.setupRequired||state.mfa?.stepUpRequired)redirect('/security');
   }else{
-    const session=await (await getAuth()).api.getSession({headers:requestHeaders});
-    if(!session)redirect('/login');
+    const request=new Request(appOrigin(),{headers:requestHeaders});
+    const {session}=await requireOwnerSession(request).catch(()=>redirect('/login'));
+    const mfa=await mfaStatus(session);
+    if(mfa.setupRequired||mfa.stepUpRequired)redirect('/security');
   }
   return <OrvoApp path={path}/>;
 }

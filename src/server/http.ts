@@ -2,12 +2,19 @@ import { getAuth } from './auth';
 import { getWorkspace } from './domain';
 import {DomainError} from '../shared/types';
 import { appOrigin } from './app-origin';
-export async function requireOwner(request: Request) {
+import { mfaStatus } from './mfa';
+export async function requireOwnerSession(request: Request) {
   const session = await (await getAuth()).api.getSession({headers:request.headers});
   if (!session) throw Object.assign(new Error('Войдите в пространство Orvo.'), {code:'UNAUTHENTICATED',status:401});
   const workspace = await getWorkspace();
   if (workspace.ownerId !== session.user.id) throw Object.assign(new Error('Нет доступа к пространству.'), {code:'FORBIDDEN',status:403});
   return {session,workspace};
+}
+export async function requireOwner(request: Request) {
+  const result=await requireOwnerSession(request);
+  const mfa=await mfaStatus(result.session);
+  if(mfa.setupRequired||mfa.stepUpRequired)throw new DomainError('MFA_REQUIRED','Подтвердите двухфакторную защиту, чтобы открыть офис.',403);
+  return result;
 }
 export function assertOrigin(request: Request) {
   const expected = appOrigin();

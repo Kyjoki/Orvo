@@ -15,4 +15,4 @@ export function proxy(request: NextRequest) {
   return response;
 }
 
-export const config={matcher:['/','/login','/office/:path*','/tasks/:path*','/agents/:path*','/history/:path*','/settings/:path*']};
+export const config={matcher:['/','/login','/security/:path*','/office/:path*','/tasks/:path*','/agents/:path*','/history/:path*','/settings/:path*']};

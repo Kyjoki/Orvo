@@ -161,6 +161,7 @@ async function execute(db:Queryable,w:any,type:string,p:any):Promise<any>{
     else if(type==='task.revise'){assert(row.status==='ready_for_review','INVALID_TRANSITION','Правки доступны после готового результата.');assert((row.data.revision||0)<3,'REVISION_LIMIT','Достигнут лимит трёх циклов правок.');next='queued';p.comment=text(p.comment,8000);}
     else throw new DomainError('UNKNOWN_COMMAND','Неизвестная команда задачи.',400);
     const restart=type==='task.retry'||type==='task.revise'||type==='task.start'||(type==='task.resume'&&!row.data.workflowRunId);
+    if(next==='queued')assert(!row.data.runtimeDispatchUncertainId||row.data.runtimeDispatchSentId===row.data.runtimeDispatchUncertainId,'RUNTIME_RECONCILIATION_REQUIRED','Исход отправки исполнителю неизвестен. Нужна ручная сверка журнала выполнения; повторный запуск временно запрещён.',409);
     const patch={...(type==='task.revise'?{revision:(row.data.revision||0)+1,revisionComment:p.comment}:{}),...(next==='queued'?{error:null,setupRequired:false,...(restart?{workflowRunId:null}:{})}:{}),...(p.comment&&type!=='task.revise'?{inputReply:text(p.comment,8000)}:{})};
     await updateTask(db,row,next,patch);return{id:row.id,status:next,dispatchTaskIds:next==='queued'&&restart?[row.id]:[],controls:!restart&&row.data.workflowRunId?[{taskId:row.id,action:type.split('.')[1],payload:{text:p.comment||'',runtimeId:row.data.workflowRunId}}]:[]};
   }

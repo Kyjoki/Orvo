@@ -4,6 +4,7 @@ import { query } from '@/server/db';
 import { requireOwner, assertOrigin, failure, readJson } from '@/server/http';
 import { captureRuntimeControl } from '@/server/runtime';
 import { drainRuntime } from '@/server/runtime-outbox';
+import { publishRuntimeWake } from '@/server/runtime-queue';
 import { checkModel } from '@/server/model-check';
 import { after } from 'next/server';
 import { consumeRateLimit, rateLimitFailure } from '@/server/rate-limit';
@@ -23,7 +24,11 @@ export async function POST(request:Request){
       if(typeof taskId==='string')bindings[taskId]=await captureRuntimeControl(taskId,p.type==='approval.decide'?String(p.payload.decision):'resume',p.type==='approval.decide'?{approvalId:p.payload.id}:{text:p.payload.comment||''});
     }
     const result=await command(workspace.id,p.type,p.payload,p.requestId,bindings);
-    after(()=>drainRuntime(workspace.id));
+    if(process.env.VERCEL){
+      // Publish before responding. The persisted outbox remains recoverable if
+      // delivery fails; the command has already committed and must not repeat.
+      try{await publishRuntimeWake(workspace.id);}catch{console.error('Runtime wake delivery failed; persisted outbox awaits reconciliation.');}
+    }else after(()=>drainRuntime(workspace.id));
     return Response.json({result},{headers:{'Cache-Control':'no-store'}});
   }catch(error){return rateLimitFailure(error) ?? failure(error);}
 }

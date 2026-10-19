@@ -58,3 +58,19 @@ test('durable claim replay is owner-bound; pause preserves paid result for resum
 test('model names cannot self-authorize a connection or another agent context',async()=>{
   await cmd('settings.save',{model:'test/unverified',modelChecked:true,checkedModels:['test/unverified']});const task=await cmd('task.create',{title:'Непроверенная модель',agentId:agentIds[11]});assert.equal(task.setupRequired,true);assert.deepEqual(task.dispatchTaskIds,[]);await assert.rejects(cmd('task.start',{id:task.id}),(e:any)=>e.code==='MODEL_NOT_CONFIGURED');await assert.rejects(domain.prepareTask(task.id,agentIds[1]),(e:any)=>e.code==='CONTEXT_AGENT_DENIED');
 });
+
+test('an unknown runtime send cannot be restarted by an owner command',async()=>{
+  await cmd('settings.save',{provider:'test',model:'test/deterministic'});
+  await domain.recordModelCheck(workspace.id,{ok:true,model:'test/deterministic'});
+  const task=await cmd('task.create',{title:'Неизвестный исход отправки',agentId:agentIds[11]});
+  await domain.setTaskStatus(task.id,'failed',{workflowRunId:'uncertain-run',runtimeDispatchUncertainId:'uncertain-run',runtimeDispatchSentId:null});
+  await assert.rejects(cmd('task.retry',{id:task.id}),(error:any)=>error.code==='RUNTIME_RECONCILIATION_REQUIRED');
+  assert.equal((await domain.getTask(task.id)).workflowRunId,'uncertain-run');
+  const revise=await cmd('task.create',{title:'Неизвестный исход при правке',agentId:agentIds[11]});
+  await domain.setTaskStatus(revise.id,'running');
+  await domain.setTaskStatus(revise.id,'ready_for_review',{workflowRunId:'uncertain-run',runtimeDispatchUncertainId:'uncertain-run'});
+  await assert.rejects(cmd('task.revise',{id:revise.id,comment:'Повторить'}),(error:any)=>error.code==='RUNTIME_RECONCILIATION_REQUIRED');
+  const start=await cmd('task.create',{title:'Неизвестный исход при запуске',agentId:agentIds[11],draft:true});
+  await query("UPDATE tasks SET status='waiting_for_input',data=data || $2::jsonb WHERE id=$1",[start.id,JSON.stringify({workflowRunId:'uncertain-run',runtimeDispatchUncertainId:'uncertain-run'})]);
+  await assert.rejects(cmd('task.start',{id:start.id}),(error:any)=>error.code==='RUNTIME_RECONCILIATION_REQUIRED');
+});
