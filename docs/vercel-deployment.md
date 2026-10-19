@@ -1,6 +1,6 @@
 # Vercel Production и Preview
 
-Действующий [Production](https://orvo-office.vercel.app) опубликован 19 октября 2026: deployment `dpl_2U68TSxqDEdzamoBKvtsJRotPu8u`, target `production`, статус `READY`, код `a2f8ca7`. Служебный immutable origin — `https://orvo-cgjd26ryw-maksimcoj697-3405.vercel.app`. Next/eve сборка заняла 42 секунды. Домен закреплён за проектом как Production domain, без привязки к Preview-ветке. Экран входа общедоступен без Vercel SSO; сам офис доступен только владельцу по паролю и Google Authenticator.
+Действующий [Production](https://orvo-office.vercel.app) обновлён 19 октября 2026: deployment `dpl_8H2YwJ3RHsVT8zBnPB2HYWPePiKM`, target `production`, статус `READY`, код `1e88384`. Служебный immutable origin — `https://orvo-lqblt6riq-maksimcoj697-3405.vercel.app`. Домен закреплён за проектом как Production domain, без привязки к Preview-ветке. Экран входа общедоступен без Vercel SSO; сам офис доступен только владельцу по паролю и Google Authenticator.
 
 Предыдущий изолированный Preview сохранён: `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app` (`dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`). На момент его сборки UI был привязан к короткому адресу, поэтому старый UI может перенаправлять на Production. Глобальный `ORVO_PREVIEW_ORIGIN` снят: будущие Preview используют собственный immutable origin. Ресурсы и автоматизация двух окружений разделены.
 
