@@ -6,11 +6,13 @@ import { captureRuntimeControl } from '@/server/runtime';
 import { drainRuntime } from '@/server/runtime-outbox';
 import { checkModel } from '@/server/model-check';
 import { after } from 'next/server';
+import { consumeRateLimit, rateLimitFailure } from '@/server/rate-limit';
 export const runtime='nodejs';
 const schema=z.object({type:z.string().min(1).max(80),payload:z.record(z.string(),z.unknown()).default({}),requestId:z.string().min(8).max(128)});
 export async function POST(request:Request){
   try {
-    assertOrigin(request);const{workspace}=await requireOwner(request);
+    assertOrigin(request);const{workspace,session}=await requireOwner(request);
+    await consumeRateLimit('command-owner', session.user.id, 120, 60);
     const p=schema.parse(await readJson(request,80000));
     if(p.type==='settings.checkModel')return Response.json({result:await checkModel(workspace.id,p.payload,p.requestId)});
     const bindings:Record<string,any>={};
@@ -23,5 +25,5 @@ export async function POST(request:Request){
     const result=await command(workspace.id,p.type,p.payload,p.requestId,bindings);
     after(()=>drainRuntime(workspace.id));
     return Response.json({result},{headers:{'Cache-Control':'no-store'}});
-  }catch(error){return failure(error);}
+  }catch(error){return rateLimitFailure(error) ?? failure(error);}
 }

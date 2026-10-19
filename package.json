@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "eve build && next build",
+    "build": "next build",
+    "build:local": "eve build && next build",
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
@@ -20,6 +21,7 @@
     "@aws-sdk/client-s3": "^3.1152.0",
     "@aws-sdk/s3-request-presigner": "^3.1152.0",
     "@electric-sql/pglite": "^0.5.10",
+    "@vercel/blob": "^2.7.0",
     "ai": "^7.0.143",
     "better-auth": "^1.7.10",
     "eve": "0.80.1",

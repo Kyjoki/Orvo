@@ -2,12 +2,13 @@ import { Client, conversationReducer, openConversationInputs } from 'eve/client'
 import { commitRuntimeId, getTask, failTask } from './domain';
 import { DomainError } from '../shared/types';
 import { assertBoundRuntime, resolveBoundRuntimeInput } from './runtime-bindings';
+import { runtimeOrigin, runtimeProtectionHeaders } from './runtime-origin';
 
 function runtimeClient(taskId?: string) {
   const secret = process.env.ORVO_RUNTIME_SECRET;
   if (!secret || secret.length < 32) throw new Error('Требуется настройка ORVO_RUNTIME_SECRET (минимум 32 символа).');
-  const host = process.env.ORVO_RUNTIME_URL ?? 'http://127.0.0.1:3000';
-  return new Client({ host, auth: { bearer: secret }, headers: taskId ? { 'x-orvo-task-id': taskId } : {}, redirect: 'error' });
+  const host = runtimeOrigin();
+  return new Client({ host, auth: { bearer: secret }, headers: { ...runtimeProtectionHeaders(new URL(host)), ...(taskId ? { 'x-orvo-task-id': taskId } : {}) }, redirect: 'error' });
 }
 
 export async function dispatchTask(taskId: string) {

@@ -1,6 +1,7 @@
 import { getAuth } from './auth';
 import { getWorkspace } from './domain';
 import {DomainError} from '../shared/types';
+import { appOrigin } from './app-origin';
 export async function requireOwner(request: Request) {
   const session = await (await getAuth()).api.getSession({headers:request.headers});
   if (!session) throw Object.assign(new Error('Войдите в пространство Orvo.'), {code:'UNAUTHENTICATED',status:401});
@@ -9,7 +10,7 @@ export async function requireOwner(request: Request) {
   return {session,workspace};
 }
 export function assertOrigin(request: Request) {
-  const expected = new URL(process.env.BETTER_AUTH_URL || 'http://127.0.0.1:3000').origin;
+  const expected = appOrigin();
   if (request.headers.get('origin') !== expected) throw Object.assign(new Error('Недопустимый источник запроса.'),{code:'INVALID_ORIGIN',status:403});
 }
 export function failure(error: unknown) {

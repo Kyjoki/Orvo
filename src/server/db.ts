@@ -1,7 +1,7 @@
 import { readFile, readdir, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { Pool } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 import { DomainError } from '../shared/types';
 
 export interface Queryable { query<T=any>(sql:string,params?:any[]):Promise<{rows:T[];rowCount?:number|null}> }
@@ -38,20 +38,36 @@ async function raw():Promise<Queryable>{
       return {query:(sql:string,params:any[]=[])=>call('query',sql,params),exec:(sql:string)=>call('exec',sql),close:()=>call('close','')} as Queryable;
     }
     if(!process.env.DATABASE_URL) throw new DomainError('DATABASE_NOT_CONFIGURED','Настройте DATABASE_URL PostgreSQL. Тестовая БД включается только ORVO_TEST_MODE=1.',503);
-    return new Pool({connectionString:process.env.DATABASE_URL,max:5}) as unknown as Queryable;
+    const connectionUrl=new URL(process.env.DATABASE_URL);
+    // Preserve certificate + hostname verification, including future pg releases.
+    if(process.env.VERCEL||['prefer','require','verify-ca'].includes(connectionUrl.searchParams.get('sslmode')||'')){
+      connectionUrl.searchParams.set('sslmode','verify-full');
+      connectionUrl.searchParams.delete('uselibpqcompat');
+    }
+    const pool=new Pool({connectionString:connectionUrl.toString(),max:5,connectionTimeoutMillis:15000,idleTimeoutMillis:30000,allowExitOnIdle:true});
+    pool.on('error',()=>console.error('An idle PostgreSQL connection closed; the pool will reconnect.'));
+    return pool as unknown as Queryable;
   })();
   return state.connection;
 }
 export async function migrate(){
   if(!state.initialized) state.initialized=(async()=>{
     const db=await raw();
-    await db.query('CREATE TABLE IF NOT EXISTS schema_migrations(name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
-    const dir=path.join(process.cwd(),'migrations');
-    for(const file of (await readdir(dir)).filter(f=>f.endsWith('.sql')).sort()){
-      const found=await db.query('SELECT name FROM schema_migrations WHERE name=$1',[file]);
-      if(!found.rows.length){const sql=await readFile(path.join(dir,file),'utf8');if(state.databaseKind==='pglite')await (db as any).exec(sql);else await db.query(sql);await db.query('INSERT INTO schema_migrations(name) VALUES($1) ON CONFLICT DO NOTHING',[file]);}
-    }
-  })();
+    const client=state.databaseKind==='postgres'?await (db as unknown as Pool).connect():db;
+    try{
+      await client.query('BEGIN');
+      // Transaction scoped: safe with pooled Neon connections and concurrent cold starts.
+      if(state.databaseKind==='postgres')await client.query('SELECT pg_advisory_xact_lock(1869772399, 1)');
+      await client.query('CREATE TABLE IF NOT EXISTS schema_migrations(name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
+      const dir=path.join(process.cwd(),'migrations');
+      for(const file of (await readdir(dir)).filter(f=>f.endsWith('.sql')).sort()){
+        const found=await client.query('SELECT name FROM schema_migrations WHERE name=$1',[file]);
+        if(!found.rows.length){const sql=await readFile(path.join(dir,file),'utf8');if(state.databaseKind==='pglite')await (client as any).exec(sql);else await client.query(sql);await client.query('INSERT INTO schema_migrations(name) VALUES($1)',[file]);}
+      }
+      await client.query('COMMIT');
+    }catch(error){await client.query('ROLLBACK');throw error;}
+    finally{if(state.databaseKind==='postgres')(client as PoolClient).release();}
+  })().catch(error=>{state.initialized=undefined;throw error;});
   await state.initialized;
 }
 export async function acquireEmbeddedLock(){

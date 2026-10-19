@@ -1,6 +1,7 @@
 // eve executes in a separate Nitro process. The Next process owns the domain DB
 // connection (including the single-process PGlite test database).
 type Domain = typeof import('../../src/server/domain');
+import { runtimeOrigin, runtimeProtectionHeaders } from '../../src/server/runtime-origin';
 type Action = 'prepareTask' | 'getTask' | 'claimTask' | 'releaseTask' | 'setTaskStatus' | 'recordTaskEvent' | 'reserveUsage' | 'settleUsage' | 'saveResult' | 'failTask' | 'createApproval';
 export class DomainRpcError extends Error {
   constructor(public code: string, message: string) { super(message); this.name = 'DomainRpcError'; }
@@ -9,10 +10,10 @@ export class DomainRpcError extends Error {
 async function call<K extends Action>(action: K, args: Parameters<Domain[K]>): Promise<Awaited<ReturnType<Domain[K]>>> {
   const secret = process.env.ORVO_RUNTIME_SECRET;
   if (!secret || secret.length < 32) throw new Error('Runtime authentication is not configured.');
-  const origin = process.env.ORVO_RUNTIME_URL ?? 'http://127.0.0.1:3000';
-  const response = await fetch(new URL('/api/runtime/domain', origin), {
+  const url = new URL('/api/runtime/domain', runtimeOrigin());
+  const response = await fetch(url, {
     method: 'POST',
-    headers: { authorization: `Bearer ${secret}`, 'content-type': 'application/json' },
+    headers: { authorization: `Bearer ${secret}`, 'content-type': 'application/json', ...runtimeProtectionHeaders(url) },
     body: JSON.stringify({ action, args }),
     redirect: 'error',
     signal: AbortSignal.timeout(60000),

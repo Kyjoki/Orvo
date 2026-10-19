@@ -8,6 +8,7 @@ export default function Login() {
     const form=new FormData(event.currentTarget);
     try {
       const response=await fetch('/api/auth/sign-in/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:form.get('email'),password:form.get('password')})});
+      if(response.status===429){const seconds=Number(response.headers.get('Retry-After')||response.headers.get('X-Retry-After'));setError(`Слишком много попыток входа. ${seconds>0?`Повторите через ${Math.ceil(seconds)} сек.`:'Повторите позже.'}`);return;}
       if(!response.ok) { setError('Не удалось войти. Проверьте email и пароль владельца.'); return; }
       window.location.href='/office';
     } catch { setError('Нет соединения с сервером. Повторите вход.'); } finally {setBusy(false);}

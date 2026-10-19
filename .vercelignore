@@ -1,0 +1,17 @@
+# Deploy only Orvo sources. Local data, credentials and unrelated workspace files stay local.
+*
+!src
+!src/**
+!agent
+!agent/**
+!public
+!public/**
+!migrations
+!migrations/**
+!package.json
+!package-lock.json
+!next.config.ts
+!next-env.d.ts
+!tsconfig.json
+!eve.config.ts
+!vercel.json
