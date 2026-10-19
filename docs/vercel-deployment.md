@@ -4,6 +4,8 @@
 
 Предыдущий изолированный Preview сохранён: `https://orvo-jzhfoc3xx-maksimcoj697-3405.vercel.app` (`dpl_GXbFja58a5fXLNG9tgw6fE1cqakG`). На момент его сборки UI был привязан к короткому адресу, поэтому старый UI может перенаправлять на Production. Глобальный `ORVO_PREVIEW_ORIGIN` снят: будущие Preview используют собственный immutable origin. Ресурсы и автоматизация двух окружений разделены.
 
+По запросу владельца старый адрес `orvo-jh3adr8kj-maksimcoj697-3405.vercel.app` закрыт отдельным опубликованным WAF deny-правилом по точному hostname. После обновления вкладки с Vercel SSO проверен HTTP 403 вместо входа Orvo. Анонимные запросы сначала останавливаются Vercel Authentication (GET 302 на вход Vercel, POST 401). Блокировка обратима; deployment, базы и файлы не удалялись. Production domain и служебный immutable origin этим правилом не затронуты.
+
 ## Подтверждённая конфигурация
 
 | Область | Настройка |
