@@ -1,0 +1,50 @@
+name: Orvo Production daily backup
+
+on:
+  schedule:
+    - cron: '43 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orvo-production-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    environment: orvo-production-operations
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Install official PostgreSQL 18 clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-18
+      - name: Create encrypted Production database and attachment archive
+        run: node --import tsx scripts/backup.ts --output "$RUNNER_TEMP/orvo-production.orvobak" --upload --retention-days 14
+        env:
+          ORVO_BACKUP_SOURCE_DATABASE_URL: ${{ secrets.ORVO_BACKUP_SOURCE_DATABASE_URL }}
+          ORVO_BACKUP_SOURCE_BLOB_TOKEN: ${{ secrets.ORVO_BACKUP_SOURCE_BLOB_TOKEN }}
+          ORVO_BACKUP_BLOB_TOKEN: ${{ secrets.ORVO_BACKUP_BLOB_TOKEN }}
+          ORVO_BACKUP_KEY_B64: ${{ secrets.ORVO_BACKUP_KEY_B64 }}
+          PG_DUMP_BIN: /usr/lib/postgresql/18/bin/pg_dump
+          PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
+      - name: Verify archive integrity
+        run: node --import tsx scripts/restore.ts --archive "$RUNNER_TEMP/orvo-production.orvobak" --dry-run
+        env:
+          ORVO_BACKUP_KEY_B64: ${{ secrets.ORVO_BACKUP_KEY_B64 }}
+      - name: Remove runner archive
+        if: always()
+        run: rm -f "$RUNNER_TEMP/orvo-production.orvobak"

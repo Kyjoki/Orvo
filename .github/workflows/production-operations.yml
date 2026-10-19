@@ -1,0 +1,32 @@
+name: Orvo Production operations
+
+on:
+  schedule:
+    - cron: '4-59/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orvo-production-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    environment: orvo-production-operations
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Reconcile persisted Production outbox
+        run: node scripts/reconcile.mjs
+        env:
+          ORVO_DEPLOYMENT_URL: ${{ vars.ORVO_DEPLOYMENT_URL }}
+          ORVO_RECONCILE_SECRET: ${{ secrets.ORVO_RECONCILE_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
