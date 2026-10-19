@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<title>Orvo — Офис</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+
+<style>/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/design/fonts/d3b57e6a-e127-4e24-be88-377aec19a1ce.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/design/fonts/83779deb-5956-47d8-9b32-607ae6a6bffd.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/design/fonts/d3b57e6a-e127-4e24-be88-377aec19a1ce.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/design/fonts/83779deb-5956-47d8-9b32-607ae6a6bffd.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/design/fonts/d3b57e6a-e127-4e24-be88-377aec19a1ce.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/design/fonts/83779deb-5956-47d8-9b32-607ae6a6bffd.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/design/fonts/d3b57e6a-e127-4e24-be88-377aec19a1ce.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/design/fonts/83779deb-5956-47d8-9b32-607ae6a6bffd.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/design/fonts/0efb8684-7f34-4677-afc0-8f71f3978d6e.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/design/fonts/723ec34a-17c6-4319-8809-1f0f87800ad7.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/design/fonts/0efb8684-7f34-4677-afc0-8f71f3978d6e.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/design/fonts/723ec34a-17c6-4319-8809-1f0f87800ad7.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/design/fonts/650d2a46-3846-4929-acba-00b8e99bfaa3.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/design/fonts/5dce5177-7e34-402b-8988-693b99f8a8c3.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+
+/* cyrillic */
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/design/fonts/650d2a46-3846-4929-acba-00b8e99bfaa3.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/design/fonts/5dce5177-7e34-402b-8988-693b99f8a8c3.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Pixel portraits match the characters in the office. */
+.av[style*="#C98BDB" i]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0yNCAtNzIgNDggNTIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+PHJlY3QgeD0iLTI0IiB5PSItNzIiIHdpZHRoPSI0OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzI1MzEzRSIvPjxyZWN0IHg9Ii0xNyIgeT0iLTUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI3IiBmaWxsPSIjMzMyODFGIi8+PHJlY3QgeD0iLTEwIiB5PSItMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjcyQzQzIi8+PHJlY3QgeD0iMyIgeT0iLTEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzI3MkM0MyIvPjxyZWN0IHg9Ii0xMiIgeT0iLTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iMyIgeT0iLTUiIHdpZHRoPSIxMSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iLTE0IiB5PSItMzQiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyNCIgZmlsbD0iI0M5OEJEQiIvPjxyZWN0IHg9Ii0xMCIgeT0iLTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMTciIGZpbGw9IiNDOThCREIiLz48cmVjdCB4PSItMTQiIHk9Ii0xMyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4xMzMiLz48cmVjdCB4PSItNSIgeT0iLTM5IiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgZmlsbD0iI0YxRDNCQyIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU3IiB3aWR0aD0iMjYiIGhlaWdodD0iMjIiIGZpbGw9IiNGMUQzQkMiLz48cmVjdCB4PSItMTciIHk9Ii01MiIgd2lkdGg9IjQiIGhlaWdodD0iMTAiIGZpbGw9IiNGMUQzQkMiLz48cmVjdCB4PSIxMyIgeT0iLTUyIiB3aWR0aD0iNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0YxRDNCQyIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU5IiB3aWR0aD0iMjYiIGhlaWdodD0iMTAiIGZpbGw9IiM0QTJFM0YiLz48cmVjdCB4PSItMTciIHk9Ii01NSIgd2lkdGg9IjUiIGhlaWdodD0iMTMiIGZpbGw9IiM0QTJFM0YiLz48cmVjdCB4PSIxMiIgeT0iLTU1IiB3aWR0aD0iNSIgaGVpZ2h0PSIxMyIgZmlsbD0iIzRBMkUzRiIvPjxyZWN0IHg9Ii05IiB5PSItNjEiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjNEEyRTNGIi8+PHJlY3QgeD0iLTExIiB5PSItNDkiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIGZpbGw9IiM0QTJFM0YiLz48cmVjdCB4PSItMTciIHk9Ii00NyIgd2lkdGg9IjUiIGhlaWdodD0iMjEiIGZpbGw9IiM0QTJFM0YiLz48cmVjdCB4PSIxMyIgeT0iLTQ3IiB3aWR0aD0iNSIgaGVpZ2h0PSIyMSIgZmlsbD0iIzRBMkUzRiIvPjxyZWN0IHg9IjEwIiB5PSItNTUiIHdpZHRoPSI3IiBoZWlnaHQ9IjQiIGZpbGw9IiNFRkFDQ0YiLz48cmVjdCB4PSItOCIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iNSIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iLTMiIHk9Ii0zNiIgd2lkdGg9IjciIGhlaWdodD0iMiIgZmlsbD0iI0FDNzA1QSIvPjxnIGNsYXNzPSJwaXhlbC1oYW5kcyI+PHJlY3QgeD0iLTE4IiB5PSItMjkiIHdpZHRoPSI2IiBoZWlnaHQ9IjEyIiBmaWxsPSIjRjFEM0JDIi8+PHJlY3QgeD0iMTMiIHk9Ii0yOSIgd2lkdGg9IjYiIGhlaWdodD0iMTIiIGZpbGw9IiNGMUQzQkMiLz48cmVjdCB4PSItMTkiIHk9Ii0yOCIgd2lkdGg9IjgiIGhlaWdodD0iNSIgZmlsbD0iI0M5OEJEQiIvPjxyZWN0IHg9IjEyIiB5PSItMjgiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiIGZpbGw9IiNDOThCREIiLz48L2c+PC9zdmc+") !important;background-size:cover !important;image-rendering:pixelated;border-radius:7px;color:transparent !important;font-size:0 !important;overflow:hidden}
+.av[style*="#6FA8F0" i]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0yNCAtNzIgNDggNTIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+PHJlY3QgeD0iLTI0IiB5PSItNzIiIHdpZHRoPSI0OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzI1MzEzRSIvPjxyZWN0IHg9Ii0xNyIgeT0iLTUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI3IiBmaWxsPSIjMzMyODFGIi8+PHJlY3QgeD0iLTEwIiB5PSItMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjcyQzQzIi8+PHJlY3QgeD0iMyIgeT0iLTEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzI3MkM0MyIvPjxyZWN0IHg9Ii0xMiIgeT0iLTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iMyIgeT0iLTUiIHdpZHRoPSIxMSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iLTE0IiB5PSItMzQiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzZGQThGMCIvPjxyZWN0IHg9Ii0xMCIgeT0iLTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMTciIGZpbGw9IiM2RkE4RjAiLz48cmVjdCB4PSItMTQiIHk9Ii0xMyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4xMzMiLz48cmVjdCB4PSItNSIgeT0iLTM5IiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgZmlsbD0iI0M0OEI2NSIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU3IiB3aWR0aD0iMjYiIGhlaWdodD0iMjIiIGZpbGw9IiNDNDhCNjUiLz48cmVjdCB4PSItMTciIHk9Ii01MiIgd2lkdGg9IjQiIGhlaWdodD0iMTAiIGZpbGw9IiNDNDhCNjUiLz48cmVjdCB4PSIxMyIgeT0iLTUyIiB3aWR0aD0iNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0M0OEI2NSIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU5IiB3aWR0aD0iMjYiIGhlaWdodD0iMTAiIGZpbGw9IiMyNDIyMkQiLz48cmVjdCB4PSItMTciIHk9Ii01NSIgd2lkdGg9IjUiIGhlaWdodD0iMTMiIGZpbGw9IiMyNDIyMkQiLz48cmVjdCB4PSIxMiIgeT0iLTU1IiB3aWR0aD0iNSIgaGVpZ2h0PSIxMyIgZmlsbD0iIzI0MjIyRCIvPjxyZWN0IHg9Ii05IiB5PSItNjEiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMjJEIi8+PHJlY3QgeD0iLTExIiB5PSItNDkiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMyNDIyMkQiLz48cmVjdCB4PSItOCIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iNSIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iLTMiIHk9Ii0zNiIgd2lkdGg9IjciIGhlaWdodD0iMiIgZmlsbD0iI0FDNzA1QSIvPjxnIGNsYXNzPSJwaXhlbC1oYW5kcyI+PHJlY3QgeD0iLTE4IiB5PSItMjkiIHdpZHRoPSI2IiBoZWlnaHQ9IjEyIiBmaWxsPSIjQzQ4QjY1Ii8+PHJlY3QgeD0iMTMiIHk9Ii0yOSIgd2lkdGg9IjYiIGhlaWdodD0iMTIiIGZpbGw9IiNDNDhCNjUiLz48cmVjdCB4PSItMTkiIHk9Ii0yOCIgd2lkdGg9IjgiIGhlaWdodD0iNSIgZmlsbD0iIzZGQThGMCIvPjxyZWN0IHg9IjEyIiB5PSItMjgiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiIGZpbGw9IiM2RkE4RjAiLz48L2c+PC9zdmc+") !important;background-size:cover !important;image-rendering:pixelated;border-radius:7px;color:transparent !important;font-size:0 !important;overflow:hidden}
+.av[style*="#63C5B0" i]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0yNCAtNzIgNDggNTIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+PHJlY3QgeD0iLTI0IiB5PSItNzIiIHdpZHRoPSI0OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzI1MzEzRSIvPjxyZWN0IHg9Ii0xNyIgeT0iLTUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI3IiBmaWxsPSIjMzMyODFGIi8+PHJlY3QgeD0iLTEwIiB5PSItMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjcyQzQzIi8+PHJlY3QgeD0iMyIgeT0iLTEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzI3MkM0MyIvPjxyZWN0IHg9Ii0xMiIgeT0iLTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iMyIgeT0iLTUiIHdpZHRoPSIxMSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iLTE0IiB5PSItMzQiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzYzQzVCMCIvPjxyZWN0IHg9Ii0xMCIgeT0iLTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMTciIGZpbGw9IiM2M0M1QjAiLz48cmVjdCB4PSItMTQiIHk9Ii0xMyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4xMzMiLz48cmVjdCB4PSItNSIgeT0iLTM5IiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgZmlsbD0iI0U2QkM5OCIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU3IiB3aWR0aD0iMjYiIGhlaWdodD0iMjIiIGZpbGw9IiNFNkJDOTgiLz48cmVjdCB4PSItMTciIHk9Ii01MiIgd2lkdGg9IjQiIGhlaWdodD0iMTAiIGZpbGw9IiNFNkJDOTgiLz48cmVjdCB4PSIxMyIgeT0iLTUyIiB3aWR0aD0iNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0U2QkM5OCIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU5IiB3aWR0aD0iMjYiIGhlaWdodD0iMTAiIGZpbGw9IiM3QTNFMkUiLz48cmVjdCB4PSItMTciIHk9Ii01NSIgd2lkdGg9IjUiIGhlaWdodD0iMTMiIGZpbGw9IiM3QTNFMkUiLz48cmVjdCB4PSIxMiIgeT0iLTU1IiB3aWR0aD0iNSIgaGVpZ2h0PSIxMyIgZmlsbD0iIzdBM0UyRSIvPjxyZWN0IHg9Ii05IiB5PSItNjEiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjN0EzRTJFIi8+PHJlY3QgeD0iLTExIiB5PSItNDkiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIGZpbGw9IiM3QTNFMkUiLz48cmVjdCB4PSItOCIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iNSIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iLTMiIHk9Ii0zNiIgd2lkdGg9IjciIGhlaWdodD0iMiIgZmlsbD0iI0FDNzA1QSIvPjxwYXRoIGQ9Ik0tMTEgLTQ3aDEydjloLTEyek0zIC00N2gxMnY5SDN6TTEgLTQ0aDIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzI5MzM0NCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGcgY2xhc3M9InBpeGVsLWhhbmRzIj48cmVjdCB4PSItMTgiIHk9Ii0yOSIgd2lkdGg9IjYiIGhlaWdodD0iMTIiIGZpbGw9IiNFNkJDOTgiLz48cmVjdCB4PSIxMyIgeT0iLTI5IiB3aWR0aD0iNiIgaGVpZ2h0PSIxMiIgZmlsbD0iI0U2QkM5OCIvPjxyZWN0IHg9Ii0xOSIgeT0iLTI4IiB3aWR0aD0iOCIgaGVpZ2h0PSI1IiBmaWxsPSIjNjNDNUIwIi8+PHJlY3QgeD0iMTIiIHk9Ii0yOCIgd2lkdGg9IjgiIGhlaWdodD0iNSIgZmlsbD0iIzYzQzVCMCIvPjwvZz48L3N2Zz4=") !important;background-size:cover !important;image-rendering:pixelated;border-radius:7px;color:transparent !important;font-size:0 !important;overflow:hidden}
+.av[style*="#F0A36F" i]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0yNCAtNzIgNDggNTIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+PHJlY3QgeD0iLTI0IiB5PSItNzIiIHdpZHRoPSI0OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzI1MzEzRSIvPjxyZWN0IHg9Ii0xNyIgeT0iLTUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI3IiBmaWxsPSIjMzMyODFGIi8+PHJlY3QgeD0iLTEwIiB5PSItMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjcyQzQzIi8+PHJlY3QgeD0iMyIgeT0iLTEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzI3MkM0MyIvPjxyZWN0IHg9Ii0xMiIgeT0iLTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iMyIgeT0iLTUiIHdpZHRoPSIxMSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iLTE0IiB5PSItMzQiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyNCIgZmlsbD0iI0YwQTM2RiIvPjxyZWN0IHg9Ii0xMCIgeT0iLTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMTciIGZpbGw9IiNGMEEzNkYiLz48cmVjdCB4PSItMTQiIHk9Ii0xMyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4xMzMiLz48cmVjdCB4PSItNSIgeT0iLTM5IiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgZmlsbD0iI0E4NzE0RSIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU3IiB3aWR0aD0iMjYiIGhlaWdodD0iMjIiIGZpbGw9IiNBODcxNEUiLz48cmVjdCB4PSItMTciIHk9Ii01MiIgd2lkdGg9IjQiIGhlaWdodD0iMTAiIGZpbGw9IiNBODcxNEUiLz48cmVjdCB4PSIxMyIgeT0iLTUyIiB3aWR0aD0iNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0E4NzE0RSIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU5IiB3aWR0aD0iMjYiIGhlaWdodD0iMTAiIGZpbGw9IiMyQjFGMjYiLz48cmVjdCB4PSItMTciIHk9Ii01NSIgd2lkdGg9IjUiIGhlaWdodD0iMTMiIGZpbGw9IiMyQjFGMjYiLz48cmVjdCB4PSIxMiIgeT0iLTU1IiB3aWR0aD0iNSIgaGVpZ2h0PSIxMyIgZmlsbD0iIzJCMUYyNiIvPjxyZWN0IHg9Ii05IiB5PSItNjEiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjMkIxRjI2Ii8+PHJlY3QgeD0iLTExIiB5PSItNDkiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMyQjFGMjYiLz48cmVjdCB4PSItMTkiIHk9Ii01NiIgd2lkdGg9IjciIGhlaWdodD0iMTciIGZpbGw9IiMyQjFGMjYiLz48cmVjdCB4PSIxMiIgeT0iLTU2IiB3aWR0aD0iNyIgaGVpZ2h0PSIxNyIgZmlsbD0iIzJCMUYyNiIvPjxyZWN0IHg9Ii0xNSIgeT0iLTYxIiB3aWR0aD0iNyIgaGVpZ2h0PSI2IiBmaWxsPSIjMkIxRjI2Ii8+PHJlY3QgeD0iOCIgeT0iLTYxIiB3aWR0aD0iNyIgaGVpZ2h0PSI2IiBmaWxsPSIjMkIxRjI2Ii8+PHJlY3QgeD0iLTgiIHk9Ii00NCIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iIzI0MjMzNCIvPjxyZWN0IHg9IjUiIHk9Ii00NCIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iIzI0MjMzNCIvPjxyZWN0IHg9Ii0zIiB5PSItMzYiIHdpZHRoPSI3IiBoZWlnaHQ9IjIiIGZpbGw9IiNBQzcwNUEiLz48ZyBjbGFzcz0icGl4ZWwtaGFuZHMiPjxyZWN0IHg9Ii0xOCIgeT0iLTI5IiB3aWR0aD0iNiIgaGVpZ2h0PSIxMiIgZmlsbD0iI0E4NzE0RSIvPjxyZWN0IHg9IjEzIiB5PSItMjkiIHdpZHRoPSI2IiBoZWlnaHQ9IjEyIiBmaWxsPSIjQTg3MTRFIi8+PHJlY3QgeD0iLTE5IiB5PSItMjgiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiIGZpbGw9IiNGMEEzNkYiLz48cmVjdCB4PSIxMiIgeT0iLTI4IiB3aWR0aD0iOCIgaGVpZ2h0PSI1IiBmaWxsPSIjRjBBMzZGIi8+PC9nPjwvc3ZnPg==") !important;background-size:cover !important;image-rendering:pixelated;border-radius:7px;color:transparent !important;font-size:0 !important;overflow:hidden}
+.av[style*="#E58AA6" i]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0yNCAtNzIgNDggNTIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+PHJlY3QgeD0iLTI0IiB5PSItNzIiIHdpZHRoPSI0OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzI1MzEzRSIvPjxyZWN0IHg9Ii0xNyIgeT0iLTUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI3IiBmaWxsPSIjMzMyODFGIi8+PHJlY3QgeD0iLTEwIiB5PSItMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjcyQzQzIi8+PHJlY3QgeD0iMyIgeT0iLTEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzI3MkM0MyIvPjxyZWN0IHg9Ii0xMiIgeT0iLTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iMyIgeT0iLTUiIHdpZHRoPSIxMSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iLTE0IiB5PSItMzQiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyNCIgZmlsbD0iI0U1OEFBNiIvPjxyZWN0IHg9Ii0xMCIgeT0iLTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMTciIGZpbGw9IiNFNThBQTYiLz48cmVjdCB4PSItMTQiIHk9Ii0xMyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4xMzMiLz48cmVjdCB4PSItNSIgeT0iLTM5IiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgZmlsbD0iI0YzRDlDNiIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU3IiB3aWR0aD0iMjYiIGhlaWdodD0iMjIiIGZpbGw9IiNGM0Q5QzYiLz48cmVjdCB4PSItMTciIHk9Ii01MiIgd2lkdGg9IjQiIGhlaWdodD0iMTAiIGZpbGw9IiNGM0Q5QzYiLz48cmVjdCB4PSIxMyIgeT0iLTUyIiB3aWR0aD0iNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0YzRDlDNiIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU5IiB3aWR0aD0iMjYiIGhlaWdodD0iMTAiIGZpbGw9IiNDOUEyNkIiLz48cmVjdCB4PSItMTciIHk9Ii01NSIgd2lkdGg9IjUiIGhlaWdodD0iMTMiIGZpbGw9IiNDOUEyNkIiLz48cmVjdCB4PSIxMiIgeT0iLTU1IiB3aWR0aD0iNSIgaGVpZ2h0PSIxMyIgZmlsbD0iI0M5QTI2QiIvPjxyZWN0IHg9Ii05IiB5PSItNjEiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjQzlBMjZCIi8+PHJlY3QgeD0iLTExIiB5PSItNDkiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIGZpbGw9IiNDOUEyNkIiLz48cmVjdCB4PSItNiIgeT0iLTY3IiB3aWR0aD0iMTIiIGhlaWdodD0iOCIgZmlsbD0iI0M5QTI2QiIvPjxyZWN0IHg9Ii05IiB5PSItNjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjQzlBMjZCIi8+PHJlY3QgeD0iLTgiIHk9Ii02NiIgd2lkdGg9IjQiIGhlaWdodD0iMyIgZmlsbD0iI0Y1Q0U4RCIvPjxyZWN0IHg9Ii04IiB5PSItNDQiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMyNDIzMzQiLz48cmVjdCB4PSI1IiB5PSItNDQiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMyNDIzMzQiLz48cmVjdCB4PSItMyIgeT0iLTM2IiB3aWR0aD0iNyIgaGVpZ2h0PSIyIiBmaWxsPSIjQUM3MDVBIi8+PGcgY2xhc3M9InBpeGVsLWhhbmRzIj48cmVjdCB4PSItMTgiIHk9Ii0yOSIgd2lkdGg9IjYiIGhlaWdodD0iMTIiIGZpbGw9IiNGM0Q5QzYiLz48cmVjdCB4PSIxMyIgeT0iLTI5IiB3aWR0aD0iNiIgaGVpZ2h0PSIxMiIgZmlsbD0iI0YzRDlDNiIvPjxyZWN0IHg9Ii0xOSIgeT0iLTI4IiB3aWR0aD0iOCIgaGVpZ2h0PSI1IiBmaWxsPSIjRTU4QUE2Ii8+PHJlY3QgeD0iMTIiIHk9Ii0yOCIgd2lkdGg9IjgiIGhlaWdodD0iNSIgZmlsbD0iI0U1OEFBNiIvPjwvZz48L3N2Zz4=") !important;background-size:cover !important;image-rendering:pixelated;border-radius:7px;color:transparent !important;font-size:0 !important;overflow:hidden}
+.av[style*="#A69CF7" i]{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0yNCAtNzIgNDggNTIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+PHJlY3QgeD0iLTI0IiB5PSItNzIiIHdpZHRoPSI0OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzI1MzEzRSIvPjxyZWN0IHg9Ii0xNyIgeT0iLTUiIHdpZHRoPSIzNCIgaGVpZ2h0PSI3IiBmaWxsPSIjMzMyODFGIi8+PHJlY3QgeD0iLTEwIiB5PSItMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjEwIiBmaWxsPSIjMjcyQzQzIi8+PHJlY3QgeD0iMyIgeT0iLTEyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzI3MkM0MyIvPjxyZWN0IHg9Ii0xMiIgeT0iLTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iMyIgeT0iLTUiIHdpZHRoPSIxMSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTQxOTIyIi8+PHJlY3QgeD0iLTE0IiB5PSItMzQiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyNCIgZmlsbD0iI0E2OUNGNyIvPjxyZWN0IHg9Ii0xMCIgeT0iLTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMTciIGZpbGw9IiNBNjlDRjciLz48cmVjdCB4PSItMTQiIHk9Ii0xMyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4xMzMiLz48cmVjdCB4PSItNSIgeT0iLTM5IiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgZmlsbD0iI0Q5QTk4MiIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU3IiB3aWR0aD0iMjYiIGhlaWdodD0iMjIiIGZpbGw9IiNEOUE5ODIiLz48cmVjdCB4PSItMTciIHk9Ii01MiIgd2lkdGg9IjQiIGhlaWdodD0iMTAiIGZpbGw9IiNEOUE5ODIiLz48cmVjdCB4PSIxMyIgeT0iLTUyIiB3aWR0aD0iNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0Q5QTk4MiIvPjxyZWN0IHg9Ii0xMyIgeT0iLTU5IiB3aWR0aD0iMjYiIGhlaWdodD0iMTAiIGZpbGw9IiMzRDVBODAiLz48cmVjdCB4PSItMTciIHk9Ii01NSIgd2lkdGg9IjUiIGhlaWdodD0iMTMiIGZpbGw9IiMzRDVBODAiLz48cmVjdCB4PSIxMiIgeT0iLTU1IiB3aWR0aD0iNSIgaGVpZ2h0PSIxMyIgZmlsbD0iIzNENUE4MCIvPjxyZWN0IHg9Ii05IiB5PSItNjEiIHdpZHRoPSIxOCIgaGVpZ2h0PSI0IiBmaWxsPSIjM0Q1QTgwIi8+PHJlY3QgeD0iLTExIiB5PSItNDkiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIGZpbGw9IiMzRDVBODAiLz48cmVjdCB4PSItOCIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iNSIgeT0iLTQ0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjQyMzM0Ii8+PHJlY3QgeD0iLTMiIHk9Ii0zNiIgd2lkdGg9IjciIGhlaWdodD0iMiIgZmlsbD0iI0FDNzA1QSIvPjxyZWN0IHg9Ii0xNCIgeT0iLTU5IiB3aWR0aD0iMjgiIGhlaWdodD0iNyIgZmlsbD0iIzNENUE4MCIvPjxyZWN0IHg9Ii0xOCIgeT0iLTU0IiB3aWR0aD0iMzUiIGhlaWdodD0iNCIgZmlsbD0iIzNENUE4MCIvPjxyZWN0IHg9Ii01IiB5PSItNTgiIHdpZHRoPSIxMCIgaGVpZ2h0PSIzIiBmaWxsPSIjOEVBOEMxIi8+PGcgY2xhc3M9InBpeGVsLWhhbmRzIj48cmVjdCB4PSItMTgiIHk9Ii0yOSIgd2lkdGg9IjYiIGhlaWdodD0iMTIiIGZpbGw9IiNEOUE5ODIiLz48cmVjdCB4PSIxMyIgeT0iLTI5IiB3aWR0aD0iNiIgaGVpZ2h0PSIxMiIgZmlsbD0iI0Q5QTk4MiIvPjxyZWN0IHg9Ii0xOSIgeT0iLTI4IiB3aWR0aD0iOCIgaGVpZ2h0PSI1IiBmaWxsPSIjQTY5Q0Y3Ii8+PHJlY3QgeD0iMTIiIHk9Ii0yOCIgd2lkdGg9IjgiIGhlaWdodD0iNSIgZmlsbD0iI0E2OUNGNyIvPjwvZz48L3N2Zz4=") !important;background-size:cover !important;image-rendering:pixelated;border-radius:7px;color:transparent !important;font-size:0 !important;overflow:hidden}
+
+/* Orvo pixel office: the dashboard layout and its controls remain intact. */
+.scene{aspect-ratio:1000/600;background:#13171F;border:1px solid var(--line);border-radius:12px;overflow:hidden;isolation:isolate}
+.scene>svg.pixel-office{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.scene .pixel-office{shape-rendering:crispEdges}
+.scene .tag{border-radius:7px;min-width:142px;max-width:180px;padding:6px 8px;gap:2px;box-shadow:0 3px 0 #0003}
+.scene .tag-n{font-size:12px}.scene .tag-r{font-size:11px}.scene .tag-s{font-size:10.5px}
+.scene .hit{top:auto;width:12%;height:18%;border-radius:0}
+.scene .tag.sel,.scene .mt[aria-pressed="true"]{box-shadow:0 0 0 2px var(--acc),0 3px 0 #0003}
+.scene .tag::after{width:6px;height:6px;bottom:-4px}
+.scene .pixel-person{transform-box:fill-box;transform-origin:50% 100%}
+.scene .pixel-run .pixel-hands{animation:pixel-type .24s steps(2,end) infinite}
+.scene .pixel-run{animation:pixel-breathe 2s steps(2,end) infinite}
+.scene .pixel-idle{animation:pixel-idle 7s steps(8,end) infinite}
+.scene .pixel-code{animation:pixel-screen 2.4s steps(2,end) infinite}
+.scene .pixel-code:nth-child(even){animation-delay:.7s}
+.scene .pixel-waiting{animation:pixel-wait 1.8s steps(2,end) infinite}
+.scene .pixel-steam{animation:pixel-steam 2s steps(3,end) infinite}
+.scene .pixel-bubble{filter:drop-shadow(0 3px 0 #0005)}
+.scene .selg.on{opacity:.45;stroke:var(--acc);stroke-width:3;fill:#9F91FF33}
+.scene .rtag{left:10% !important;top:91% !important;border-radius:6px;font-size:10px;padding:3px 6px;transform:translateY(-50%)}
+.scene .mt,.scene .mt.r{border-radius:6px;transform:translate(-50%,calc(-100% - 4px));height:26px;gap:4px;padding:0 6px;font-size:11px}
+.scene .mt .av{width:18px !important;height:18px !important}
+.scene .mt svg{position:static;inset:auto;width:14px;height:14px}
+.calm .scene *{animation:none !important}
+@keyframes pixel-type{to{transform:translateY(-2px)}}
+@keyframes pixel-breathe{50%{transform:translateY(-1px)}}
+@keyframes pixel-idle{0%,30%,100%{transform:translate(0,0)}45%,65%{transform:translate(10px,0)}}
+@keyframes pixel-screen{50%{opacity:.55}}
+@keyframes pixel-wait{50%{transform:translateY(-3px)}}
+@keyframes pixel-steam{to{transform:translateY(-6px);opacity:0}}
+@container (max-width:780px){.scene .tag{min-width:0;max-width:144px;padding:4px 6px}.scene .tag-r{display:none}.scene .tag-n{font-size:11px}}
+@media (prefers-reduced-motion:reduce){.scene *{animation:none !important}}
+
+/* Seated sprites: fixed hips and chair, forward arms, tiny wrist motion. */
+.scene .pixel-run,.scene .pixel-idle,.scene .pixel-person{animation:none !important}
+.scene .pixel-run .seated-arms{animation:seated-typing .32s steps(2,end) infinite}
+.scene .pixel-run .seated-head{animation:seated-reading 3.4s steps(2,end) infinite}
+@keyframes seated-typing{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+@keyframes seated-reading{0%,75%,100%{transform:translateY(0)}80%,90%{transform:translateY(1px)}}
+.scene .tag .tag-s{display:flex}.scene .tag .bar{display:block}
+.scene .tag .tag-r{display:inline}
+.scene .tag{max-width:200px;border-radius:10px}
+@container(max-width:780px){.scene .tag{max-width:22cqw;padding:4px 5px}.scene .tag .tag-n{font-size:clamp(8px,1.2cqw,11px)}.scene .tag .tag-s{font-size:clamp(7px,1.05cqw,10px);display:flex}.scene .tag .bar{display:block}}
+.calm .scene .seated-agent *{animation:none !important}
+@media(prefers-reduced-motion:reduce){.scene .seated-agent *{animation:none !important}}
+</style>
+<style>
+body{margin:0}
+a{color:#C9BFFF}a:hover{color:#ffffff}
+.o{--bg:#101014;--side:#141419;--surf:#1A1A21;--surf2:#21212A;--surf3:#2B2B36;--line:#2B2B36;--line2:#3A3A48;--tx:#EEEDF5;--tx2:#BAB8CA;--tx3:#9491A8;--acc:#9F91FF;--acc2:#CBC2FF;--btn:#6D5AE6;--btnH:#7B69F0;--accSoft:rgba(159,145,255,.15);--run:#B5ABFF;--runSoft:rgba(159,145,255,.14);--wait:#F4B860;--waitSoft:rgba(244,184,96,.12);--waitLine:rgba(244,184,96,.42);--waitBtn:#F4B860;--waitTx:#22180A;--done:#62D6A9;--doneSoft:rgba(98,214,169,.12);--doneBtn:#62D6A9;--doneTx:#0D241B;--err:#F5816F;--errSoft:rgba(245,129,111,.13);--pause:#ADABBD;--pauseSoft:rgba(173,171,189,.13);--tagBg:rgba(26,26,33,.93);--sh:0 1px 0 rgba(255,255,255,.03) inset,0 16px 40px -18px rgba(0,0,0,.7);--shS:0 10px 24px -10px rgba(0,0,0,.6);--floor:#1D1C26;--floorLine:#272634;--slab:#15141C;--wallL:#24222F;--wallR:#2A2838;--wallTop:#3A3752;--win:#2E2C46;--winG:#3A3670;--board:#34314A;--deskT:#3D3A55;--deskF:#2C2A40;--deskS:#232135;--mon:#16151F;--monS:#0D0D13;--chair:#33304A;--kb:#57537A;--pot:#3D3A55;--potT:#4A4766;--leaf:#4FA587;--leaf2:#3A8669;--rug:#272540;--tbl:#423F5E;--tblS:#2C2A40;--eye:#1A1820;--paper:#D9D5EA;--rack:#26243A;--rackS:#1C1B2B;
+background:var(--bg);color:var(--tx);font-family:'Golos Text',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.o.light{--bg:#F4F3F8;--side:#EDEBF4;--surf:#FFFFFF;--surf2:#F6F5FA;--surf3:#ECEAF4;--line:#E3E1EC;--line2:#D2CFDF;--tx:#18171F;--tx2:#45425A;--tx3:#625F77;--acc:#5B49D6;--acc2:#4A39BE;--btn:#5B49D6;--btnH:#4D3BC8;--accSoft:rgba(91,73,214,.09);--run:#5241C9;--runSoft:rgba(91,73,214,.09);--wait:#94560A;--waitSoft:rgba(222,150,40,.12);--waitLine:rgba(190,120,20,.42);--waitBtn:#94560A;--waitTx:#FFFFFF;--done:#11734F;--doneSoft:rgba(30,160,110,.1);--doneBtn:#11734F;--doneTx:#FFFFFF;--err:#B83A27;--errSoft:rgba(210,70,50,.09);--pause:#5E5B72;--pauseSoft:rgba(94,91,114,.1);--tagBg:rgba(255,255,255,.95);--sh:0 1px 2px rgba(24,23,31,.05),0 14px 34px -16px rgba(40,30,90,.2);--shS:0 8px 18px -8px rgba(40,30,90,.22);--floor:#ECE9F5;--floorLine:#DEDAEC;--slab:#D3CEE4;--wallL:#E3DFF0;--wallR:#D9D4EA;--wallTop:#F5F3FB;--win:#C6DAF2;--winG:#DDEAFA;--board:#FFFFFF;--deskT:#FFFFFF;--deskF:#DCD7EA;--deskS:#CAC4DE;--mon:#3B3850;--monS:#2C2A3E;--chair:#BDB6D4;--kb:#CFC9E2;--pot:#D6D0E8;--potT:#E7E3F2;--leaf:#4C9F80;--leaf2:#3A8468;--rug:#E0DBF1;--tbl:#FFFFFF;--tblS:#D3CDE4;--eye:#2A2633;--paper:#FFFFFF;--rack:#D6D0E8;--rackS:#C4BDDA}
+.o *{box-sizing:border-box}
+.o button,.o input,.o textarea,.o select{font:inherit;color:inherit}
+.o a{text-decoration:none}
+.o :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hide{display:none}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.s14{width:14px;height:14px}.ic.s16{width:16px;height:16px}.ic.s20{width:20px;height:20px}
+.mono{font-family:'JetBrains Mono',monospace}
+.disp{font-family:'Unbounded',sans-serif}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--line2);background:var(--surf2);color:var(--tx);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.btn:hover{background:var(--surf3);color:var(--tx)}
+.btn.pri{background:var(--btn);border-color:transparent;color:#fff;box-shadow:0 8px 20px -8px rgba(109,90,230,.7)}
+.btn.pri:hover{background:var(--btnH);color:#fff}
+.btn.lg{height:44px;padding:0 18px;font-size:15px}
+.btn.sm{height:34px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--tx2)}
+.btn.ghost:hover{background:var(--surf2);color:var(--tx)}
+.btn.warn{background:var(--waitBtn);border-color:transparent;color:var(--waitTx)}
+.btn.warn:hover{filter:brightness(1.06);background:var(--waitBtn);color:var(--waitTx)}
+.btn.okb{background:var(--doneBtn);border-color:transparent;color:var(--doneTx)}
+.btn.dang{color:var(--err)}
+.btn[aria-pressed="true"]{background:var(--accSoft);color:var(--tx);border-color:transparent}
+.iconbtn{width:36px;padding:0}
+.kbd{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:16px;padding:0 5px;border-radius:5px;border:1px solid rgba(255,255,255,.35);color:rgba(255,255,255,.9)}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.st-run{color:var(--run);background:var(--runSoft)}.st-wait{color:var(--wait);background:var(--waitSoft)}.st-done{color:var(--done);background:var(--doneSoft)}.st-err{color:var(--err);background:var(--errSoft)}.st-pause{color:var(--pause);background:var(--pauseSoft)}.st-idle{color:var(--tx2);background:var(--surf3)}
+.c-run{color:var(--run)}.c-wait{color:var(--wait)}.c-done{color:var(--done)}.c-pause{color:var(--pause)}.c-idle{color:var(--tx3)}
+.bar{height:4px;border-radius:4px;background:var(--surf3);overflow:hidden;display:block}
+.bar>span{display:block;height:100%;background:var(--acc);border-radius:4px;transition:width .6s ease}
+.av{display:inline-grid;place-items:center;border-radius:50%;color:#17161E;font-weight:700;flex:none;line-height:1}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--tx2);font-weight:500}
+.nav a:hover{background:var(--surf2);color:var(--tx)}
+.nav a.on{background:var(--accSoft);color:var(--tx)}
+.nav a.on .ic{color:var(--acc)}
+.nav .cnt{margin-left:auto;font-size:12px;color:var(--tx3)}
+.nav .cnt.w{color:var(--waitTx);background:var(--waitBtn);border-radius:999px;padding:0 7px;line-height:18px;font-weight:600}
+.seg{display:flex;padding:3px;border-radius:11px;background:var(--surf2);border:1px solid var(--line)}
+.seg button{flex:1;height:32px;border:0;border-radius:8px;background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--surf);color:var(--tx);box-shadow:var(--shS)}
+.lgm{fill:var(--btn)}
+.stat{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.stat .si{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none}
+.num{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:600;line-height:1}
+.banner{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:16px 18px;border-radius:18px;border:1px solid var(--waitLine);background:var(--waitSoft)}
+.scene{position:relative;width:100%;aspect-ratio:1000/600;container-type:inline-size}
+.scene svg.iso{position:absolute;inset:0;width:100%;height:100%}
+.floor{fill:var(--floor)}.slab{fill:var(--slab)}.wl{fill:var(--wallL)}.wr{fill:var(--wallR)}.wt{fill:var(--wallTop)}
+.grid path{fill:none;stroke:var(--floorLine);stroke-width:1;vector-effect:non-scaling-stroke}
+.win{fill:var(--win)}.winG{fill:var(--winG)}.board{fill:var(--board)}.dt{fill:var(--deskT)}.df{fill:var(--deskF)}.ds{fill:var(--deskS)}.mon{fill:var(--mon)}.monS{fill:var(--monS)}.kb{fill:var(--kb)}.chair{fill:var(--chair)}.pot{fill:var(--pot)}.potT{fill:var(--potT)}.leaf{fill:var(--leaf)}.leaf2{fill:var(--leaf2)}.rug{fill:var(--rug)}.tbl{fill:var(--tbl)}.tblS{fill:var(--tblS)}.eye{fill:var(--eye)}.paper{fill:var(--paper)}.rk{fill:var(--rack)}.rkS{fill:var(--rackS)}
+.shadow{fill:#000;opacity:.16}
+.mug{fill:var(--acc);opacity:.9}
+.mled{fill:var(--acc)}
+.ledg{fill:#62D6A9}.ledv{fill:#9F91FF}
+.selg{fill:var(--acc);opacity:0;transition:opacity .25s}
+.selg.on{opacity:.2}
+.bub-run{fill:var(--btn)}.bub-wait{fill:var(--waitBtn)}.bub-done{fill:var(--doneBtn)}.bub-pause,.bub-idle{fill:var(--surf3);stroke:var(--line2);stroke-width:1}
+.bi{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.bi-l{stroke:#fff;stroke-width:4.2}.bi-w{stroke:var(--waitTx);stroke-width:3.4}.bi-d{stroke:var(--doneTx);stroke-width:3}.bi-m{stroke:var(--tx2)}
+.pring{fill:none;stroke-width:2;transform-box:fill-box;transform-origin:center}
+.pr-wait{stroke:var(--waitBtn)}.pr-done{stroke:var(--doneBtn)}
+.tag{position:absolute;transform:translate(-50%,calc(-100% - 8px));display:flex;flex-direction:column;gap:3px;min-width:140px;max-width:200px;padding:7px 10px 8px;border-radius:12px;background:var(--tagBg);border:1px solid var(--line2);box-shadow:var(--shS);text-align:left;cursor:pointer;z-index:2;transition:border-color .2s,box-shadow .2s}
+.tag::after{content:"";position:absolute;left:50%;bottom:-5px;width:9px;height:9px;background:var(--tagBg);border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);transform:translateX(-50%) rotate(45deg)}
+.tag:hover{border-color:var(--acc)}
+.tag.w{border-color:var(--waitLine)}.tag.w::after{border-color:var(--waitLine)}
+.tag.sel{border-color:var(--acc);box-shadow:0 0 0 3px var(--accSoft),var(--shS)}
+.tag.sel::after{border-color:var(--acc)}
+.tag-n{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--tx);white-space:nowrap}
+.tag-r{color:var(--tx3);font-weight:500}
+.tag-s{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hit{position:absolute;transform:translateX(-50%);width:5.6%;height:10.5%;border:0;background:transparent;cursor:pointer;padding:0;border-radius:14px;z-index:1}
+.rtag{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:var(--tagBg);border:1px solid var(--line2);font-size:11.5px;color:var(--tx2);white-space:nowrap;box-shadow:var(--shS)}
+@container (max-width:780px){.tag{min-width:0;padding:5px 8px}.tag-s{display:none}.tag .bar{display:none}.rtag{display:none}}
+.panel{flex:1 1 360px;max-width:420px;display:flex;flex-direction:column;overflow:hidden;animation:slideIn .28s ease-out;align-self:flex-start}
+.ph{display:flex;gap:12px;align-items:center;padding:18px 16px 14px 18px;border-bottom:1px solid var(--line)}
+.sec{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.sec:last-child{border-bottom:0}
+.eyebrow{margin:0;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3)}
+.stages{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.stages li{display:flex;align-items:center;gap:10px;min-height:30px;font-size:13.5px;color:var(--tx3)}
+.sgi{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;border:1.5px dashed var(--line2);color:var(--tx3)}
+.sg.done{color:var(--tx2)}.sg.done .sgi{background:var(--doneSoft);border:0;color:var(--done)}
+.sg.now{color:var(--tx);font-weight:500}.sg.now .sgi{border:1.5px solid var(--acc);color:var(--acc);background:var(--accSoft)}
+.sg.wait{color:var(--tx);font-weight:500}.sg.wait .sgi{border:0;background:var(--waitSoft);color:var(--wait)}
+.sg.pause{color:var(--tx);font-weight:500}.sg.pause .sgi{border:0;background:var(--pauseSoft);color:var(--pause)}
+.sgn{margin-left:auto;font-size:12px;color:var(--tx3);font-weight:400;text-align:right}
+.file{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surf2);color:var(--tx)}
+.file:hover{border-color:var(--line2);color:var(--tx)}
+.fi{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--accSoft);color:var(--acc);flex:none}
+.chat{display:flex;flex-direction:column;gap:8px}
+.msg{max-width:90%;padding:9px 12px;border-radius:14px;font-size:13.5px}
+.msg.ag{background:var(--surf2);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start}
+.msg.me{background:var(--accSoft);border:1px solid transparent;border-bottom-right-radius:5px;align-self:flex-end}
+.rulebtn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;height:28px;padding:0 10px;border-radius:8px;border:1px dashed var(--acc);background:transparent;color:var(--acc2);font-size:12px;font-weight:500;cursor:pointer}
+.rulebtn:disabled{border-style:solid;border-color:transparent;background:var(--doneSoft);color:var(--done);cursor:default}
+.field{height:40px;border-radius:10px;border:1px solid var(--line2);background:var(--surf2);padding:0 12px;color:var(--tx);min-width:0}
+.field::placeholder{color:var(--tx3)}
+.approve{border:1px solid var(--waitLine);background:var(--waitSoft);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.kv{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;font-size:13px}
+.kv dt{color:var(--tx3)}.kv dd{margin:0;color:var(--tx);overflow-wrap:anywhere}
+.confirm{border:1px solid var(--line2);background:var(--surf2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:12px 14px 12px 16px;border-radius:14px;background:var(--surf);border:1px solid var(--line2);box-shadow:var(--sh);z-index:20;animation:rise .25s ease-out;max-width:calc(100% - 32px)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--tx2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--done);animation:blink 1.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes pulse{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rise{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.bob{animation:bob 2.2s ease-in-out infinite}
+.hop{animation:hop 1.5s ease-in-out infinite}
+.pulse{animation:pulse 1.9s ease-out infinite}
+.blinkS{animation:blink 1.4s ease-in-out infinite}
+.lled{animation:blink 1.8s ease-in-out infinite}
+.lled2{animation:blink 1.1s ease-in-out infinite}
+.spin{animation:spin 1.1s linear infinite}
+.calm *,.calm *::after{animation:none !important;transition:none !important}
+@media (prefers-reduced-motion:reduce){.o *,.o *::after{animation:none !important;transition:none !important}}
+@media (max-width:720px){.side{max-width:none !important}}
+</style>
+</helmet>
+<div class="{{rootCls}}" style="min-height:100vh;display:flex;flex-wrap:wrap;align-items:stretch">
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+<symbol id="i-office" sc-camel-view-box="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9.5 21v-4.5h5V21M9 11h.01M12 11h.01M15 11h.01"></path></symbol>
+<symbol id="i-tasks" sc-camel-view-box="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6.2l1.3 1.3L7.6 5M4 12.2l1.3 1.3 2.3-2.5M4 18.2l1.3 1.3 2.3-2.5"></path></symbol>
+<symbol id="i-agents" sc-camel-view-box="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2A6.5 6.5 0 0 1 21.5 20"></path></symbol>
+<symbol id="i-history" sc-camel-view-box="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5M3.5 4v4.5H8M12 7.5V12l3 2"></path></symbol>
+<symbol id="i-settings" sc-camel-view-box="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"></path><circle cx="15" cy="7" r="2"></circle><circle cx="9" cy="17" r="2"></circle></symbol>
+<symbol id="i-plus" sc-camel-view-box="0 0 24 24"><path d="M12 5v14M5 12h14"></path></symbol>
+<symbol id="i-sun" sc-camel-view-box="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path></symbol>
+<symbol id="i-moon" sc-camel-view-box="0 0 24 24"><path d="M20.5 13.5A8.5 8.5 0 1 1 10.5 3.5a6.8 6.8 0 0 0 10 10z"></path></symbol>
+<symbol id="i-pause" sc-camel-view-box="0 0 24 24"><path d="M9 5.5v13M15 5.5v13"></path></symbol>
+<symbol id="i-play" sc-camel-view-box="0 0 24 24"><path d="M7.5 5v14l11-7z"></path></symbol>
+<symbol id="i-x" sc-camel-view-box="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></symbol>
+<symbol id="i-check" sc-camel-view-box="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"></path></symbol>
+<symbol id="i-alert" sc-camel-view-box="0 0 24 24"><path d="M12 6.5v7M12 17.5v.01"></path></symbol>
+<symbol id="i-warn" sc-camel-view-box="0 0 24 24"><path d="M12 3.5 2.5 20h19z"></path><path d="M12 10v4.5M12 17.2v.01"></path></symbol>
+<symbol id="i-dots" sc-camel-view-box="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01"></path></symbol>
+<symbol id="i-run" sc-camel-view-box="0 0 24 24"><path d="M20.5 12A8.5 8.5 0 1 1 12 3.5"></path></symbol>
+<symbol id="i-coffee" sc-camel-view-box="0 0 24 24"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5v2.5M12 3.5v2.5"></path></symbol>
+<symbol id="i-clock" sc-camel-view-box="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></symbol>
+<symbol id="i-server" sc-camel-view-box="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="2"></rect><rect x="4" y="13" width="16" height="7" rx="2"></rect><path d="M8 7.5h.01M8 16.5h.01"></path></symbol>
+<symbol id="i-coins" sc-camel-view-box="0 0 24 24"><ellipse cx="12" cy="6.5" rx="7" ry="3"></ellipse><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"></path></symbol>
+<symbol id="i-mail" sc-camel-view-box="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3.5 6.5 8.5 6.5 8.5-6.5"></path></symbol>
+<symbol id="i-file" sc-camel-view-box="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"></path><path d="M14 3v5h5M8.5 13h7M8.5 16.5h5"></path></symbol>
+<symbol id="i-send" sc-camel-view-box="0 0 24 24"><path d="M4.5 12 20 4.5 15.5 20l-3.2-6.3zM12.3 13.7 20 4.5"></path></symbol>
+<symbol id="i-bookmark" sc-camel-view-box="0 0 24 24"><path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"></path></symbol>
+<symbol id="i-expand" sc-camel-view-box="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"></path></symbol>
+<symbol id="i-wave" sc-camel-view-box="0 0 24 24"><path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"></path></symbol>
+<symbol id="i-plug" sc-camel-view-box="0 0 24 24"><path d="M9 3v5M15 3v5M6.5 8h11v3a5.5 5.5 0 0 1-11 0zM12 16.5V21"></path></symbol>
+<symbol id="i-clip" sc-camel-view-box="0 0 24 24"><path d="M20.5 11.5 12 20a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"></path></symbol>
+<symbol id="i-bell" sc-camel-view-box="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9zM10 20.5a2.2 2.2 0 0 0 4 0"></path></symbol>
+<symbol id="i-undo" sc-camel-view-box="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></symbol>
+<symbol id="i-stop" sc-camel-view-box="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2.5"></rect></symbol>
+<symbol id="i-edit" sc-camel-view-box="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></symbol>
+</svg>
+
+<aside class="side" style="flex:1 1 220px;max-width:248px;display:flex;flex-direction:column;gap:18px;padding:20px 14px;background:var(--side);border-right:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:10px;padding:2px 8px 6px">
+<svg width="30" height="30" sc-camel-view-box="0 0 30 30" aria-hidden="true"><rect class="lgm" width="30" height="30" rx="9"></rect><path d="M15 7.5l6.5 3.7v7.6L15 22.5l-6.5-3.7v-7.6z" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"></path><path d="M8.5 11.2 15 15l6.5-3.8M15 15v7.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" opacity=".65"></path></svg>
+<span class="disp" style="font-size:19px;font-weight:600;letter-spacing:-.01em">orvo</span>
+</div>
+<nav class="nav" aria-label="Основная навигация">
+<a class="on" href="Main.dc.html" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-office"></use></svg>Офис</a>
+<a href="Tasks.dc.html"><svg class="ic" aria-hidden="true"><use href="#i-tasks"></use></svg>Задачи<span class="{{navWaitCls}}">{{navWait}}</span></a>
+<a href="Agent.dc.html"><svg class="ic" aria-hidden="true"><use href="#i-agents"></use></svg>Агенты<span class="cnt">6</span></a>
+<a href="#history"><svg class="ic" aria-hidden="true"><use href="#i-history"></use></svg>История</a>
+<a href="#settings"><svg class="ic" aria-hidden="true"><use href="#i-settings"></use></svg>Настройки</a>
+</nav>
+<div style="flex:1"></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;background:var(--surf);border:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tx2)"><svg class="ic s16" aria-hidden="true"><use href="#i-coins"></use></svg>Расходы · октябрь</div>
+<div style="display:flex;align-items:baseline;gap:6px"><span class="disp" style="font-size:20px;font-weight:600">$18,40</span><span style="font-size:12.5px;color:var(--tx3)">из $40</span></div>
+<span class="bar" role="img" aria-label="Израсходовано 46% месячного лимита"><span style="width:46%"></span></span>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tx3)"><span>Сегодня $2,15</span><span>46%</span></div>
+</div>
+<div class="seg" role="group" aria-label="Тема оформления">
+<button aria-pressed="{{isDark}}" sc-camel-on-click="{{setDark}}"><svg class="ic s16" aria-hidden="true"><use href="#i-moon"></use></svg>Тёмная</button>
+<button aria-pressed="{{isLight}}" sc-camel-on-click="{{setLight}}"><svg class="ic s16" aria-hidden="true"><use href="#i-sun"></use></svg>Светлая</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:4px 4px 0">
+<span class="av" style="width:36px;height:36px;font-size:14px;background:#CBC2FF">АС</span>
+<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px">Алия Серикова</div><div style="font-size:12px;color:var(--tx3)">Личный офис</div></div>
+<button class="btn ghost iconbtn" aria-label="Настройки профиля"><svg class="ic" aria-hidden="true"><use href="#i-settings"></use></svg></button>
+</div>
+</aside>
+
+<main style="flex:999 1 560px;min-width:0;padding:24px 32px 32px;display:flex;flex-direction:column;gap:20px">
+<header style="display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px">
+<div style="flex:1 1 260px;min-width:0">
+<h1 style="margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em">Офис</h1>
+<p style="margin:2px 0 0;color:var(--tx3);font-size:13.5px">Воскресенье, 18 октября · 6 агентов в команде</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+<span class="chip st-done" style="height:30px;padding:0 11px"><svg class="ic s14" aria-hidden="true"><use href="#i-plug"></use></svg>Модель подключена</span>
+<button class="btn sm ghost" aria-pressed="{{calm}}" sc-camel-on-click="{{toggleCalm}}"><svg class="ic s16" aria-hidden="true"><use href="#i-wave"></use></svg>Меньше анимации</button>
+<button class="btn ghost iconbtn" aria-label="Уведомления: 2 новых"><svg class="ic" aria-hidden="true"><use href="#i-bell"></use></svg></button>
+<a class="btn pri lg" href="NewTask.dc.html"><svg class="ic" aria-hidden="true"><use href="#i-plus"></use></svg>Поставить задачу<span class="kbd" aria-hidden="true">N</span></a>
+</div>
+</header>
+
+<section aria-label="Сводка" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+<div class="card stat"><span class="si st-run"><svg class="ic s20 spin" aria-hidden="true"><use href="#i-run"></use></svg></span><div><div class="num">{{nRun}}</div><div style="color:var(--tx2);margin-top:4px;font-size:13px">Выполняется</div></div></div>
+<div class="card stat"><span class="si st-wait"><svg class="ic s20" aria-hidden="true"><use href="#i-warn"></use></svg></span><div><div class="num">{{nWait}}</div><div style="color:var(--tx2);margin-top:4px;font-size:13px">Ожидает решения</div></div></div>
+<div class="card stat"><span class="si st-done"><svg class="ic s20" aria-hidden="true"><use href="#i-check"></use></svg></span><div><div class="num">5</div><div style="color:var(--tx2);margin-top:4px;font-size:13px">Завершено сегодня</div></div></div>
+</section>
+
+<sc-if value="{{showBanner}}" hint-placeholder-val="{{ true }}">
+<section class="banner" aria-label="Нужно ваше решение">
+<span class="si" style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--waitBtn);color:var(--waitTx);flex:none"><svg class="ic s20" aria-hidden="true"><use href="#i-mail"></use></svg></span>
+<div style="flex:1 1 380px;min-width:0">
+<div style="font-weight:600">Тим · Аналитик ждёт вашего решения</div>
+<div style="color:var(--tx2);font-size:13.5px;margin-top:2px">Отправить письмо от вашего имени на <span class="mono" style="font-size:12.5px;color:var(--tx)">m.akhmetova@severo.kz</span> с отчётом «Продажи, 3 квартал» (sales-q3.pdf, 2,1 МБ).</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button class="btn sm ghost" sc-camel-on-click="{{openTim}}">Посмотреть письмо</button>
+<button class="btn sm" sc-camel-on-click="{{reject}}">Отклонить</button>
+<button class="btn sm warn" sc-camel-on-click="{{approve}}"><svg class="ic s16" aria-hidden="true"><use href="#i-send"></use></svg>Подтвердить отправку</button>
+</div>
+</section>
+</sc-if>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section class="card" aria-label="Виртуальный офис" style="flex:999 1 520px;min-width:0;padding:16px 16px 14px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:2px 4px 0">
+<h2 style="margin:0;font-size:15px;font-weight:600">Команда в офисе</h2>
+<span style="font-size:12.5px;color:var(--tx3)">Нажмите на агента или выберите его клавишей Tab, чтобы открыть панель</span>
+<span style="flex:1"></span>
+<span class="chip st-idle"><span class="led" aria-hidden="true"></span>2 задания на сервере — продолжат работу без вас</span>
+</div>
+<div class="scene">
+<svg class="iso pixel-office" sc-camel-view-box="0 0 1000 600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="px-wood" width="96" height="32" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="96" height="32" fill="#956D46"/><rect x="0" y="1" width="95" height="14" fill="#A67B4F"/><rect x="0" y="17" width="95" height="14" fill="#9D734A"/><rect x="47" y="0" width="2" height="16" fill="#795B3E"/><rect x="0" y="16" width="2" height="16" fill="#795B3E"/><rect x="7" y="5" width="22" height="1" fill="#B08757"/><rect x="58" y="23" width="28" height="1" fill="#B08757"/></pattern><pattern id="px-carpet" width="12" height="12" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="12" height="12" fill="#36566B"/><rect x="0" y="0" width="2" height="2" fill="#3D6075"/><rect x="6" y="6" width="2" height="2" fill="#2E4C63"/></pattern></defs><rect x="0" y="0" width="1000" height="600" fill="#13171F"/><rect x="40" y="43" width="920" height="521" fill="#090E16"/><rect x="48" y="53" width="904" height="504" fill="#526171"/><rect x="56" y="65" width="888" height="483" fill="#243746"/><rect x="64" y="96" width="872" height="440" fill="url(#px-wood)"/><rect x="64" y="90" width="872" height="10" fill="#18242E"/><rect x="64" y="93" width="872" height="3" fill="#6A7882"/><rect x="64" y="65" width="872" height="25" fill="#2D4252"/><rect x="64" y="64" width="872" height="4" fill="#405B6A"/><rect x="693" y="100" width="243" height="436" fill="url(#px-carpet)"/><rect x="687" y="96" width="8" height="333" fill="#182630"/><rect x="689" y="96" width="4" height="333" fill="#536779"/><rect x="687" y="474" width="8" height="62" fill="#536779"/><rect x="687" y="425" width="8" height="8" fill="#77919A"/><rect x="687" y="474" width="8" height="8" fill="#77919A"/><rect x="102" y="57" width="112" height="44" fill="#4E3A31"/><rect x="106" y="61" width="104" height="34" fill="#282D36"/><rect x="110" y="64" width="6" height="11" fill="#83AB88"/><rect x="120" y="64" width="6" height="10" fill="#CD9867"/><rect x="130" y="64" width="6" height="9" fill="#B3B5BF"/><rect x="140" y="64" width="6" height="11" fill="#A488A8"/><rect x="150" y="64" width="6" height="10" fill="#D0B46D"/><rect x="160" y="64" width="6" height="9" fill="#658F94"/><rect x="170" y="64" width="6" height="11" fill="#B65E60"/><rect x="180" y="64" width="6" height="10" fill="#B6AF98"/><rect x="190" y="64" width="6" height="9" fill="#66828E"/><rect x="200" y="64" width="6" height="11" fill="#B99165"/><rect x="105" y="77" width="106" height="4" fill="#A77B50"/><rect x="110" y="83" width="6" height="11" fill="#83AB88"/><rect x="120" y="83" width="6" height="10" fill="#CD9867"/><rect x="130" y="83" width="6" height="9" fill="#B3B5BF"/><rect x="140" y="83" width="6" height="11" fill="#A488A8"/><rect x="150" y="83" width="6" height="10" fill="#D0B46D"/><rect x="160" y="83" width="6" height="9" fill="#658F94"/><rect x="170" y="83" width="6" height="11" fill="#B65E60"/><rect x="180" y="83" width="6" height="10" fill="#B6AF98"/><rect x="190" y="83" width="6" height="9" fill="#66828E"/><rect x="200" y="83" width="6" height="11" fill="#B99165"/><rect x="105" y="96" width="106" height="4" fill="#A77B50"/><rect x="468" y="57" width="112" height="44" fill="#4E3A31"/><rect x="472" y="61" width="104" height="34" fill="#282D36"/><rect x="476" y="64" width="6" height="11" fill="#83AB88"/><rect x="486" y="64" width="6" height="10" fill="#CD9867"/><rect x="496" y="64" width="6" height="9" fill="#B3B5BF"/><rect x="506" y="64" width="6" height="11" fill="#A488A8"/><rect x="516" y="64" width="6" height="10" fill="#D0B46D"/><rect x="526" y="64" width="6" height="9" fill="#658F94"/><rect x="536" y="64" width="6" height="11" fill="#B65E60"/><rect x="546" y="64" width="6" height="10" fill="#B6AF98"/><rect x="556" y="64" width="6" height="9" fill="#66828E"/><rect x="566" y="64" width="6" height="11" fill="#B99165"/><rect x="471" y="77" width="106" height="4" fill="#A77B50"/><rect x="476" y="83" width="6" height="11" fill="#83AB88"/><rect x="486" y="83" width="6" height="10" fill="#CD9867"/><rect x="496" y="83" width="6" height="9" fill="#B3B5BF"/><rect x="506" y="83" width="6" height="11" fill="#A488A8"/><rect x="516" y="83" width="6" height="10" fill="#D0B46D"/><rect x="526" y="83" width="6" height="9" fill="#658F94"/><rect x="536" y="83" width="6" height="11" fill="#B65E60"/><rect x="546" y="83" width="6" height="10" fill="#B6AF98"/><rect x="556" y="83" width="6" height="9" fill="#66828E"/><rect x="566" y="83" width="6" height="11" fill="#B99165"/><rect x="471" y="96" width="106" height="4" fill="#A77B50"/><rect x="264" y="52" width="114" height="41" fill="#192B3C"/><rect x="270" y="57" width="102" height="30" fill="#63889A"/><rect x="274" y="60" width="44" height="23" fill="#86A8B3"/><rect x="323" y="60" width="44" height="23" fill="#7299A9"/><rect x="318" y="56" width="5" height="32" fill="#344D60"/><rect x="279" y="63" width="3" height="18" fill="#ABC7CD"/><rect x="328" y="63" width="3" height="18" fill="#97B8C4"/><rect x="403" y="53" width="34" height="34" fill="#142632"/><rect x="407" y="57" width="26" height="26" fill="#D1CCB2"/><rect x="410" y="60" width="20" height="20" fill="#E8E1CA"/><path d="M420 63v9h7" fill="none" stroke="#506171" stroke-width="3"/><rect x="758" y="55" width="122" height="35" fill="#1D303F"/><rect x="763" y="60" width="112" height="25" fill="#3E5B66"/><text x="819" y="78" text-anchor="middle" font-size="15" font-family="monospace" letter-spacing="5" fill="#D2DCCB">ORVO</text><rect x="730" y="111" width="170" height="73" fill="#1E303E"/><rect x="734" y="115" width="162" height="65" fill="#AD9674"/><rect x="740" y="121" width="150" height="53" fill="#D9C8A2"/><rect x="751" y="130" width="22" height="14" fill="#B29CCC"/><rect x="755" y="134" width="13" height="2" fill="#000000" fill-opacity="0.188"/><rect x="782" y="128" width="22" height="14" fill="#D5AF69"/><rect x="786" y="132" width="13" height="2" fill="#000000" fill-opacity="0.188"/><rect x="814" y="131" width="22" height="14" fill="#8EBBA3"/><rect x="818" y="135" width="13" height="2" fill="#000000" fill-opacity="0.188"/><rect x="845" y="130" width="22" height="14" fill="#AFB9CD"/><rect x="849" y="134" width="13" height="2" fill="#000000" fill-opacity="0.188"/><rect x="751" y="152" width="22" height="14" fill="#94B6A4"/><rect x="755" y="156" width="13" height="2" fill="#000000" fill-opacity="0.188"/><rect x="783" y="151" width="22" height="14" fill="#B8A1BF"/><rect x="787" y="155" width="13" height="2" fill="#000000" fill-opacity="0.188"/><rect x="745" y="205" width="141" height="48" fill="#203B46"/><rect x="742" y="202" width="144" height="39" fill="#507B7D"/><rect x="748" y="206" width="132" height="28" fill="#709A94"/><rect x="750" y="241" width="10" height="9" fill="#21313A"/><rect x="867" y="241" width="10" height="9" fill="#21313A"/><rect x="810" y="207" width="4" height="27" fill="#4D7E7D"/><rect x="740" y="348" width="152" height="100" fill="#1F4053"/><rect x="744" y="352" width="144" height="92" fill="#456775"/><rect x="752" y="366" width="128" height="61" fill="#6E4C3F"/><rect x="748" y="360" width="136" height="60" fill="#BA8E61"/><rect x="752" y="364" width="128" height="49" fill="#CAA273"/><rect x="758" y="419" width="8" height="18" fill="#29414D"/><rect x="865" y="419" width="8" height="18" fill="#29414D"/><rect x="842" y="381" width="23" height="19" fill="#E8DFC5"/><rect x="846" y="385" width="15" height="2" fill="#9FA2A1"/><rect x="846" y="390" width="11" height="2" fill="#9FA2A1"/><rect x="775" y="382" width="12" height="14" fill="#B8C5BD"/><rect x="778" y="380" width="6" height="4" fill="#9B7A5E"/><g transform="translate(220 204)"><rect x="-65" y="10" width="132" height="49" fill="#000000" fill-opacity="0.145"/><rect x="-57" y="28" width="9" height="25" fill="#52616A"/><rect x="49" y="28" width="9" height="25" fill="#52616A"/><rect x="-62" y="-8" width="124" height="41" fill="#6B4933"/><rect x="-62" y="-12" width="124" height="39" fill="#BA8E5D"/><rect x="-58" y="-8" width="116" height="30" fill="#C69B68"/><rect x="-59" y="24" width="118" height="5" fill="#D0A979"/><rect x="-49" y="-5" width="2" height="24" fill="#BE925E"/><rect x="46" y="-5" width="2" height="24" fill="#BE925E"/><rect x="-10" y="-22" width="20" height="8" fill="#6B787C"/><rect x="-4" y="-34" width="8" height="15" fill="#8A9898"/><rect x="-27" y="-68" width="54" height="39" fill="#54626C"/><rect x="-25" y="-70" width="50" height="37" fill="#B0BCB6"/><rect x="-21" y="-66" width="42" height="28" fill="#233F44"/><rect x="-18" y="-63" width="36" height="22" fill="#315A59"/><rect x="-14" y="-59" width="21" height="2" fill="#C98BDB" class="pixel-code"/><rect x="-14" y="-55" width="27" height="2" fill="#C98BDB" class="pixel-code"/><rect x="-14" y="-51" width="14" height="2" fill="#C98BDB" class="pixel-code"/><rect x="-14" y="-47" width="22" height="2" fill="#C98BDB" class="pixel-code"/><rect x="-4" y="-36" width="8" height="2" fill="#6B7C81"/><rect x="18" y="-36" width="3" height="2" fill="#7AE3AF"/><rect x="-22" y="4" width="45" height="13" fill="#708287"/><rect x="-19" y="6" width="39" height="7" fill="#AFBCB7"/><rect x="-17" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-17" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="10" width="3" height="2" fill="#6D7F83"/><rect x="1" y="6" width="3" height="2" fill="#6D7F83"/><rect x="1" y="10" width="3" height="2" fill="#6D7F83"/><rect x="7" y="6" width="3" height="2" fill="#6D7F83"/><rect x="7" y="10" width="3" height="2" fill="#6D7F83"/><rect x="13" y="6" width="3" height="2" fill="#6D7F83"/><rect x="13" y="10" width="3" height="2" fill="#6D7F83"/><rect x="30" y="4" width="8" height="12" fill="#B1BDB4"/><rect x="-49" y="0" width="11" height="14" fill="#C98BDB"/><rect x="-47" y="-2" width="7" height="3" fill="#D8D3B9"/><path d="M-38 3h5v7h-5" fill="none" stroke="#C98BDB" stroke-width="3"/><rect x="-22" y="48" width="44" height="18" fill="#38535B"/><rect x="-19" y="51" width="38" height="10" fill="#4A7073"/><rect x="-3" y="64" width="6" height="15" fill="#263944"/><rect x="-22" y="78" width="44" height="4" fill="#293E47"/></g><g transform="translate(420 204)"><rect x="-65" y="10" width="132" height="49" fill="#000000" fill-opacity="0.145"/><rect x="-57" y="28" width="9" height="25" fill="#52616A"/><rect x="49" y="28" width="9" height="25" fill="#52616A"/><rect x="-62" y="-8" width="124" height="41" fill="#6B4933"/><rect x="-62" y="-12" width="124" height="39" fill="#BA8E5D"/><rect x="-58" y="-8" width="116" height="30" fill="#C69B68"/><rect x="-59" y="24" width="118" height="5" fill="#D0A979"/><rect x="-49" y="-5" width="2" height="24" fill="#BE925E"/><rect x="46" y="-5" width="2" height="24" fill="#BE925E"/><rect x="-10" y="-22" width="20" height="8" fill="#6B787C"/><rect x="-4" y="-34" width="8" height="15" fill="#8A9898"/><rect x="-27" y="-68" width="54" height="39" fill="#54626C"/><rect x="-25" y="-70" width="50" height="37" fill="#B0BCB6"/><rect x="-21" y="-66" width="42" height="28" fill="#233F44"/><rect x="-18" y="-63" width="36" height="22" fill="#315A59"/><rect x="-14" y="-59" width="21" height="2" fill="#6FA8F0" class="pixel-code"/><rect x="-14" y="-55" width="27" height="2" fill="#6FA8F0" class="pixel-code"/><rect x="-14" y="-51" width="14" height="2" fill="#6FA8F0" class="pixel-code"/><rect x="-14" y="-47" width="22" height="2" fill="#6FA8F0" class="pixel-code"/><rect x="-4" y="-36" width="8" height="2" fill="#6B7C81"/><rect x="18" y="-36" width="3" height="2" fill="#7AE3AF"/><rect x="-22" y="4" width="45" height="13" fill="#708287"/><rect x="-19" y="6" width="39" height="7" fill="#AFBCB7"/><rect x="-17" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-17" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="10" width="3" height="2" fill="#6D7F83"/><rect x="1" y="6" width="3" height="2" fill="#6D7F83"/><rect x="1" y="10" width="3" height="2" fill="#6D7F83"/><rect x="7" y="6" width="3" height="2" fill="#6D7F83"/><rect x="7" y="10" width="3" height="2" fill="#6D7F83"/><rect x="13" y="6" width="3" height="2" fill="#6D7F83"/><rect x="13" y="10" width="3" height="2" fill="#6D7F83"/><rect x="30" y="4" width="8" height="12" fill="#B1BDB4"/><rect x="-49" y="0" width="11" height="14" fill="#6FA8F0"/><rect x="-47" y="-2" width="7" height="3" fill="#D8D3B9"/><path d="M-38 3h5v7h-5" fill="none" stroke="#6FA8F0" stroke-width="3"/><rect x="-22" y="48" width="44" height="18" fill="#38535B"/><rect x="-19" y="51" width="38" height="10" fill="#4A7073"/><rect x="-3" y="64" width="6" height="15" fill="#263944"/><rect x="-22" y="78" width="44" height="4" fill="#293E47"/></g><g transform="translate(620 204)"><rect x="-65" y="10" width="132" height="49" fill="#000000" fill-opacity="0.145"/><rect x="-57" y="28" width="9" height="25" fill="#52616A"/><rect x="49" y="28" width="9" height="25" fill="#52616A"/><rect x="-62" y="-8" width="124" height="41" fill="#6B4933"/><rect x="-62" y="-12" width="124" height="39" fill="#BA8E5D"/><rect x="-58" y="-8" width="116" height="30" fill="#C69B68"/><rect x="-59" y="24" width="118" height="5" fill="#D0A979"/><rect x="-49" y="-5" width="2" height="24" fill="#BE925E"/><rect x="46" y="-5" width="2" height="24" fill="#BE925E"/><rect x="-10" y="-22" width="20" height="8" fill="#6B787C"/><rect x="-4" y="-34" width="8" height="15" fill="#8A9898"/><rect x="-27" y="-68" width="54" height="39" fill="#54626C"/><rect x="-25" y="-70" width="50" height="37" fill="#B0BCB6"/><rect x="-21" y="-66" width="42" height="28" fill="#233F44"/><rect x="-18" y="-63" width="36" height="22" fill="#315A59"/><rect x="-14" y="-59" width="21" height="2" fill="#63C5B0" class="pixel-code"/><rect x="-14" y="-55" width="27" height="2" fill="#63C5B0" class="pixel-code"/><rect x="-14" y="-51" width="14" height="2" fill="#63C5B0" class="pixel-code"/><rect x="-14" y="-47" width="22" height="2" fill="#63C5B0" class="pixel-code"/><rect x="-4" y="-36" width="8" height="2" fill="#6B7C81"/><rect x="18" y="-36" width="3" height="2" fill="#7AE3AF"/><rect x="-22" y="4" width="45" height="13" fill="#708287"/><rect x="-19" y="6" width="39" height="7" fill="#AFBCB7"/><rect x="-17" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-17" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="10" width="3" height="2" fill="#6D7F83"/><rect x="1" y="6" width="3" height="2" fill="#6D7F83"/><rect x="1" y="10" width="3" height="2" fill="#6D7F83"/><rect x="7" y="6" width="3" height="2" fill="#6D7F83"/><rect x="7" y="10" width="3" height="2" fill="#6D7F83"/><rect x="13" y="6" width="3" height="2" fill="#6D7F83"/><rect x="13" y="10" width="3" height="2" fill="#6D7F83"/><rect x="30" y="4" width="8" height="12" fill="#B1BDB4"/><rect x="-49" y="0" width="11" height="14" fill="#63C5B0"/><rect x="-47" y="-2" width="7" height="3" fill="#D8D3B9"/><path d="M-38 3h5v7h-5" fill="none" stroke="#63C5B0" stroke-width="3"/><rect x="-22" y="48" width="44" height="18" fill="#38535B"/><rect x="-19" y="51" width="38" height="10" fill="#4A7073"/><rect x="-3" y="64" width="6" height="15" fill="#263944"/><rect x="-22" y="78" width="44" height="4" fill="#293E47"/></g><g transform="translate(220 380)"><rect x="-65" y="10" width="132" height="49" fill="#000000" fill-opacity="0.145"/><rect x="-57" y="28" width="9" height="25" fill="#52616A"/><rect x="49" y="28" width="9" height="25" fill="#52616A"/><rect x="-62" y="-8" width="124" height="41" fill="#6B4933"/><rect x="-62" y="-12" width="124" height="39" fill="#BA8E5D"/><rect x="-58" y="-8" width="116" height="30" fill="#C69B68"/><rect x="-59" y="24" width="118" height="5" fill="#D0A979"/><rect x="-49" y="-5" width="2" height="24" fill="#BE925E"/><rect x="46" y="-5" width="2" height="24" fill="#BE925E"/><rect x="-10" y="-22" width="20" height="8" fill="#6B787C"/><rect x="-4" y="-34" width="8" height="15" fill="#8A9898"/><rect x="-27" y="-68" width="54" height="39" fill="#54626C"/><rect x="-25" y="-70" width="50" height="37" fill="#B0BCB6"/><rect x="-21" y="-66" width="42" height="28" fill="#233F44"/><rect x="-18" y="-63" width="36" height="22" fill="#31424D"/><rect x="-14" y="-59" width="21" height="2" fill="#F0A36F"/><rect x="-14" y="-55" width="27" height="2" fill="#F0A36F"/><rect x="-14" y="-51" width="14" height="2" fill="#F0A36F"/><rect x="-14" y="-47" width="22" height="2" fill="#F0A36F"/><rect x="-4" y="-36" width="8" height="2" fill="#6B7C81"/><rect x="18" y="-36" width="3" height="2" fill="#7AE3AF"/><rect x="-22" y="4" width="45" height="13" fill="#708287"/><rect x="-19" y="6" width="39" height="7" fill="#AFBCB7"/><rect x="-17" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-17" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="10" width="3" height="2" fill="#6D7F83"/><rect x="1" y="6" width="3" height="2" fill="#6D7F83"/><rect x="1" y="10" width="3" height="2" fill="#6D7F83"/><rect x="7" y="6" width="3" height="2" fill="#6D7F83"/><rect x="7" y="10" width="3" height="2" fill="#6D7F83"/><rect x="13" y="6" width="3" height="2" fill="#6D7F83"/><rect x="13" y="10" width="3" height="2" fill="#6D7F83"/><rect x="30" y="4" width="8" height="12" fill="#B1BDB4"/><rect x="-49" y="0" width="11" height="14" fill="#F0A36F"/><rect x="-47" y="-2" width="7" height="3" fill="#D8D3B9"/><path d="M-38 3h5v7h-5" fill="none" stroke="#F0A36F" stroke-width="3"/><rect x="-22" y="48" width="44" height="18" fill="#38535B"/><rect x="-19" y="51" width="38" height="10" fill="#4A7073"/><rect x="-3" y="64" width="6" height="15" fill="#263944"/><rect x="-22" y="78" width="44" height="4" fill="#293E47"/></g><g transform="translate(420 380)"><rect x="-65" y="10" width="132" height="49" fill="#000000" fill-opacity="0.145"/><rect x="-57" y="28" width="9" height="25" fill="#52616A"/><rect x="49" y="28" width="9" height="25" fill="#52616A"/><rect x="-62" y="-8" width="124" height="41" fill="#6B4933"/><rect x="-62" y="-12" width="124" height="39" fill="#BA8E5D"/><rect x="-58" y="-8" width="116" height="30" fill="#C69B68"/><rect x="-59" y="24" width="118" height="5" fill="#D0A979"/><rect x="-49" y="-5" width="2" height="24" fill="#BE925E"/><rect x="46" y="-5" width="2" height="24" fill="#BE925E"/><rect x="-10" y="-22" width="20" height="8" fill="#6B787C"/><rect x="-4" y="-34" width="8" height="15" fill="#8A9898"/><rect x="-27" y="-68" width="54" height="39" fill="#54626C"/><rect x="-25" y="-70" width="50" height="37" fill="#B0BCB6"/><rect x="-21" y="-66" width="42" height="28" fill="#233F44"/><rect x="-18" y="-63" width="36" height="22" fill="#31424D"/><rect x="-14" y="-59" width="21" height="2" fill="#E58AA6"/><rect x="-14" y="-55" width="27" height="2" fill="#E58AA6"/><rect x="-14" y="-51" width="14" height="2" fill="#E58AA6"/><rect x="-14" y="-47" width="22" height="2" fill="#E58AA6"/><rect x="-4" y="-36" width="8" height="2" fill="#6B7C81"/><rect x="18" y="-36" width="3" height="2" fill="#7AE3AF"/><rect x="-22" y="4" width="45" height="13" fill="#708287"/><rect x="-19" y="6" width="39" height="7" fill="#AFBCB7"/><rect x="-17" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-17" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-11" y="10" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="6" width="3" height="2" fill="#6D7F83"/><rect x="-5" y="10" width="3" height="2" fill="#6D7F83"/><rect x="1" y="6" width="3" height="2" fill="#6D7F83"/><rect x="1" y="10" width="3" height="2" fill="#6D7F83"/><rect x="7" y="6" width="3" height="2" fill="#6D7F83"/><rect x="7" y="10" width="3" height="2" fill="#6D7F83"/><rect x="13" y="6" width="3" height="2" fill="#6D7F83"/><rect x="13" y="10" width="3" height="2" fill="#6D7F83"/><rect x="30" y="4" width="8" height="12" fill="#B1BDB4"/><rect x="-49" y="0" width="11" height="14" fill="#E58AA6"/><rect x="-47" y="-2" width="7" height="3" fill="#D8D3B9"/><path d="M-38 3h5v7h-5" fill="none" stroke="#E58AA6" stroke-width="3"/><rect x="-22" y="48" width="44" height="18" fill="#38535B"/><rect x="-19" y="51" width="38" height="10" fill="#4A7073"/><rect x="-3" y="64" width="6" height="15" fill="#263944"/><rect x="-22" y="78" width="44" height="4" fill="#293E47"/></g><rect x="94" y="487" width="178" height="31" fill="#623E4C"/><rect x="98" y="478" width="170" height="32" fill="#9B5D6B"/><rect x="101" y="482" width="164" height="19" fill="#B7757D"/><rect x="94" y="485" width="9" height="28" fill="#794552"/><rect x="263" y="485" width="9" height="28" fill="#794552"/><rect x="152" y="483" width="4" height="18" fill="#945361"/><rect x="208" y="483" width="4" height="18" fill="#945361"/><rect x="103" y="514" width="8" height="8" fill="#332D35"/><rect x="257" y="514" width="8" height="8" fill="#332D35"/><rect x="540" y="459" width="105" height="60" fill="#664C3D"/><rect x="544" y="453" width="97" height="56" fill="#B58D63"/><rect x="548" y="484" width="89" height="2" fill="#795A44"/><rect x="549" y="419" width="43" height="35" fill="#203643"/><rect x="553" y="423" width="35" height="25" fill="#9EAEA8"/><rect x="557" y="427" width="26" height="13" fill="#2B4246"/><rect x="561" y="443" width="7" height="10" fill="#D5D6BB"/><rect x="578" y="425" width="4" height="4" fill="#A7CF9D"/><rect x="606" y="440" width="16" height="14" fill="#D5D6BB"/><rect x="609" y="439" width="10" height="3" fill="#705742"/><g class="pixel-steam"><rect x="612" y="430" width="2" height="6" fill="#D3D8C0"/><rect x="616" y="424" width="2" height="6" fill="#D3D8C0"/></g><rect x="73" y="300" width="37" height="126" fill="#243744"/><rect x="77" y="304" width="29" height="118" fill="#3C5361"/><rect x="81" y="312" width="21" height="24" fill="#233643"/><rect x="83" y="316" width="3" height="3" fill="#73C69C"/><rect x="89" y="316" width="3" height="3" fill="#C1A3F4"/><rect x="83" y="324" width="15" height="2" fill="#425D68"/><rect x="81" y="347" width="21" height="24" fill="#233643"/><rect x="83" y="351" width="3" height="3" fill="#73C69C"/><rect x="89" y="351" width="3" height="3" fill="#C1A3F4"/><rect x="83" y="359" width="15" height="2" fill="#425D68"/><rect x="81" y="382" width="21" height="24" fill="#233643"/><rect x="83" y="386" width="3" height="3" fill="#73C69C"/><rect x="89" y="386" width="3" height="3" fill="#C1A3F4"/><rect x="83" y="394" width="15" height="2" fill="#425D68"/><g transform="translate(87 147)"><rect x="-12" y="-4" width="28" height="7" fill="#000000" fill-opacity="0.133"/><rect x="-11" y="-20" width="22" height="18" fill="#85563F"/><rect x="-14" y="-23" width="28" height="7" fill="#B87951"/><rect x="-8" y="-17" width="4" height="12" fill="#A66A49"/><rect x="-3" y="-52" width="6" height="31" fill="#377052"/><rect x="-18" y="-43" width="15" height="12" fill="#3B805A"/><rect x="-14" y="-48" width="11" height="8" fill="#61AA70"/><rect x="3" y="-46" width="15" height="12" fill="#4A945D"/><rect x="5" y="-51" width="9" height="7" fill="#78B773"/><rect x="-8" y="-59" width="14" height="16" fill="#529B62"/><rect x="-5" y="-63" width="8" height="9" fill="#82BC7B"/></g><g transform="translate(655 125)"><rect x="-12" y="-4" width="28" height="7" fill="#000000" fill-opacity="0.133"/><rect x="-11" y="-20" width="22" height="18" fill="#85563F"/><rect x="-14" y="-23" width="28" height="7" fill="#B87951"/><rect x="-8" y="-17" width="4" height="12" fill="#A66A49"/><rect x="-3" y="-52" width="6" height="31" fill="#377052"/><rect x="-18" y="-43" width="15" height="12" fill="#3B805A"/><rect x="-14" y="-48" width="11" height="8" fill="#61AA70"/><rect x="3" y="-46" width="15" height="12" fill="#4A945D"/><rect x="5" y="-51" width="9" height="7" fill="#78B773"/><rect x="-8" y="-59" width="14" height="16" fill="#529B62"/><rect x="-5" y="-63" width="8" height="9" fill="#82BC7B"/></g><g transform="translate(655 527)"><rect x="-12" y="-4" width="28" height="7" fill="#000000" fill-opacity="0.133"/><rect x="-11" y="-20" width="22" height="18" fill="#85563F"/><rect x="-14" y="-23" width="28" height="7" fill="#B87951"/><rect x="-8" y="-17" width="4" height="12" fill="#A66A49"/><rect x="-3" y="-52" width="6" height="31" fill="#377052"/><rect x="-18" y="-43" width="15" height="12" fill="#3B805A"/><rect x="-14" y="-48" width="11" height="8" fill="#61AA70"/><rect x="3" y="-46" width="15" height="12" fill="#4A945D"/><rect x="5" y="-51" width="9" height="7" fill="#78B773"/><rect x="-8" y="-59" width="14" height="16" fill="#529B62"/><rect x="-5" y="-63" width="8" height="9" fill="#82BC7B"/></g><g transform="translate(915 290)"><rect x="-12" y="-4" width="28" height="7" fill="#000000" fill-opacity="0.133"/><rect x="-11" y="-20" width="22" height="18" fill="#85563F"/><rect x="-14" y="-23" width="28" height="7" fill="#B87951"/><rect x="-8" y="-17" width="4" height="12" fill="#A66A49"/><rect x="-3" y="-52" width="6" height="31" fill="#377052"/><rect x="-18" y="-43" width="15" height="12" fill="#3B805A"/><rect x="-14" y="-48" width="11" height="8" fill="#61AA70"/><rect x="3" y="-46" width="15" height="12" fill="#4A945D"/><rect x="5" y="-51" width="9" height="7" fill="#78B773"/><rect x="-8" y="-59" width="14" height="16" fill="#529B62"/><rect x="-5" y="-63" width="8" height="9" fill="#82BC7B"/></g><g transform="translate(913 520)"><rect x="-12" y="-4" width="28" height="7" fill="#000000" fill-opacity="0.133"/><rect x="-11" y="-20" width="22" height="18" fill="#85563F"/><rect x="-14" y="-23" width="28" height="7" fill="#B87951"/><rect x="-8" y="-17" width="4" height="12" fill="#A66A49"/><rect x="-3" y="-52" width="6" height="31" fill="#377052"/><rect x="-18" y="-43" width="15" height="12" fill="#3B805A"/><rect x="-14" y="-48" width="11" height="8" fill="#61AA70"/><rect x="3" y="-46" width="15" height="12" fill="#4A945D"/><rect x="5" y="-51" width="9" height="7" fill="#78B773"/><rect x="-8" y="-59" width="14" height="16" fill="#529B62"/><rect x="-5" y="-63" width="8" height="9" fill="#82BC7B"/></g><g transform="translate(220 256)"><rect x="-28" y="26" width="56" height="8" class="{{sl.mira}}"/><g class="pixel-person {{an.mira}}"><g class="seated-agent" data-pose="seated-facing-monitor"><rect x="-18" y="-6" width="36" height="17" fill="#1F333E"/><rect x="-15" y="-3" width="30" height="12" fill="#42666C"/><rect x="-12" y="2" width="24" height="9" fill="#344B60"/><rect x="-14" y="7" width="11" height="8" fill="#304358"/><rect x="3" y="7" width="11" height="8" fill="#293E52"/><rect x="-14" y="13" width="7" height="10" fill="#2A3C4E"/><rect x="7" y="13" width="7" height="10" fill="#25384B"/><rect x="-13" y="14" width="2" height="7" fill="#5F7482"/><rect x="8" y="14" width="2" height="7" fill="#516A7B"/><rect x="-18" y="21" width="12" height="5" fill="#172634"/><rect x="6" y="21" width="12" height="5" fill="#172634"/><rect x="-17" y="24" width="10" height="1" fill="#8A959B"/><rect x="7" y="24" width="10" height="1" fill="#7C8C94"/><rect x="-13" y="-26" width="26" height="29" fill="#C98BDB"/><rect x="-16" y="-24" width="6" height="17" fill="#9768a4"/><rect x="10" y="-24" width="6" height="17" fill="#9768a4"/><rect x="-9" y="-25" width="5" height="21" fill="#d4a2e2"/><rect x="-5" y="-2" width="15" height="4" fill="#9768a4"/><rect x="-11" y="-23" width="22" height="2" fill="#d4a2e2"/><rect x="-1" y="-22" width="2" height="23" fill="#b17ac1"/><rect x="-5" y="-30" width="10" height="7" fill="#F1D3BC"/><g class="seated-arms"><rect x="-20" y="-32" width="8" height="16" fill="#C98BDB"/><rect x="12" y="-32" width="8" height="16" fill="#C98BDB"/><rect x="-22" y="-36" width="8" height="9" fill="#F1D3BC"/><rect x="14" y="-36" width="8" height="9" fill="#F1D3BC"/><rect x="-20" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="13" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="-20" y="-34" width="4" height="2" fill="#f3dac7"/><rect x="16" y="-34" width="4" height="2" fill="#f3dac7"/></g><g class="seated-head"><rect x="-14" y="-48" width="28" height="21" fill="#4A2E3F"/><rect x="-11" y="-53" width="22" height="8" fill="#4A2E3F"/><rect x="-7" y="-55" width="14" height="4" fill="#4A2E3F"/><rect x="-17" y="-45" width="5" height="15" fill="#3d2634"/><rect x="12" y="-45" width="5" height="15" fill="#3d2634"/><rect x="-12" y="-49" width="6" height="9" fill="#6e5865"/><rect x="-6" y="-51" width="14" height="4" fill="#6e5865"/><rect x="-10" y="-45" width="7" height="3" fill="#5c4352"/><rect x="3" y="-46" width="8" height="2" fill="#583f4e"/><rect x="-12" y="-30" width="24" height="5" fill="#3d2634"/><rect x="-6" y="-29" width="12" height="4" fill="#F1D3BC"/><rect x="-5" y="-29" width="10" height="2" fill="#cdb3a0"/><rect x="-17" y="-38" width="4" height="7" fill="#F1D3BC"/><rect x="13" y="-38" width="4" height="7" fill="#F1D3BC"/><rect x="-17" y="-38" width="6" height="16" fill="#4A2E3F"/><rect x="11" y="-38" width="6" height="16" fill="#4A2E3F"/><rect x="-13" y="-29" width="5" height="11" fill="#4A2E3F"/><rect x="8" y="-29" width="5" height="11" fill="#4A2E3F"/><rect x="-11" y="-49" width="6" height="3" fill="#D69CC8"/></g><rect x="-18" y="-5" width="36" height="14" fill="#2A4855"/><rect x="-15" y="-3" width="30" height="10" fill="#4D7378"/><rect x="-13" y="-2" width="26" height="2" fill="#75918F"/><rect x="-21" y="-10" width="5" height="13" fill="#253D4B"/><rect x="16" y="-10" width="5" height="13" fill="#253D4B"/><rect x="-21" y="-12" width="7" height="3" fill="#6B878A"/><rect x="14" y="-12" width="7" height="3" fill="#6B878A"/></g></g><g class="pixel-bubble" transform="translate(28 -78)"><g class="{{b.mira.g}}"><rect x="-17" y="-12" width="34" height="25" class="{{b.mira.c}}"/><path d="M-8 12v8l9-8" class="{{b.mira.c}}"/><use href="{{b.mira.i}}" x="-9" y="-8" width="18" height="18" class="{{b.mira.ic}}"/></g></g></g><g transform="translate(420 256)"><rect x="-28" y="26" width="56" height="8" class="{{sl.leo}}"/><g class="pixel-person {{an.leo}}"><g class="seated-agent" data-pose="seated-facing-monitor"><rect x="-18" y="-6" width="36" height="17" fill="#1F333E"/><rect x="-15" y="-3" width="30" height="12" fill="#42666C"/><rect x="-12" y="2" width="24" height="9" fill="#344B60"/><rect x="-14" y="7" width="11" height="8" fill="#304358"/><rect x="3" y="7" width="11" height="8" fill="#293E52"/><rect x="-14" y="13" width="7" height="10" fill="#2A3C4E"/><rect x="7" y="13" width="7" height="10" fill="#25384B"/><rect x="-13" y="14" width="2" height="7" fill="#5F7482"/><rect x="8" y="14" width="2" height="7" fill="#516A7B"/><rect x="-18" y="21" width="12" height="5" fill="#172634"/><rect x="6" y="21" width="12" height="5" fill="#172634"/><rect x="-17" y="24" width="10" height="1" fill="#8A959B"/><rect x="7" y="24" width="10" height="1" fill="#7C8C94"/><rect x="-13" y="-26" width="26" height="29" fill="#6FA8F0"/><rect x="-16" y="-24" width="6" height="17" fill="#537eb4"/><rect x="10" y="-24" width="6" height="17" fill="#537eb4"/><rect x="-9" y="-25" width="5" height="21" fill="#8cb9f3"/><rect x="-5" y="-2" width="15" height="4" fill="#537eb4"/><rect x="-11" y="-23" width="22" height="2" fill="#8cb9f3"/><rect x="-1" y="-22" width="2" height="23" fill="#6294d3"/><rect x="-5" y="-30" width="10" height="7" fill="#C48B65"/><g class="seated-arms"><rect x="-20" y="-32" width="8" height="16" fill="#6FA8F0"/><rect x="12" y="-32" width="8" height="16" fill="#6FA8F0"/><rect x="-22" y="-36" width="8" height="9" fill="#C48B65"/><rect x="14" y="-36" width="8" height="9" fill="#C48B65"/><rect x="-20" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="13" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="-20" y="-34" width="4" height="2" fill="#ce9f7f"/><rect x="16" y="-34" width="4" height="2" fill="#ce9f7f"/></g><g class="seated-head"><rect x="-14" y="-48" width="28" height="21" fill="#24222D"/><rect x="-11" y="-53" width="22" height="8" fill="#24222D"/><rect x="-7" y="-55" width="14" height="4" fill="#24222D"/><rect x="-17" y="-45" width="5" height="15" fill="#1e1c25"/><rect x="12" y="-45" width="5" height="15" fill="#1e1c25"/><rect x="-12" y="-49" width="6" height="9" fill="#504e57"/><rect x="-6" y="-51" width="14" height="4" fill="#504e57"/><rect x="-10" y="-45" width="7" height="3" fill="#3a3842"/><rect x="3" y="-46" width="8" height="2" fill="#36343e"/><rect x="-12" y="-30" width="24" height="5" fill="#1e1c25"/><rect x="-6" y="-29" width="12" height="4" fill="#C48B65"/><rect x="-5" y="-29" width="10" height="2" fill="#a77656"/><rect x="-17" y="-38" width="4" height="7" fill="#C48B65"/><rect x="13" y="-38" width="4" height="7" fill="#C48B65"/><rect x="-12" y="-51" width="24" height="3" fill="#536B81"/><rect x="-18" y="-43" width="6" height="13" fill="#354D61"/><rect x="12" y="-43" width="6" height="13" fill="#354D61"/><rect x="-16" y="-40" width="3" height="7" fill="#A0B1B3"/><rect x="13" y="-40" width="3" height="7" fill="#A0B1B3"/></g><rect x="-18" y="-5" width="36" height="14" fill="#2A4855"/><rect x="-15" y="-3" width="30" height="10" fill="#4D7378"/><rect x="-13" y="-2" width="26" height="2" fill="#75918F"/><rect x="-21" y="-10" width="5" height="13" fill="#253D4B"/><rect x="16" y="-10" width="5" height="13" fill="#253D4B"/><rect x="-21" y="-12" width="7" height="3" fill="#6B878A"/><rect x="14" y="-12" width="7" height="3" fill="#6B878A"/></g></g><g class="pixel-bubble" transform="translate(28 -78)"><g class="{{b.leo.g}}"><rect x="-17" y="-12" width="34" height="25" class="{{b.leo.c}}"/><path d="M-8 12v8l9-8" class="{{b.leo.c}}"/><use href="{{b.leo.i}}" x="-9" y="-8" width="18" height="18" class="{{b.leo.ic}}"/></g></g></g><g transform="translate(620 256)"><rect x="-28" y="26" width="56" height="8" class="{{sl.nova}}"/><g class="pixel-person {{an.nova}}"><g class="seated-agent" data-pose="seated-facing-monitor"><rect x="-18" y="-6" width="36" height="17" fill="#1F333E"/><rect x="-15" y="-3" width="30" height="12" fill="#42666C"/><rect x="-12" y="2" width="24" height="9" fill="#344B60"/><rect x="-14" y="7" width="11" height="8" fill="#304358"/><rect x="3" y="7" width="11" height="8" fill="#293E52"/><rect x="-14" y="13" width="7" height="10" fill="#2A3C4E"/><rect x="7" y="13" width="7" height="10" fill="#25384B"/><rect x="-13" y="14" width="2" height="7" fill="#5F7482"/><rect x="8" y="14" width="2" height="7" fill="#516A7B"/><rect x="-18" y="21" width="12" height="5" fill="#172634"/><rect x="6" y="21" width="12" height="5" fill="#172634"/><rect x="-17" y="24" width="10" height="1" fill="#8A959B"/><rect x="7" y="24" width="10" height="1" fill="#7C8C94"/><rect x="-13" y="-26" width="26" height="29" fill="#63C5B0"/><rect x="-16" y="-24" width="6" height="17" fill="#4a9484"/><rect x="10" y="-24" width="6" height="17" fill="#4a9484"/><rect x="-9" y="-25" width="5" height="21" fill="#82d1c0"/><rect x="-5" y="-2" width="15" height="4" fill="#4a9484"/><rect x="-11" y="-23" width="22" height="2" fill="#82d1c0"/><rect x="-1" y="-22" width="2" height="23" fill="#57ad9b"/><rect x="-5" y="-30" width="10" height="7" fill="#E6BC98"/><g class="seated-arms"><rect x="-20" y="-32" width="8" height="16" fill="#63C5B0"/><rect x="12" y="-32" width="8" height="16" fill="#63C5B0"/><rect x="-22" y="-36" width="8" height="9" fill="#E6BC98"/><rect x="14" y="-36" width="8" height="9" fill="#E6BC98"/><rect x="-20" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="13" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="-20" y="-34" width="4" height="2" fill="#eac7aa"/><rect x="16" y="-34" width="4" height="2" fill="#eac7aa"/></g><g class="seated-head"><rect x="-14" y="-48" width="28" height="21" fill="#7A3E2E"/><rect x="-11" y="-53" width="22" height="8" fill="#7A3E2E"/><rect x="-7" y="-55" width="14" height="4" fill="#7A3E2E"/><rect x="-17" y="-45" width="5" height="15" fill="#643326"/><rect x="12" y="-45" width="5" height="15" fill="#643326"/><rect x="-12" y="-49" width="6" height="9" fill="#956558"/><rect x="-6" y="-51" width="14" height="4" fill="#956558"/><rect x="-10" y="-45" width="7" height="3" fill="#875143"/><rect x="3" y="-46" width="8" height="2" fill="#854d3f"/><rect x="-12" y="-30" width="24" height="5" fill="#643326"/><rect x="-6" y="-29" width="12" height="4" fill="#E6BC98"/><rect x="-5" y="-29" width="10" height="2" fill="#c4a081"/><rect x="-17" y="-38" width="4" height="7" fill="#E6BC98"/><rect x="13" y="-38" width="4" height="7" fill="#E6BC98"/><rect x="-13" y="-38" width="5" height="3" fill="#384D59"/><rect x="12" y="-38" width="5" height="3" fill="#384D59"/><rect x="-9" y="-48" width="5" height="2" fill="#B27C5A"/></g><rect x="-18" y="-5" width="36" height="14" fill="#2A4855"/><rect x="-15" y="-3" width="30" height="10" fill="#4D7378"/><rect x="-13" y="-2" width="26" height="2" fill="#75918F"/><rect x="-21" y="-10" width="5" height="13" fill="#253D4B"/><rect x="16" y="-10" width="5" height="13" fill="#253D4B"/><rect x="-21" y="-12" width="7" height="3" fill="#6B878A"/><rect x="14" y="-12" width="7" height="3" fill="#6B878A"/></g></g><g class="pixel-bubble" transform="translate(28 -78)"><g class="{{b.nova.g}}"><rect x="-17" y="-12" width="34" height="25" class="{{b.nova.c}}"/><path d="M-8 12v8l9-8" class="{{b.nova.c}}"/><use href="{{b.nova.i}}" x="-9" y="-8" width="18" height="18" class="{{b.nova.ic}}"/></g></g></g><g transform="translate(220 432)"><rect x="-28" y="26" width="56" height="8" class="{{sl.ada}}"/><g class="pixel-person {{an.ada}}"><g class="seated-agent" data-pose="seated-facing-monitor"><rect x="-18" y="-6" width="36" height="17" fill="#1F333E"/><rect x="-15" y="-3" width="30" height="12" fill="#42666C"/><rect x="-12" y="2" width="24" height="9" fill="#344B60"/><rect x="-14" y="7" width="11" height="8" fill="#304358"/><rect x="3" y="7" width="11" height="8" fill="#293E52"/><rect x="-14" y="13" width="7" height="10" fill="#2A3C4E"/><rect x="7" y="13" width="7" height="10" fill="#25384B"/><rect x="-13" y="14" width="2" height="7" fill="#5F7482"/><rect x="8" y="14" width="2" height="7" fill="#516A7B"/><rect x="-18" y="21" width="12" height="5" fill="#172634"/><rect x="6" y="21" width="12" height="5" fill="#172634"/><rect x="-17" y="24" width="10" height="1" fill="#8A959B"/><rect x="7" y="24" width="10" height="1" fill="#7C8C94"/><rect x="-13" y="-26" width="26" height="29" fill="#F0A36F"/><rect x="-16" y="-24" width="6" height="17" fill="#b47a53"/><rect x="10" y="-24" width="6" height="17" fill="#b47a53"/><rect x="-9" y="-25" width="5" height="21" fill="#f3b58c"/><rect x="-5" y="-2" width="15" height="4" fill="#b47a53"/><rect x="-11" y="-23" width="22" height="2" fill="#f3b58c"/><rect x="-1" y="-22" width="2" height="23" fill="#d38f62"/><rect x="-5" y="-30" width="10" height="7" fill="#A8714E"/><g class="seated-arms"><rect x="-20" y="-32" width="8" height="16" fill="#F0A36F"/><rect x="12" y="-32" width="8" height="16" fill="#F0A36F"/><rect x="-22" y="-36" width="8" height="9" fill="#A8714E"/><rect x="14" y="-36" width="8" height="9" fill="#A8714E"/><rect x="-20" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="13" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="-20" y="-34" width="4" height="2" fill="#b7896c"/><rect x="16" y="-34" width="4" height="2" fill="#b7896c"/></g><g class="seated-head"><rect x="-14" y="-48" width="28" height="21" fill="#2B1F26"/><rect x="-11" y="-53" width="22" height="8" fill="#2B1F26"/><rect x="-7" y="-55" width="14" height="4" fill="#2B1F26"/><rect x="-17" y="-45" width="5" height="15" fill="#23191f"/><rect x="12" y="-45" width="5" height="15" fill="#23191f"/><rect x="-12" y="-49" width="6" height="9" fill="#554c51"/><rect x="-6" y="-51" width="14" height="4" fill="#554c51"/><rect x="-10" y="-45" width="7" height="3" fill="#40353c"/><rect x="3" y="-46" width="8" height="2" fill="#3c3137"/><rect x="-12" y="-30" width="24" height="5" fill="#23191f"/><rect x="-6" y="-29" width="12" height="4" fill="#A8714E"/><rect x="-5" y="-29" width="10" height="2" fill="#8f6042"/><rect x="-17" y="-38" width="4" height="7" fill="#A8714E"/><rect x="13" y="-38" width="4" height="7" fill="#A8714E"/><rect x="-18" y="-46" width="6" height="16" fill="#2B1F26"/><rect x="12" y="-46" width="6" height="16" fill="#2B1F26"/><rect x="-14" y="-53" width="9" height="5" fill="#2B1F26"/><rect x="5" y="-53" width="9" height="5" fill="#2B1F26"/><rect x="-10" y="-49" width="5" height="2" fill="#554c51"/></g><rect x="-18" y="-5" width="36" height="14" fill="#2A4855"/><rect x="-15" y="-3" width="30" height="10" fill="#4D7378"/><rect x="-13" y="-2" width="26" height="2" fill="#75918F"/><rect x="-21" y="-10" width="5" height="13" fill="#253D4B"/><rect x="16" y="-10" width="5" height="13" fill="#253D4B"/><rect x="-21" y="-12" width="7" height="3" fill="#6B878A"/><rect x="14" y="-12" width="7" height="3" fill="#6B878A"/></g></g><g class="pixel-bubble" transform="translate(28 -78)"><g class="{{b.ada.g}}"><rect x="-17" y="-12" width="34" height="25" class="{{b.ada.c}}"/><path d="M-8 12v8l9-8" class="{{b.ada.c}}"/><use href="{{b.ada.i}}" x="-9" y="-8" width="18" height="18" class="{{b.ada.ic}}"/></g></g></g><g transform="translate(420 432)"><rect x="-28" y="26" width="56" height="8" class="{{sl.vera}}"/><g class="pixel-person {{an.vera}}"><g class="seated-agent" data-pose="seated-facing-monitor"><rect x="-18" y="-6" width="36" height="17" fill="#1F333E"/><rect x="-15" y="-3" width="30" height="12" fill="#42666C"/><rect x="-12" y="2" width="24" height="9" fill="#344B60"/><rect x="-14" y="7" width="11" height="8" fill="#304358"/><rect x="3" y="7" width="11" height="8" fill="#293E52"/><rect x="-14" y="13" width="7" height="10" fill="#2A3C4E"/><rect x="7" y="13" width="7" height="10" fill="#25384B"/><rect x="-13" y="14" width="2" height="7" fill="#5F7482"/><rect x="8" y="14" width="2" height="7" fill="#516A7B"/><rect x="-18" y="21" width="12" height="5" fill="#172634"/><rect x="6" y="21" width="12" height="5" fill="#172634"/><rect x="-17" y="24" width="10" height="1" fill="#8A959B"/><rect x="7" y="24" width="10" height="1" fill="#7C8C94"/><rect x="-13" y="-26" width="26" height="29" fill="#E58AA6"/><rect x="-16" y="-24" width="6" height="17" fill="#ac687c"/><rect x="10" y="-24" width="6" height="17" fill="#ac687c"/><rect x="-9" y="-25" width="5" height="21" fill="#eaa1b8"/><rect x="-5" y="-2" width="15" height="4" fill="#ac687c"/><rect x="-11" y="-23" width="22" height="2" fill="#eaa1b8"/><rect x="-1" y="-22" width="2" height="23" fill="#ca7992"/><rect x="-5" y="-30" width="10" height="7" fill="#F3D9C6"/><g class="seated-arms"><rect x="-20" y="-32" width="8" height="16" fill="#E58AA6"/><rect x="12" y="-32" width="8" height="16" fill="#E58AA6"/><rect x="-22" y="-36" width="8" height="9" fill="#F3D9C6"/><rect x="14" y="-36" width="8" height="9" fill="#F3D9C6"/><rect x="-20" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="13" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="-20" y="-34" width="4" height="2" fill="#f5dfd0"/><rect x="16" y="-34" width="4" height="2" fill="#f5dfd0"/></g><g class="seated-head"><rect x="-14" y="-48" width="28" height="21" fill="#C9A26B"/><rect x="-11" y="-53" width="22" height="8" fill="#C9A26B"/><rect x="-7" y="-55" width="14" height="4" fill="#C9A26B"/><rect x="-17" y="-45" width="5" height="15" fill="#a58558"/><rect x="12" y="-45" width="5" height="15" fill="#a58558"/><rect x="-12" y="-49" width="6" height="9" fill="#d4b589"/><rect x="-6" y="-51" width="14" height="4" fill="#d4b589"/><rect x="-10" y="-45" width="7" height="3" fill="#ceab7a"/><rect x="3" y="-46" width="8" height="2" fill="#cda977"/><rect x="-12" y="-30" width="24" height="5" fill="#a58558"/><rect x="-6" y="-29" width="12" height="4" fill="#F3D9C6"/><rect x="-5" y="-29" width="10" height="2" fill="#cfb8a8"/><rect x="-17" y="-38" width="4" height="7" fill="#F3D9C6"/><rect x="13" y="-38" width="4" height="7" fill="#F3D9C6"/><rect x="-6" y="-61" width="12" height="8" fill="#C9A26B"/><rect x="-9" y="-57" width="18" height="5" fill="#C9A26B"/><rect x="-5" y="-61" width="6" height="2" fill="#d4b589"/><rect x="-9" y="-53" width="18" height="2" fill="#E4BC8E"/></g><rect x="-18" y="-5" width="36" height="14" fill="#2A4855"/><rect x="-15" y="-3" width="30" height="10" fill="#4D7378"/><rect x="-13" y="-2" width="26" height="2" fill="#75918F"/><rect x="-21" y="-10" width="5" height="13" fill="#253D4B"/><rect x="16" y="-10" width="5" height="13" fill="#253D4B"/><rect x="-21" y="-12" width="7" height="3" fill="#6B878A"/><rect x="14" y="-12" width="7" height="3" fill="#6B878A"/></g></g><g class="pixel-bubble" transform="translate(28 -78)"><g class="{{b.vera.g}}"><rect x="-17" y="-12" width="34" height="25" class="{{b.vera.c}}"/><path d="M-8 12v8l9-8" class="{{b.vera.c}}"/><use href="{{b.vera.i}}" x="-9" y="-8" width="18" height="18" class="{{b.vera.ic}}"/></g></g></g><g transform="translate(815 444)"><rect x="-28" y="26" width="56" height="8" class="{{sl.tim}}"/><g class="pixel-person {{an.tim}}"><g class="seated-agent" data-pose="seated-facing-monitor"><rect x="-22" y="-4" width="44" height="18" fill="#38535B"/><rect x="-19" y="-1" width="38" height="10" fill="#4A7073"/><rect x="-3" y="12" width="6" height="15" fill="#263944"/><rect x="-22" y="26" width="44" height="4" fill="#293E47"/><rect x="-18" y="-6" width="36" height="17" fill="#1F333E"/><rect x="-15" y="-3" width="30" height="12" fill="#42666C"/><rect x="-12" y="2" width="24" height="9" fill="#344B60"/><rect x="-14" y="7" width="11" height="8" fill="#304358"/><rect x="3" y="7" width="11" height="8" fill="#293E52"/><rect x="-14" y="13" width="7" height="10" fill="#2A3C4E"/><rect x="7" y="13" width="7" height="10" fill="#25384B"/><rect x="-13" y="14" width="2" height="7" fill="#5F7482"/><rect x="8" y="14" width="2" height="7" fill="#516A7B"/><rect x="-18" y="21" width="12" height="5" fill="#172634"/><rect x="6" y="21" width="12" height="5" fill="#172634"/><rect x="-17" y="24" width="10" height="1" fill="#8A959B"/><rect x="7" y="24" width="10" height="1" fill="#7C8C94"/><rect x="-13" y="-26" width="26" height="29" fill="#A69CF7"/><rect x="-16" y="-24" width="6" height="17" fill="#7c75b9"/><rect x="10" y="-24" width="6" height="17" fill="#7c75b9"/><rect x="-9" y="-25" width="5" height="21" fill="#b8b0f9"/><rect x="-5" y="-2" width="15" height="4" fill="#7c75b9"/><rect x="-11" y="-23" width="22" height="2" fill="#b8b0f9"/><rect x="-1" y="-22" width="2" height="23" fill="#9289d9"/><rect x="-5" y="-30" width="10" height="7" fill="#D9A982"/><g class="seated-arms"><rect x="-20" y="-32" width="8" height="16" fill="#A69CF7"/><rect x="12" y="-32" width="8" height="16" fill="#A69CF7"/><rect x="-22" y="-36" width="8" height="9" fill="#D9A982"/><rect x="14" y="-36" width="8" height="9" fill="#D9A982"/><rect x="-20" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="13" y="-29" width="7" height="3" fill="#D5DCD0"/><rect x="-20" y="-34" width="4" height="2" fill="#dfb897"/><rect x="16" y="-34" width="4" height="2" fill="#dfb897"/></g><g class="seated-head"><rect x="-14" y="-48" width="28" height="21" fill="#3D5A80"/><rect x="-11" y="-53" width="22" height="8" fill="#3D5A80"/><rect x="-7" y="-55" width="14" height="4" fill="#3D5A80"/><rect x="-17" y="-45" width="5" height="15" fill="#324a69"/><rect x="12" y="-45" width="5" height="15" fill="#324a69"/><rect x="-12" y="-49" width="6" height="9" fill="#647b99"/><rect x="-6" y="-51" width="14" height="4" fill="#647b99"/><rect x="-10" y="-45" width="7" height="3" fill="#506a8d"/><rect x="3" y="-46" width="8" height="2" fill="#4d678a"/><rect x="-12" y="-30" width="24" height="5" fill="#324a69"/><rect x="-6" y="-29" width="12" height="4" fill="#D9A982"/><rect x="-5" y="-29" width="10" height="2" fill="#b8906e"/><rect x="-17" y="-38" width="4" height="7" fill="#D9A982"/><rect x="13" y="-38" width="4" height="7" fill="#D9A982"/><rect x="-15" y="-51" width="30" height="7" fill="#3D5A80"/><rect x="-18" y="-46" width="36" height="4" fill="#3D5A80"/><rect x="-9" y="-50" width="17" height="2" fill="#6F89A3"/></g><rect x="-18" y="-5" width="36" height="14" fill="#2A4855"/><rect x="-15" y="-3" width="30" height="10" fill="#4D7378"/><rect x="-13" y="-2" width="26" height="2" fill="#75918F"/><rect x="-21" y="-10" width="5" height="13" fill="#253D4B"/><rect x="16" y="-10" width="5" height="13" fill="#253D4B"/><rect x="-21" y="-12" width="7" height="3" fill="#6B878A"/><rect x="14" y="-12" width="7" height="3" fill="#6B878A"/></g></g><g class="pixel-bubble" transform="translate(28 -78)"><g class="{{b.tim.g}}"><rect x="-17" y="-12" width="34" height="25" class="{{b.tim.c}}"/><path d="M-8 12v8l9-8" class="{{b.tim.c}}"/><use href="{{b.tim.i}}" x="-9" y="-8" width="18" height="18" class="{{b.tim.ic}}"/></g></g></g><rect x="48" y="538" width="904" height="10" fill="#455A69"/><rect x="48" y="548" width="904" height="8" fill="#22313E"/><rect x="48" y="538" width="904" height="3" fill="#75818A"/><g transform="translate(327 502)"><rect x="-13" y="-1" width="30" height="14" fill="#C1A17A"/><rect x="9" y="-7" width="15" height="18" fill="#D2B58B"/><rect x="10" y="-11" width="5" height="8" fill="#D2B58B"/><rect x="20" y="-11" width="4" height="8" fill="#D2B58B"/><rect x="12" y="-2" width="3" height="2" fill="#3F3C37"/><rect x="20" y="-2" width="3" height="2" fill="#3F3C37"/><rect x="-18" y="3" width="8" height="5" fill="#C1A17A"/></g></svg>
+<div class="rtag" style="left:21.2%;top:42.6%"><span class="led" aria-hidden="true"></span>Сервер · 2 задания</div>
+<sc-for list="{{agents}}" as="a" hint-placeholder-count="6">
+<button class="hit" tabindex="-1" aria-hidden="true" style="left:{{a.x}};top:calc({{a.y}} + 3%)" sc-camel-on-click="{{a.pick}}"></button>
+</sc-for>
+<sc-for list="{{agents}}" as="a" hint-placeholder-count="6">
+<button class="{{a.tagCls}}" style="left:{{a.x}};top:{{a.y}}" sc-camel-on-click="{{a.pick}}" aria-label="{{a.aria}}" aria-expanded="{{a.isSel}}">
+<span class="tag-n"><span class="av" style="width:18px;height:18px;font-size:10px;background:{{a.color}}">{{a.ini}}</span>{{a.name}}<span class="tag-r">· {{a.role}}</span></span>
+<span class="{{a.sCls}}"><svg class="{{a.iconCls}}" aria-hidden="true"><use href="{{a.icon}}"></use></svg>{{a.action}}</span>
+<sc-if value="{{a.showBar}}" hint-placeholder-val="{{ false }}"><span class="bar" style="margin-top:3px"><span style="width:{{a.pctW}}"></span></span></sc-if>
+</button>
+</sc-for>
+</div>
+<div class="legend" style="padding:0 4px">
+<span class="c-run"><svg class="ic s14" aria-hidden="true"><use href="#i-run"></use></svg><span style="color:var(--tx2)">Работает</span></span>
+<span class="c-wait"><svg class="ic s14" aria-hidden="true"><use href="#i-warn"></use></svg><span style="color:var(--tx2)">Нужно решение</span></span>
+<span class="c-done"><svg class="ic s14" aria-hidden="true"><use href="#i-check"></use></svg><span style="color:var(--tx2)">Результат готов</span></span>
+<span class="c-pause"><svg class="ic s14" aria-hidden="true"><use href="#i-pause"></use></svg><span style="color:var(--tx2)">На паузе</span></span>
+<span class="c-idle"><svg class="ic s14" aria-hidden="true"><use href="#i-coffee"></use></svg><span style="color:var(--tx2)">Свободен</span></span>
+</div>
+</section>
+
+<sc-if value="{{panelOpen}}" hint-placeholder-val="{{ false }}">
+<aside class="card panel" aria-label="Панель агента">
+<div class="ph">
+<span class="av" style="width:44px;height:44px;font-size:17px;background:{{p.color}}">{{p.ini}}</span>
+<div style="flex:1;min-width:0">
+<h2 style="margin:0;font-size:16px;font-weight:600">{{p.name}} <span style="color:var(--tx3);font-weight:500">· {{p.role}}</span></h2>
+<div style="display:flex;gap:8px;align-items:center;margin-top:5px;flex-wrap:wrap"><span class="{{p.chipCls}}"><svg class="ic s14" aria-hidden="true"><use href="{{p.icon}}"></use></svg>{{p.stLabel}}</span><span style="font-size:12px;color:var(--tx3)">{{p.where}}</span></div>
+</div>
+<a class="btn ghost iconbtn" href="Agent.dc.html" aria-label="Открыть полную карточку агента"><svg class="ic" aria-hidden="true"><use href="#i-expand"></use></svg></a>
+<button class="btn ghost iconbtn" sc-camel-on-click="{{close}}" aria-label="Закрыть панель"><svg class="ic" aria-hidden="true"><use href="#i-x"></use></svg></button>
+</div>
+
+<sc-if value="{{p.isIdle}}" hint-placeholder-val="{{ false }}">
+<div class="sec" style="align-items:flex-start;gap:12px">
+<p class="eyebrow">Сейчас</p>
+<div style="font-size:15px;font-weight:600">{{p.idleTitle}}</div>
+<p style="margin:0;color:var(--tx2);font-size:13.5px">{{p.upd}}. Агент готов взять новую задачу — можно поставить её прямо отсюда.</p>
+<a class="btn pri" href="NewTask.dc.html"><svg class="ic" aria-hidden="true"><use href="#i-plus"></use></svg>Поставить задачу {{p.dat}}</a>
+</div>
+</sc-if>
+
+<sc-if value="{{p.hasTask}}" hint-placeholder-val="{{ true }}">
+<div class="sec">
+<p class="eyebrow">Текущая задача</p>
+<div style="font-size:15px;font-weight:600">{{p.task}}</div>
+<div style="display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--tx3)"><span style="display:inline-flex;gap:5px;align-items:center"><svg class="ic s14" aria-hidden="true"><use href="#i-clock"></use></svg>{{p.upd}}</span><span style="display:inline-flex;gap:5px;align-items:center"><svg class="ic s14" aria-hidden="true"><use href="#i-coins"></use></svg>{{p.cost}}</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span class="bar" style="flex:1;height:6px" role="img" aria-label="Прогресс {{p.pctW}}"><span style="width:{{p.pctW}}"></span></span><span class="mono" style="font-size:12px;color:var(--tx2)">{{p.pctW}}</span></div>
+<ol class="stages" aria-label="Этапы">
+<sc-for list="{{p.stages}}" as="s" hint-placeholder-count="4">
+<li class="{{s.cls}}"><span class="sgi"><svg class="ic s14" aria-hidden="true"><use href="{{s.icon}}"></use></svg></span><span>{{s.label}}</span><span class="sgn">{{s.note}}</span></li>
+</sc-for>
+</ol>
+
+<sc-if value="{{p.isWait}}" hint-placeholder-val="{{ false }}">
+<div class="approve" role="group" aria-label="Запрос на подтверждение">
+<div style="display:flex;align-items:center;gap:8px;font-weight:600;color:var(--wait)"><svg class="ic s16" aria-hidden="true"><use href="#i-warn"></use></svg>Нужно ваше подтверждение</div>
+<div style="font-weight:600">Отправить письмо от вашего имени</div>
+<dl class="kv" style="margin:0">
+<dt>Кому</dt><dd class="mono" style="font-size:12.5px">m.akhmetova@severo.kz</dd>
+<dt>Тема</dt><dd>Отчёт о продажах, 3 квартал</dd>
+<dt>Вложение</dt><dd>sales-q3.pdf · 2,1 МБ</dd>
+<dt>Текст</dt><dd style="color:var(--tx2)">«Мария, добрый вечер! Направляю отчёт о продажах за третий квартал…»</dd>
+</dl>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn sm" sc-camel-on-click="{{reject}}">Отклонить</button><button class="btn sm warn" sc-camel-on-click="{{approve}}"><svg class="ic s16" aria-hidden="true"><use href="#i-send"></use></svg>Подтвердить отправку</button></div>
+</div>
+</sc-if>
+
+<sc-if value="{{p.isDone}}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn sm okb" sc-camel-on-click="{{accept}}"><svg class="ic s16" aria-hidden="true"><use href="#i-check"></use></svg>Принять результат</button><button class="btn sm">Попросить правки</button></div>
+</sc-if>
+
+<sc-if value="{{p.canControl}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{p.noConfirm}}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn sm" sc-camel-on-click="{{p.togglePause}}"><svg class="ic s16" aria-hidden="true"><use href="{{p.pauseIcon}}"></use></svg>{{p.pauseLabel}}</button><button class="btn sm ghost dang" sc-camel-on-click="{{p.askCancel}}"><svg class="ic s16" aria-hidden="true"><use href="#i-stop"></use></svg>Отменить задачу</button></div>
+</sc-if>
+<sc-if value="{{p.confirming}}" hint-placeholder-val="{{ false }}">
+<div class="confirm" role="alertdialog" aria-label="Отменить задачу?">
+<div style="font-weight:600">Отменить задачу?</div>
+<p style="margin:0;font-size:13px;color:var(--tx2)">{{p.name}} остановится сразу. Готовые этапы и материалы сохранятся в «Истории», незавершённый этап будет потерян. Потраченные {{p.cost}} не возвращаются.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn sm" sc-camel-on-click="{{keepTask}}">Не отменять</button><button class="btn sm dang" sc-camel-on-click="{{p.doCancel}}">Да, отменить</button></div>
+</div>
+</sc-if>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{p.hasResults}}" hint-placeholder-val="{{ true }}">
+<div class="sec">
+<p class="eyebrow">Результаты</p>
+<sc-for list="{{p.res}}" as="r" hint-placeholder-count="1">
+<a class="file" href="#result"><span class="fi"><svg class="ic s16" aria-hidden="true"><use href="#i-file"></use></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-weight:500;font-size:13.5px">{{r.name}}</span><span style="display:block;font-size:12px;color:var(--tx3)">{{r.meta}}</span></span><svg class="ic s16" aria-hidden="true" style="color:var(--tx3)"><use href="#i-expand"></use></svg></a>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{p.hasChat}}" hint-placeholder-val="{{ true }}">
+<div class="sec">
+<p class="eyebrow">Чат</p>
+<div class="chat">
+<sc-for list="{{p.chat}}" as="m" hint-placeholder-count="2">
+<div class="{{m.cls}}">{{m.text}}<sc-if value="{{m.canRule}}" hint-placeholder-val="{{ false }}"><div><button class="rulebtn" sc-camel-on-click="{{m.rule}}" disabled="{{m.saved}}"><svg class="ic s14" aria-hidden="true"><use href="{{m.rIcon}}"></use></svg>{{m.rLabel}}</button></div></sc-if></div>
+</sc-for>
+</div>
+<div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+<button class="btn ghost iconbtn" aria-label="Прикрепить файл"><svg class="ic" aria-hidden="true"><use href="#i-clip"></use></svg></button>
+<label class="sr" for="panel-msg">Сообщение агенту</label>
+<input id="panel-msg" class="field" style="flex:1" placeholder="Сообщение или поправка…">
+<button class="btn pri iconbtn" aria-label="Отправить сообщение"><svg class="ic" aria-hidden="true"><use href="#i-send"></use></svg></button>
+</div>
+</div>
+</sc-if>
+</aside>
+</sc-if>
+</div>
+</main>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div class="toast" role="status" aria-live="polite"><svg class="ic s16" aria-hidden="true" style="color:var(--done)"><use href="#i-check"></use></svg><span style="font-size:13.5px">{{toast}}</span><sc-if value="{{canUndo}}" hint-placeholder-val="{{ false }}"><button class="btn sm ghost" sc-camel-on-click="{{undo}}"><svg class="ic s16" aria-hidden="true"><use href="#i-undo"></use></svg>Отменить</button></sc-if></div>
+</sc-if>
+</div>
+</x-dc>
+
+
+
+</body></html>

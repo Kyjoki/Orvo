@@ -1,0 +1,33 @@
+import { test, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+process.env.ORVO_TEST_MODE='1';
+delete process.env.DATABASE_URL; delete process.env.ORVO_TEST_DB_DIR;
+process.env.ORVO_TEST_DB_NAME=`providers-${process.pid}-${randomUUID().slice(0,8)}`;
+process.env.ORVO_WORKSPACE_ID=`providers-${process.pid}`;
+delete process.env.OPENAI_API_KEY;
+process.env.AI_GATEWAY_API_KEY='unit-test-only';
+const domain=await import('../src/server/domain');
+const {getDatabase}=await import('../src/server/db');
+const workspace=await domain.getWorkspace();
+const command=(type:string,payload:any={})=>domain.command(workspace.id,type,payload,randomUUID());
+after(async()=>{const database=await getDatabase();if(database.kind==='pglite')await database.db.close();});
+
+test('OpenAI uses its own credential and provider changes revoke model checks',async()=>{
+  const agent=await command('agents.create',{name:'Проверка',role:'Редактор'});
+  await command('settings.save',{provider:'gateway',model:'openai/gpt-6-luna'});
+  await domain.recordModelCheck(workspace.id,{ok:true,model:'openai/gpt-6-luna'});
+  await command('settings.save',{provider:'openai',model:'gpt-6-luna'});
+  let snapshot=await domain.getSnapshot(workspace.id);
+  assert.equal(snapshot.settings.credentialsConfigured,false,'Gateway key cannot authorize OpenAI');
+  assert.deepEqual(snapshot.settings.checkedModels,[]);
+  await domain.recordModelCheck(workspace.id,{ok:true,model:'gpt-6-luna'});
+  const task=await command('task.create',{title:'Проверка без ключа',agentId:agent.id});
+  assert.equal((await domain.getTask(task.id)).setupRequired,true);
+  await command('task.cancel',{id:task.id});
+  process.env.OPENAI_API_KEY='unit-test-only';
+  snapshot=await domain.getSnapshot(workspace.id);
+  assert.equal(snapshot.settings.credentialsConfigured,true);
+  await command('settings.save',{provider:'gateway',model:'openai/gpt-6-luna'});
+  assert.deepEqual((await domain.getSnapshot(workspace.id)).settings.checkedModels,[]);
+});

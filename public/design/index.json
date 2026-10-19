@@ -1,0 +1,68 @@
+{
+  "source": "Orvo-Pixel-Office-Seated.html",
+  "pages": [
+    {
+      "title": "Офис · десктоп (тёмная тема)",
+      "html": "01-reference.html",
+      "css": "01-reference.css",
+      "svgCount": 46
+    },
+    {
+      "title": "Карточка агента · вкладки",
+      "html": "02-reference.html",
+      "css": "02-reference.css",
+      "svgCount": 40
+    },
+    {
+      "title": "Новая задача · форма и проверка",
+      "html": "03-reference.html",
+      "css": "03-reference.css",
+      "svgCount": 22
+    },
+    {
+      "title": "Задачи и результаты",
+      "html": "04-reference.html",
+      "css": "04-reference.css",
+      "svgCount": 61
+    },
+    {
+      "title": "Состояния",
+      "html": "05-reference.html",
+      "css": "05-reference.css",
+      "svgCount": 24
+    },
+    {
+      "title": "Дизайн-система",
+      "html": "06-reference.html",
+      "css": "06-reference.css",
+      "svgCount": 18
+    },
+    {
+      "title": "Телефон · список",
+      "html": "07-reference.html",
+      "css": "07-reference.css",
+      "svgCount": 18
+    },
+    {
+      "title": "Телефон · режим офиса",
+      "html": "08-reference.html",
+      "css": "08-reference.css",
+      "svgCount": 13
+    },
+    {
+      "title": "Телефон · панель агента",
+      "html": "09-reference.html",
+      "css": "09-reference.css",
+      "svgCount": 21
+    }
+  ],
+  "fonts": [
+    "Golos Text",
+    "JetBrains Mono",
+    "Unbounded"
+  ],
+  "canvas": {
+    "width": 1000,
+    "height": 600
+  }
+}

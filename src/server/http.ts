@@ -1,0 +1,28 @@
+import { getAuth } from './auth';
+import { getWorkspace } from './domain';
+import {DomainError} from '../shared/types';
+export async function requireOwner(request: Request) {
+  const session = await (await getAuth()).api.getSession({headers:request.headers});
+  if (!session) throw Object.assign(new Error('Войдите в пространство Orvo.'), {code:'UNAUTHENTICATED',status:401});
+  const workspace = await getWorkspace();
+  if (workspace.ownerId !== session.user.id) throw Object.assign(new Error('Нет доступа к пространству.'), {code:'FORBIDDEN',status:403});
+  return {session,workspace};
+}
+export function assertOrigin(request: Request) {
+  const expected = new URL(process.env.BETTER_AUTH_URL || 'http://127.0.0.1:3000').origin;
+  if (request.headers.get('origin') !== expected) throw Object.assign(new Error('Недопустимый источник запроса.'),{code:'INVALID_ORIGIN',status:403});
+}
+export function failure(error: unknown) {
+  const e = error as {code?:string;status?:number;message?:string};
+  const status = e.status || (e.code === 'UNAUTHENTICATED' ? 401 : 400);
+  // Do not expose connection strings, provider responses, or SQL in browser errors.
+  const safe = error instanceof DomainError || ['UNAUTHENTICATED','FORBIDDEN','INVALID_ORIGIN'].includes(e.code||'');
+  return Response.json({error:{code:safe ? e.code : 'REQUEST_FAILED',message:safe ? e.message : 'Не удалось выполнить запрос. Проверьте настройки и повторите.'}},{status,headers:{'Cache-Control':'no-store'}});
+}
+export async function readJson(request:Request,limit:number){
+ const reader=request.body?.getReader();if(!reader)throw new DomainError('INVALID_JSON','Тело запроса отсутствует.',400);
+ const chunks:Uint8Array[]=[];let length=0;
+ try{for(;;){const {done,value}=await reader.read();if(done)break;length+=value.byteLength;if(length>limit){await reader.cancel();throw new DomainError('BODY_TOO_LARGE','Превышен допустимый размер запроса.',413);}chunks.push(value);}}
+ finally{reader.releaseLock();}
+ try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}catch{throw new DomainError('INVALID_JSON','Некорректный JSON запроса.',400);}
+}
