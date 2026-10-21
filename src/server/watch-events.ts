@@ -26,7 +26,7 @@ export function watchEventsEnabled() {
 }
 
 export async function watchEventsReady(workspaceId: string) {
-  if (!watchEventsEnabled() || !process.env.OPENAI_API_KEY || !watchOutboxConfigured()) return false;
+  if (!watchEventsEnabled() || !process.env.ORVO_WATCH_OPENAI_API_KEY || !watchOutboxConfigured()) return false;
   const usage = await watchUsageStatus(workspaceId);
   if (usage.analyzed >= WATCH_MONTHLY_EVENT_LIMIT || usage.accountedMicroUsd >= WATCH_MONTHLY_BUDGET_MICRO_USD) return false;
   const status = await telegramStatus(workspaceId);
@@ -64,6 +64,7 @@ const services: WatchServices = {
   reserve: reserveWatchBudget,
   generate: (system, prompt) => generateOpenAI({
     model: WATCH_ANALYSIS_MODEL,
+    apiKey: process.env.ORVO_WATCH_OPENAI_API_KEY,
     system,
     prompt,
     maxOutputTokens: WATCH_MAX_OUTPUT_TOKENS,
@@ -85,7 +86,7 @@ export async function processWatchEvent(
   const age = now.getTime() - new Date(event.observedAt).getTime();
   if (age > 10 * 60_000 || age < -60_000) return { accepted: false, status: 'stale' };
   if (!watchEventsEnabled()) return { accepted: false, status: 'disabled' };
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.ORVO_WATCH_OPENAI_API_KEY) {
     throw new DomainError('WATCH_MODEL_UNAVAILABLE', 'Модель наблюдения не настроена.', 503);
   }
   if (!(await deps.isTelegramReady(workspaceId))) {

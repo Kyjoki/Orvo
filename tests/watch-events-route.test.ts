@@ -55,14 +55,16 @@ test('cross-site origin and invalid bearer fail before payload processing', asyn
 test('enabled ingest reserves once, classifies synthetic text and sends one encrypted-outbox alert', async () => {
   const old = {
     flag: process.env.ORVO_WATCH_EVENTS_ENABLED,
-    key: process.env.OPENAI_API_KEY,
+    key: process.env.ORVO_WATCH_OPENAI_API_KEY,
+    primaryKey: process.env.OPENAI_API_KEY,
     bot: process.env.TELEGRAM_BOT_TOKEN,
     runtime: process.env.ORVO_RUNTIME_SECRET,
     fetch: globalThis.fetch,
   };
   const botToken = 'synthetic-bot-token';
   process.env.ORVO_WATCH_EVENTS_ENABLED = '1';
-  process.env.OPENAI_API_KEY = 'synthetic-openai-key';
+  process.env.ORVO_WATCH_OPENAI_API_KEY = 'synthetic-watch-openai-key';
+  process.env.OPENAI_API_KEY = 'synthetic-primary-openai-key';
   process.env.TELEGRAM_BOT_TOKEN = botToken;
   process.env.ORVO_RUNTIME_SECRET = 'synthetic-runtime-secret-000000000000000000';
   await query(`INSERT INTO telegram_connections(workspace_id,chat_id,bot_username,token_hash,last_test_at)
@@ -74,6 +76,7 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
     if (url === 'https://api.openai.com/v1/responses') {
       modelCalls++;
       const body = JSON.parse(String(init?.body));
+      assert.equal((init?.headers as Record<string,string>).authorization, 'Bearer synthetic-watch-openai-key');
       assert.equal(body.model, 'gpt-6-luna');
       assert.equal(body.store, false);
       assert.deepEqual(body.reasoning, { effort: 'none' });
@@ -116,7 +119,7 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
   } finally {
     globalThis.fetch = old.fetch;
     for (const [name, value] of [
-      ['ORVO_WATCH_EVENTS_ENABLED', old.flag], ['OPENAI_API_KEY', old.key],
+      ['ORVO_WATCH_EVENTS_ENABLED', old.flag], ['ORVO_WATCH_OPENAI_API_KEY', old.key], ['OPENAI_API_KEY', old.primaryKey],
       ['TELEGRAM_BOT_TOKEN', old.bot], ['ORVO_RUNTIME_SECRET', old.runtime],
     ] as const) {
       if (value === undefined) delete process.env[name]; else process.env[name] = value;

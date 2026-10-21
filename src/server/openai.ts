@@ -1,15 +1,15 @@
 import { APICallError } from 'ai';
 
 const RESPONSES_URL='https://api.openai.com/v1/responses';
-type GenerateOptions={model:string;system:string;prompt:string;maxOutputTokens:number;reasoningEffort?:'none'|'low';signal?:AbortSignal;fetch?:typeof fetch};
+type GenerateOptions={model:string;system:string;prompt:string;maxOutputTokens:number;reasoningEffort?:'none'|'low';apiKey?:string;signal?:AbortSignal;fetch?:typeof fetch};
 type ResponseData={status?:unknown;output?:unknown;usage?:unknown};
 
 function usageTokens(value:unknown):number|undefined{
   return Number.isSafeInteger(value)&&typeof value==='number'&&value>=0?value:undefined;
 }
 
-export async function generateOpenAI({model,system,prompt,maxOutputTokens,reasoningEffort,signal,fetch:fetchImpl=fetch}:GenerateOptions){
-  const key=process.env.OPENAI_API_KEY;
+export async function generateOpenAI({model,system,prompt,maxOutputTokens,reasoningEffort,apiKey,signal,fetch:fetchImpl=fetch}:GenerateOptions){
+  const key=apiKey===undefined?process.env.OPENAI_API_KEY:apiKey;
   if(!key)throw new Error('OpenAI API is not configured.');
   if(typeof model!=='string'||!model.trim()||!Number.isInteger(maxOutputTokens)||maxOutputTokens<16)throw new Error('Invalid OpenAI request configuration.');
   const body={model,instructions:system,input:prompt,max_output_tokens:maxOutputTokens,store:false,

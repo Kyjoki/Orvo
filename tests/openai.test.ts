@@ -39,6 +39,14 @@ test('triage can request no reasoning without changing other model calls',async(
   }});
 });
 
+test('watcher can use a separate API key without changing the primary Orvo key', async()=>{
+  await generateOpenAI({...options,apiKey:'watch-only-test-key',fetch:async(_url,init)=>{
+    assert.equal((init?.headers as Record<string,string>).authorization,'Bearer watch-only-test-key');
+    return Response.json(completed);
+  }});
+  assert.equal(process.env.OPENAI_API_KEY,'unit-test-key-never-sent');
+});
+
 test('incomplete or empty output is rejected without leaking provider details',async()=>{
   await assert.rejects(generateOpenAI({...options,fetch:async()=>Response.json({...completed,status:'incomplete',error:{message:'private-provider-detail'}})}),error=>{
     assert(!String(error).includes('private-provider-detail'));return true;

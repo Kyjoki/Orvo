@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { processWatchEvent, watchDecisionMatchesLevel, watchEventSchema, watchEventsEnabled, watchOriginAllowed } from '../src/server/watch-events';
 
-const oldKey = process.env.OPENAI_API_KEY;
+const oldKey = process.env.ORVO_WATCH_OPENAI_API_KEY;
 const oldFlag = process.env.ORVO_WATCH_EVENTS_ENABLED;
-process.env.OPENAI_API_KEY = 'watch-unit-test-key';
+process.env.ORVO_WATCH_OPENAI_API_KEY = 'watch-unit-test-key';
 process.env.ORVO_WATCH_EVENTS_ENABLED = '1';
 after(() => {
-  if (oldKey === undefined) delete process.env.OPENAI_API_KEY;
-  else process.env.OPENAI_API_KEY = oldKey;
+  if (oldKey === undefined) delete process.env.ORVO_WATCH_OPENAI_API_KEY;
+  else process.env.ORVO_WATCH_OPENAI_API_KEY = oldKey;
   if (oldFlag === undefined) delete process.env.ORVO_WATCH_EVENTS_ENABLED;
   else process.env.ORVO_WATCH_EVENTS_ENABLED = oldFlag;
 });
@@ -52,6 +52,31 @@ test('stale changes and an unpaired Telegram make no model call', async () => {
   await assert.rejects(processWatchEvent('workspace', event, deps, new Date('2026-10-21T06:01:00Z')),
     { code: 'WATCH_TELEGRAM_UNAVAILABLE' });
   assert.equal(calls, 1);
+});
+
+test('primary Orvo key cannot activate watch analysis without its own key', async () => {
+  const previousPrimary = process.env.OPENAI_API_KEY;
+  const previousWatch = process.env.ORVO_WATCH_OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY = 'primary-only-test-key';
+  delete process.env.ORVO_WATCH_OPENAI_API_KEY;
+  let calls = 0;
+  const deps = {
+    isTelegramReady: async () => { calls++; return true; },
+    isOutboxReady: () => true,
+    reserve: async () => { calls++; return 'reserved' as const; },
+    generate: async () => { calls++; return { text: '{}', usage: { inputTokens: 1, outputTokens: 1 } }; },
+    settle: async () => { calls++; },
+    enqueue: async () => { calls++; return true; },
+    deliver: async () => { calls++; return 'delivered' as const; },
+  };
+  try {
+    await assert.rejects(processWatchEvent('workspace', event, deps, new Date('2026-10-21T06:01:00Z')),
+      { code: 'WATCH_MODEL_UNAVAILABLE' });
+    assert.equal(calls, 0);
+  } finally {
+    if (previousPrimary === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = previousPrimary;
+    if (previousWatch === undefined) delete process.env.ORVO_WATCH_OPENAI_API_KEY; else process.env.ORVO_WATCH_OPENAI_API_KEY = previousWatch;
+  }
 });
 
 test('one fresh event can notify; duplicate never calls the model twice', async () => {
