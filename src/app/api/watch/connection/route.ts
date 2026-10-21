@@ -4,13 +4,16 @@ import { createWatchConnection, revokeWatchConnection, watchConnectionStatus } f
 import { watchEventsReady } from '@/server/watch-events';
 import { watchUsageStatus } from '@/server/watch-usage';
 import { watchAlertCounts } from '@/server/watch-outbox';
+import { loadWatchProfile } from '@/server/watch-profile';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' };
 
 async function details(workspaceId: string, connection: Awaited<ReturnType<typeof watchConnectionStatus>>) {
+  const profile = await loadWatchProfile(workspaceId);
   return { ...connection, dataTransferEnabled: connection.connected && await watchEventsReady(workspaceId),
+    agent: profile ? { id: profile.id, name: profile.name, instructionVersion: profile.instructionVersion } : null,
     usage: await watchUsageStatus(workspaceId), alerts: await watchAlertCounts(workspaceId) };
 }
 

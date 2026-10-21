@@ -3,9 +3,11 @@ import { generateOpenAI } from './openai';
 import { reserveWatchBudget, settleWatchBudget, WATCH_ANALYSIS_MODEL, WATCH_MAX_OUTPUT_TOKENS, WATCH_MONTHLY_BUDGET_MICRO_USD, WATCH_MONTHLY_EVENT_LIMIT } from './watch-budget';
 import { watchUsageStatus } from './watch-usage';
 import { deliverWatchAlert, enqueueWatchAlert, watchOutboxConfigured, type WatchDeliveryStatus } from './watch-outbox';
-import { formatWatchTelegram, parseWatchDecision, shouldNotifyWatch, WATCH_AGENT_INSTRUCTIONS, watchPrompt, type WatchCandidate, type WatchDecision } from './watch-triage';
+import { formatWatchTelegram, parseWatchDecision, shouldNotifyWatch, watchPrompt, type WatchCandidate, type WatchDecision } from './watch-triage';
+import { loadWatchProfile, watchSystemInstructions, type WatchProfile } from './watch-profile';
 import { telegramStatus } from './telegram';
 import { DomainError } from '../shared/types';
+import { watchConnectionGenerationIsCurrent } from './watch-connection-generation';
 
 export const watchEventSchema = z.object({
   // Generated randomly by the extension, and kept stable when retrying this event.
@@ -27,6 +29,7 @@ export function watchEventsEnabled() {
 
 export async function watchEventsReady(workspaceId: string) {
   if (!watchEventsEnabled() || !process.env.ORVO_WATCH_OPENAI_API_KEY || !watchOutboxConfigured()) return false;
+  if (!(await loadWatchProfile(workspaceId))) return false;
   const usage = await watchUsageStatus(workspaceId);
   if (usage.analyzed >= WATCH_MONTHLY_EVENT_LIMIT || usage.accountedMicroUsd >= WATCH_MONTHLY_BUDGET_MICRO_USD) return false;
   const status = await telegramStatus(workspaceId);
@@ -48,11 +51,14 @@ export function watchDecisionMatchesLevel(decision: WatchDecision, event: WatchE
 
 type WatchServices = {
   isTelegramReady(workspaceId: string): Promise<boolean>;
+  loadProfile(workspaceId: string): Promise<WatchProfile | null>;
+  isConnectionCurrent(workspaceId: string, generation: string): Promise<boolean>;
   reserve(workspaceId: string, eventId: string, system: string, prompt: string): Promise<'reserved' | 'duplicate' | 'limit-reached'>;
   generate(system: string, prompt: string): Promise<{ text: string; usage: { inputTokens: number; outputTokens: number } }>;
   settle(workspaceId: string, eventId: string, usage: { inputTokens: number; outputTokens: number }): Promise<void>;
   isOutboxReady(): boolean;
-  enqueue(workspaceId: string, eventId: string, message: string, expiresAt: Date): Promise<boolean>;
+  enqueue(workspaceId: string, eventId: string, message: string, expiresAt: Date,
+    agent: { id: string; version: number }, connectionGeneration: string): Promise<boolean>;
   deliver(workspaceId: string, eventId: string): Promise<WatchDeliveryStatus | 'none'>;
 };
 
@@ -61,6 +67,8 @@ const services: WatchServices = {
     const status = await telegramStatus(workspaceId);
     return status.paired && status.tested;
   },
+  loadProfile: loadWatchProfile,
+  isConnectionCurrent: watchConnectionGenerationIsCurrent,
   reserve: reserveWatchBudget,
   generate: (system, prompt) => generateOpenAI({
     model: WATCH_ANALYSIS_MODEL,
@@ -80,6 +88,7 @@ const services: WatchServices = {
 export async function processWatchEvent(
   workspaceId: string,
   event: WatchEvent,
+  connectionGeneration: string,
   deps: WatchServices = services,
   now = new Date(),
 ): Promise<{ accepted: boolean; status: WatchEventStatus }> {
@@ -95,17 +104,25 @@ export async function processWatchEvent(
   if (!deps.isOutboxReady()) {
     throw new DomainError('WATCH_OUTBOX_UNAVAILABLE', 'Защищённая очередь уведомлений не настроена.', 503);
   }
+  const profile = await deps.loadProfile(workspaceId);
+  if (!profile) {
+    throw new DomainError('WATCH_AGENT_UNAVAILABLE', 'Профиль наблюдателя не настроен или архивирован.', 503);
+  }
+  if (!(await deps.isConnectionCurrent(workspaceId, connectionGeneration))) {
+    return { accepted: false, status: 'disabled' };
+  }
   const candidate: WatchCandidate = {
     chatTitle: event.chatTitle,
     pinned: event.pinned,
     excerpts: event.excerpts,
   };
   const prompt = watchPrompt(candidate);
-  const claim = await deps.reserve(workspaceId, event.eventId, WATCH_AGENT_INSTRUCTIONS, prompt);
+  const system = watchSystemInstructions(profile);
+  const claim = await deps.reserve(workspaceId, event.eventId, system, prompt);
   if (claim !== 'reserved') return { accepted: false, status: claim };
   // Retain the reservation on a failed or unknown provider call, so a retry cannot bill twice.
   let result: Awaited<ReturnType<WatchServices['generate']>>;
-  try { result = await deps.generate(WATCH_AGENT_INSTRUCTIONS, prompt); }
+  try { result = await deps.generate(system, prompt); }
   catch { throw new DomainError('WATCH_MODEL_UNAVAILABLE', 'Модель не завершила анализ. Повтор события не запускает второй платный запрос.', 503); }
   await deps.settle(workspaceId, event.eventId, result.usage);
   let decision: WatchDecision;
@@ -115,9 +132,16 @@ export async function processWatchEvent(
   const alert = formatWatchTelegram(candidate, decision);
   if (!alert) return { accepted: true, status: 'ignored' };
   if (!watchEventsEnabled()) return { accepted: true, status: 'disabled' };
+  const currentProfile = await deps.loadProfile(workspaceId);
+  if (!currentProfile || currentProfile.id !== profile.id || currentProfile.version !== profile.version ||
+      currentProfile.instructionVersion !== profile.instructionVersion) return { accepted: true, status: 'disabled' };
+  if (!(await deps.isConnectionCurrent(workspaceId, connectionGeneration))) {
+    return { accepted: true, status: 'disabled' };
+  }
   const expiresAt = new Date(new Date(event.observedAt).getTime() + 15 * 60_000);
   if (expiresAt.getTime() <= now.getTime()) return { accepted: true, status: 'stale' };
-  const enqueued = await deps.enqueue(workspaceId, event.eventId, alert, expiresAt);
+  const enqueued = await deps.enqueue(workspaceId, event.eventId, alert, expiresAt,
+    { id: profile.id, version: profile.version }, connectionGeneration);
   if (!enqueued) return { accepted: true, status: 'stale' };
   const delivery = await deps.deliver(workspaceId, event.eventId);
   return { accepted: true, status: !watchEventsEnabled() ? 'disabled' : delivery === 'none' ? 'queued' : delivery };

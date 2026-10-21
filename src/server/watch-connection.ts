@@ -2,6 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { query } from './db';
 import { DomainError } from '../shared/types';
 import { cancelWatchAlerts } from './watch-outbox';
+import { watchConnectionGeneration } from './watch-connection-generation';
 
 const tokenPattern = /^orvo_watch_[A-Za-z0-9_-]{43}$/;
 
@@ -25,6 +26,8 @@ export async function createWatchConnection(workspaceId: string) {
   await query(`INSERT INTO watch_connections(workspace_id,token_hash)
     VALUES($1,$2) ON CONFLICT(workspace_id) DO UPDATE SET
     token_hash=EXCLUDED.token_hash,created_at=now()`, [workspaceId, hashWatchToken(token)]);
+  // Replacing the credential discards alerts accepted through the old one.
+  await cancelWatchAlerts(workspaceId);
   return { ...(await watchConnectionStatus(workspaceId)), token };
 }
 
@@ -46,4 +49,5 @@ export async function requireWatchConnection(workspaceId: string, authorization:
   if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
     throw new DomainError('WATCH_UNAUTHORIZED', 'Расширение не привязано к Orvo.', 401);
   }
+  return watchConnectionGeneration(row.token_hash);
 }

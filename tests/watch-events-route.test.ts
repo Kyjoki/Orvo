@@ -59,6 +59,7 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
     primaryKey: process.env.OPENAI_API_KEY,
     bot: process.env.TELEGRAM_BOT_TOKEN,
     runtime: process.env.ORVO_RUNTIME_SECRET,
+    agentId: process.env.ORVO_WATCH_AGENT_ID,
     fetch: globalThis.fetch,
   };
   const botToken = 'synthetic-bot-token';
@@ -67,6 +68,12 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
   process.env.OPENAI_API_KEY = 'synthetic-primary-openai-key';
   process.env.TELEGRAM_BOT_TOKEN = botToken;
   process.env.ORVO_RUNTIME_SECRET = 'synthetic-runtime-secret-000000000000000000';
+  const watchAgentId = randomUUID();
+  process.env.ORVO_WATCH_AGENT_ID = watchAgentId;
+  await query('INSERT INTO agents(id,workspace_id,role_key,data) VALUES($1,$2,$3,$4)', [
+    watchAgentId, workspace.id, 'synthetic-watch-agent',
+    JSON.stringify({ name: 'Наблюдатель', instructions: 'Сообщать о вызове специалиста.', instructionVersion: 1 }),
+  ]);
   await query(`INSERT INTO telegram_connections(workspace_id,chat_id,bot_username,token_hash,last_test_at)
     VALUES($1,$2,$3,$4,now())`, [workspace.id, '1234567', 'SyntheticBot', createHash('sha256').update(botToken).digest('hex')]);
   let modelCalls = 0;
@@ -78,6 +85,7 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
       const body = JSON.parse(String(init?.body));
       assert.equal((init?.headers as Record<string,string>).authorization, 'Bearer synthetic-watch-openai-key');
       assert.equal(body.model, 'gpt-6-luna');
+      assert.match(body.instructions, /Сообщать о вызове специалиста/);
       assert.equal(body.store, false);
       assert.deepEqual(body.reasoning, { effort: 'none' });
       return Response.json({ status: 'completed', output: [{ type: 'message', role: 'assistant', status: 'completed',
@@ -120,7 +128,7 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
     globalThis.fetch = old.fetch;
     for (const [name, value] of [
       ['ORVO_WATCH_EVENTS_ENABLED', old.flag], ['ORVO_WATCH_OPENAI_API_KEY', old.key], ['OPENAI_API_KEY', old.primaryKey],
-      ['TELEGRAM_BOT_TOKEN', old.bot], ['ORVO_RUNTIME_SECRET', old.runtime],
+      ['TELEGRAM_BOT_TOKEN', old.bot], ['ORVO_RUNTIME_SECRET', old.runtime], ['ORVO_WATCH_AGENT_ID', old.agentId],
     ] as const) {
       if (value === undefined) delete process.env[name]; else process.env[name] = value;
     }

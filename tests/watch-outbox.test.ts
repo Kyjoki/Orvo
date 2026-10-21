@@ -15,12 +15,25 @@ const { reserveWatchBudget } = await import('../src/server/watch-budget');
 const { encryptWatchAlert, decryptWatchAlert, enqueueWatchAlert, deliverWatchAlert,
   expireWatchAlerts, watchAlertCounts } = await import('../src/server/watch-outbox');
 const { createWatchConnection, revokeWatchConnection } = await import('../src/server/watch-connection');
+const { currentWatchConnectionGeneration } = await import('../src/server/watch-connection-generation');
 const workspace = await getWorkspace();
+const watchAgentId = randomUUID();
+const boundAgent = { id: watchAgentId, version: 1 };
+process.env.ORVO_WATCH_AGENT_ID = watchAgentId;
+await query('INSERT INTO agents(id,workspace_id,role_key,data) VALUES($1,$2,$3,$4)', [
+  watchAgentId, workspace.id, 'watch-outbox-test', JSON.stringify({ name: 'Наблюдатель', instructions: 'Отбирать важное.', instructionVersion: 1 }),
+]);
 const id = () => randomBytes(32).toString('hex');
 const future = () => new Date(Date.now() + 15 * 60_000);
 async function reserve(eventId: string) {
   assert.equal(await reserveWatchBudget(workspace.id, eventId, 'rule', 'synthetic'), 'reserved');
 }
+async function enqueue(eventId: string, message: string, expiresAt: Date, agent = boundAgent) {
+  const generation = await currentWatchConnectionGeneration(workspace.id);
+  assert.ok(generation);
+  return enqueueWatchAlert(workspace.id, eventId, message, expiresAt, agent, generation);
+}
+await createWatchConnection(workspace.id);
 after(async () => { const db = await getDatabase(); if (db.kind === 'pglite') await db.db.close(); });
 
 test('AES-GCM binds the alert to its event and detects tampering', () => {
@@ -35,8 +48,8 @@ test('AES-GCM binds the alert to its event and detects tampering', () => {
 
 test('delivered alert is encrypted in DB then promptly purged; duplicate cannot resend', async () => {
   const eventId = id(); await reserve(eventId);
-  assert.equal(await enqueueWatchAlert(workspace.id, eventId, 'Synthetic terminal problem', future()), true);
-  assert.equal(await enqueueWatchAlert(workspace.id, eventId, 'Synthetic terminal problem', future()), false);
+  assert.equal(await enqueue(eventId, 'Synthetic terminal problem', future()), true);
+  assert.equal(await enqueue(eventId, 'Synthetic terminal problem', future()), false);
   const before = (await query<{ ciphertext: string; state: string }>(
     'SELECT ciphertext,state FROM watch_alert_outbox WHERE workspace_id=$1 AND event_id=$2', [workspace.id, eventId],
   )).rows[0];
@@ -55,7 +68,7 @@ test('delivered alert is encrypted in DB then promptly purged; duplicate cannot 
 
 test('ambiguous Telegram result is retried with lease; three failures become dead', async () => {
   const eventId = id(); await reserve(eventId);
-  await enqueueWatchAlert(workspace.id, eventId, 'Synthetic urgent alert', future());
+  await enqueue(eventId, 'Synthetic urgent alert', future());
   let sends = 0;
   const fails = async () => { sends++; throw new Error('Synthetic timeout'); };
   for (let attempt = 1; attempt <= 3; attempt++) {
@@ -75,7 +88,7 @@ test('ambiguous Telegram result is retried with lease; three failures become dea
 
 test('expired alerts and alerts encrypted under an old runtime secret are never sent', async () => {
   const expiredId = id(); await reserve(expiredId);
-  await enqueueWatchAlert(workspace.id, expiredId, 'Synthetic old alert', future());
+  await enqueue(expiredId, 'Synthetic old alert', future());
   await query("UPDATE watch_alert_outbox SET expires_at=now()-interval '1 second' WHERE workspace_id=$1 AND event_id=$2", [workspace.id, expiredId]);
   assert.ok(await expireWatchAlerts() >= 1);
   assert.equal(await deliverWatchAlert(workspace.id, expiredId, async () => { throw new Error('must not send'); }), 'none');
@@ -86,7 +99,7 @@ test('expired alerts and alerts encrypted under an old runtime secret are never 
   assert.equal(expired.ciphertext, null);
 
   const rotatedId = id(); await reserve(rotatedId);
-  await enqueueWatchAlert(workspace.id, rotatedId, 'Synthetic encrypted alert', future());
+  await enqueue(rotatedId, 'Synthetic encrypted alert', future());
   process.env.ORVO_RUNTIME_SECRET = 'new-restore-secret-for-unit-tests-000000000000000';
   try {
     assert.equal(await deliverWatchAlert(workspace.id, rotatedId, async () => { throw new Error('must not send'); }), 'failed');
@@ -100,7 +113,7 @@ test('expired alerts and alerts encrypted under an old runtime secret are never 
 
 test('server kill switch purges queued alerts without sending them later', async () => {
   const eventId = id(); await reserve(eventId);
-  await enqueueWatchAlert(workspace.id, eventId, 'Synthetic paused alert', future());
+  await enqueue(eventId, 'Synthetic paused alert', future());
   process.env.ORVO_WATCH_EVENTS_ENABLED = '0';
   try {
     assert.equal(await deliverWatchAlert(workspace.id, eventId, async () => { throw new Error('must not send'); }), 'none');
@@ -113,10 +126,38 @@ test('server kill switch purges queued alerts without sending them later', async
   assert.equal(await deliverWatchAlert(workspace.id, eventId, async () => { throw new Error('must not resend'); }), 'none');
 });
 
+test('archived watch profile stops an already queued notification', async () => {
+  const eventId = id(); await reserve(eventId);
+  await enqueue(eventId, 'Synthetic archived alert', future());
+  await query('UPDATE agents SET archived=true WHERE id=$1', [watchAgentId]);
+  try {
+    assert.equal(await deliverWatchAlert(workspace.id, eventId, async () => { throw new Error('must not send'); }), 'failed');
+  } finally { await query('UPDATE agents SET archived=false WHERE id=$1', [watchAgentId]); }
+  const row = (await query<{ state: string; ciphertext: string | null }>(
+    'SELECT state,ciphertext FROM watch_alert_outbox WHERE workspace_id=$1 AND event_id=$2', [workspace.id, eventId],
+  )).rows[0];
+  assert.equal(row.state, 'expired');
+  assert.equal(row.ciphertext, null);
+});
+
+test('editing a watch profile invalidates its queued decision', async () => {
+  const eventId = id(); await reserve(eventId);
+  await enqueue(eventId, 'Synthetic old-policy alert', future());
+  await query('UPDATE agents SET version=version+1 WHERE id=$1', [watchAgentId]);
+  try {
+    assert.equal(await deliverWatchAlert(workspace.id, eventId, async () => { throw new Error('must not send'); }), 'failed');
+  } finally { await query('UPDATE agents SET version=1 WHERE id=$1', [watchAgentId]); }
+  const row = (await query<{ state: string; ciphertext: string | null }>(
+    'SELECT state,ciphertext FROM watch_alert_outbox WHERE workspace_id=$1 AND event_id=$2', [workspace.id, eventId],
+  )).rows[0];
+  assert.equal(row.state, 'expired');
+  assert.equal(row.ciphertext, null);
+});
+
 test('revoking a watch connection cancels its queued alert', async () => {
   const eventId = id(); await reserve(eventId);
   await createWatchConnection(workspace.id);
-  await enqueueWatchAlert(workspace.id, eventId, 'Synthetic private alert', future());
+  await enqueue(eventId, 'Synthetic private alert', future());
   assert.equal((await revokeWatchConnection(workspace.id)).connected, false);
   assert.equal(await deliverWatchAlert(workspace.id, eventId, async () => { throw new Error('must not send'); }), 'none');
   const row = (await query<{ state: string; ciphertext: string | null }>(
@@ -126,9 +167,34 @@ test('revoking a watch connection cancels its queued alert', async () => {
   assert.equal(row.ciphertext, null);
 });
 
+test('replacing an extension key cancels alerts queued under the previous key', async () => {
+  const eventId = id(); await reserve(eventId);
+  await createWatchConnection(workspace.id);
+  await enqueue(eventId, 'Synthetic prior-key alert', future());
+  await createWatchConnection(workspace.id);
+  assert.equal(await deliverWatchAlert(workspace.id, eventId, async () => { throw new Error('must not send'); }), 'none');
+  const row = (await query<{ state: string; ciphertext: string | null }>(
+    'SELECT state,ciphertext FROM watch_alert_outbox WHERE workspace_id=$1 AND event_id=$2', [workspace.id, eventId],
+  )).rows[0];
+  assert.equal(row.state, 'expired');
+  assert.equal(row.ciphertext, null);
+});
+
+test('an in-flight request authenticated with the prior key cannot enqueue after rotation', async () => {
+  const eventId = id(); await reserve(eventId);
+  const priorGeneration = await currentWatchConnectionGeneration(workspace.id);
+  assert.ok(priorGeneration);
+  await createWatchConnection(workspace.id);
+  assert.equal(await enqueueWatchAlert(workspace.id, eventId, 'Synthetic late alert', future(), boundAgent, priorGeneration), false);
+  const row = (await query<{ count: number }>(
+    'SELECT count(*)::int AS count FROM watch_alert_outbox WHERE workspace_id=$1 AND event_id=$2', [workspace.id, eventId],
+  )).rows[0];
+  assert.equal(row.count, 0);
+});
+
 test('parallel workers lease the same alert only once', async () => {
   const eventId = id(); await reserve(eventId);
-  await enqueueWatchAlert(workspace.id, eventId, 'Synthetic parallel alert', future());
+  await enqueue(eventId, 'Synthetic parallel alert', future());
   let sends = 0;
   const sender = async () => { sends++; await new Promise(resolve => setTimeout(resolve, 20)); };
   const outcomes = await Promise.all([

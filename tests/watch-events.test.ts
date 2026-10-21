@@ -1,10 +1,17 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { processWatchEvent, watchDecisionMatchesLevel, watchEventSchema, watchEventsEnabled, watchOriginAllowed } from '../src/server/watch-events';
+import { loadWatchProfile, watchSystemInstructions, type WatchProfile } from '../src/server/watch-profile';
+
+process.env.ORVO_TEST_MODE = '1';
+delete process.env.DATABASE_URL;
+process.env.ORVO_TEST_DB_NAME = `watch-profile-${process.pid}-${randomUUID().slice(0, 8)}`;
+process.env.ORVO_WORKSPACE_ID = `watch-profile-${process.pid}`;
 
 const oldKey = process.env.ORVO_WATCH_OPENAI_API_KEY;
 const oldFlag = process.env.ORVO_WATCH_EVENTS_ENABLED;
+const oldAgentId = process.env.ORVO_WATCH_AGENT_ID;
 process.env.ORVO_WATCH_OPENAI_API_KEY = 'watch-unit-test-key';
 process.env.ORVO_WATCH_EVENTS_ENABLED = '1';
 after(() => {
@@ -12,7 +19,15 @@ after(() => {
   else process.env.ORVO_WATCH_OPENAI_API_KEY = oldKey;
   if (oldFlag === undefined) delete process.env.ORVO_WATCH_EVENTS_ENABLED;
   else process.env.ORVO_WATCH_EVENTS_ENABLED = oldFlag;
+  if (oldAgentId === undefined) delete process.env.ORVO_WATCH_AGENT_ID;
+  else process.env.ORVO_WATCH_AGENT_ID = oldAgentId;
 });
+
+const profile: WatchProfile = {
+  id: randomUUID(), name: 'Наблюдатель', instructions: 'Особенно важен вызов специалиста.',
+  version: 1, instructionVersion: 1,
+};
+const generation = 'a'.repeat(64);
 
 const event = watchEventSchema.parse({
   eventId: randomBytes(32).toString('hex'),
@@ -39,6 +54,8 @@ test('stale changes and an unpaired Telegram make no model call', async () => {
   let calls = 0;
   const deps = {
     isTelegramReady: async () => { calls++; return false; },
+    loadProfile: async () => profile,
+    isConnectionCurrent: async () => true,
     isOutboxReady: () => true,
     reserve: async () => { calls++; return 'reserved' as const; },
     generate: async () => { calls++; return { text: '{}', usage: { inputTokens: 1, outputTokens: 1 } }; },
@@ -46,10 +63,10 @@ test('stale changes and an unpaired Telegram make no model call', async () => {
     enqueue: async () => { calls++; return true; },
     deliver: async () => { calls++; return 'delivered' as const; },
   };
-  assert.deepEqual(await processWatchEvent('workspace', event, deps, new Date('2026-10-21T06:11:00Z')),
+  assert.deepEqual(await processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:11:00Z')),
     { accepted: false, status: 'stale' });
   assert.equal(calls, 0);
-  await assert.rejects(processWatchEvent('workspace', event, deps, new Date('2026-10-21T06:01:00Z')),
+  await assert.rejects(processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:01:00Z')),
     { code: 'WATCH_TELEGRAM_UNAVAILABLE' });
   assert.equal(calls, 1);
 });
@@ -62,6 +79,8 @@ test('primary Orvo key cannot activate watch analysis without its own key', asyn
   let calls = 0;
   const deps = {
     isTelegramReady: async () => { calls++; return true; },
+    loadProfile: async () => profile,
+    isConnectionCurrent: async () => true,
     isOutboxReady: () => true,
     reserve: async () => { calls++; return 'reserved' as const; },
     generate: async () => { calls++; return { text: '{}', usage: { inputTokens: 1, outputTokens: 1 } }; },
@@ -70,7 +89,7 @@ test('primary Orvo key cannot activate watch analysis without its own key', asyn
     deliver: async () => { calls++; return 'delivered' as const; },
   };
   try {
-    await assert.rejects(processWatchEvent('workspace', event, deps, new Date('2026-10-21T06:01:00Z')),
+    await assert.rejects(processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:01:00Z')),
       { code: 'WATCH_MODEL_UNAVAILABLE' });
     assert.equal(calls, 0);
   } finally {
@@ -83,9 +102,14 @@ test('one fresh event can notify; duplicate never calls the model twice', async 
   const calls: string[] = [];
   const deps = {
     isTelegramReady: async () => true,
+    loadProfile: async () => profile,
+    isConnectionCurrent: async () => true,
     isOutboxReady: () => true,
-    reserve: async () => { calls.push('reserve'); return calls.filter(v => v === 'reserve').length === 1 ? 'reserved' as const : 'duplicate' as const; },
-    generate: async () => { calls.push('model'); return {
+    reserve: async (_workspaceId: string, _eventId: string, system: string) => {
+      calls.push('reserve'); assert.match(system, /Особенно важен вызов специалиста/);
+      return calls.filter(v => v === 'reserve').length === 1 ? 'reserved' as const : 'duplicate' as const;
+    },
+    generate: async (system: string) => { calls.push('model'); assert.equal(system, watchSystemInstructions(profile)); return {
       text: JSON.stringify({ priority: 'urgent', confidence: 0.96, summary: 'Нужен специалист для терминала', reason: 'Прямой вызов' }),
       usage: { inputTokens: 300, outputTokens: 70 },
     }; },
@@ -94,8 +118,8 @@ test('one fresh event can notify; duplicate never calls the model twice', async 
     deliver: async () => { calls.push('telegram'); return 'delivered' as const; },
   };
   const now = new Date('2026-10-21T06:01:00Z');
-  assert.deepEqual(await processWatchEvent('workspace', event, deps, now), { accepted: true, status: 'delivered' });
-  assert.deepEqual(await processWatchEvent('workspace', event, deps, now), { accepted: false, status: 'duplicate' });
+  assert.deepEqual(await processWatchEvent('workspace', event, generation, deps, now), { accepted: true, status: 'delivered' });
+  assert.deepEqual(await processWatchEvent('workspace', event, generation, deps, now), { accepted: false, status: 'duplicate' });
   assert.deepEqual(calls, ['reserve', 'model', 'settle', 'enqueue', 'telegram', 'reserve']);
 });
 
@@ -110,6 +134,8 @@ test('unknown model outcome retains claim and never sends Telegram', async () =>
   const calls: string[] = [];
   const deps = {
     isTelegramReady: async () => true,
+    loadProfile: async () => profile,
+    isConnectionCurrent: async () => true,
     isOutboxReady: () => true,
     reserve: async () => { calls.push('reserve'); return 'reserved' as const; },
     generate: async () => { calls.push('model'); throw new Error('Private provider response'); },
@@ -117,11 +143,101 @@ test('unknown model outcome retains claim and never sends Telegram', async () =>
     enqueue: async () => { calls.push('enqueue'); return true; },
     deliver: async () => { calls.push('telegram'); return 'delivered' as const; },
   };
-  await assert.rejects(processWatchEvent('workspace', event, deps, new Date('2026-10-21T06:01:00Z')),
+  await assert.rejects(processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:01:00Z')),
     (error: unknown) => {
       assert.equal((error as { code?: string }).code, 'WATCH_MODEL_UNAVAILABLE');
       assert.doesNotMatch(String(error), /Private provider response/);
       return true;
     });
   assert.deepEqual(calls, ['reserve', 'model']);
+});
+
+test('missing profile blocks analysis before reservation or model call', async () => {
+  let billed = false;
+  const deps = {
+    isTelegramReady: async () => true,
+    loadProfile: async () => null,
+    isConnectionCurrent: async () => true,
+    isOutboxReady: () => true,
+    reserve: async () => { billed = true; return 'reserved' as const; },
+    generate: async () => { billed = true; return { text: '{}', usage: { inputTokens: 1, outputTokens: 1 } }; },
+    settle: async () => {},
+    enqueue: async () => true,
+    deliver: async () => 'delivered' as const,
+  };
+  await assert.rejects(processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:01:00Z')),
+    { code: 'WATCH_AGENT_UNAVAILABLE' });
+  assert.equal(billed, false);
+});
+
+test('archived or edited profile after model response cannot enqueue an alert', async () => {
+  for (const later of [null, { ...profile, version: 2, instructionVersion: 2, instructions: 'Новые критерии' }]) {
+    let reads = 0;
+    let enqueued = false;
+    const deps = {
+      isTelegramReady: async () => true,
+      loadProfile: async () => ++reads === 1 ? profile : later,
+      isConnectionCurrent: async () => true,
+      isOutboxReady: () => true,
+      reserve: async () => 'reserved' as const,
+      generate: async () => ({
+        text: JSON.stringify({ priority: 'urgent', confidence: 0.98, summary: 'Нужен специалист', reason: 'Вызов' }),
+        usage: { inputTokens: 100, outputTokens: 40 },
+      }),
+      settle: async () => {},
+      enqueue: async () => { enqueued = true; return true; },
+      deliver: async () => 'delivered' as const,
+    };
+    assert.deepEqual(await processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:01:00Z')),
+      { accepted: true, status: 'disabled' });
+    assert.equal(enqueued, false);
+  }
+});
+
+test('credential rotation during model analysis prevents an alert from being queued', async () => {
+  let checks = 0;
+  let enqueued = false;
+  const deps = {
+    isTelegramReady: async () => true,
+    loadProfile: async () => profile,
+    isConnectionCurrent: async () => ++checks === 1,
+    isOutboxReady: () => true,
+    reserve: async () => 'reserved' as const,
+    generate: async () => ({
+      text: JSON.stringify({ priority: 'urgent', confidence: 0.99, summary: 'Нужен специалист', reason: 'Вызов' }),
+      usage: { inputTokens: 100, outputTokens: 30 },
+    }),
+    settle: async () => {},
+    enqueue: async () => { enqueued = true; return true; },
+    deliver: async () => 'delivered' as const,
+  };
+  assert.deepEqual(await processWatchEvent('workspace', event, generation, deps, new Date('2026-10-21T06:01:00Z')),
+    { accepted: true, status: 'disabled' });
+  assert.equal(checks, 2);
+  assert.equal(enqueued, false);
+});
+
+test('profile loader binds by exact ID and rejects missing, archived and overlong instructions', async () => {
+  const { getWorkspace } = await import('../src/server/domain');
+  const { getDatabase, query } = await import('../src/server/db');
+  const workspace = await getWorkspace();
+  const agentId = randomUUID();
+  process.env.ORVO_WATCH_AGENT_ID = agentId;
+  try {
+    assert.equal(await loadWatchProfile(workspace.id), null);
+    const data = { name: 'Наблюдатель', instructions: 'Сигнал о вызове специалиста', instructionVersion: 1 };
+    await query('INSERT INTO agents(id,workspace_id,role_key,data) VALUES($1,$2,$3,$4)',
+      [agentId, workspace.id, `custom-${agentId}`, JSON.stringify(data)]);
+    assert.deepEqual(await loadWatchProfile(workspace.id), { id: agentId, name: data.name,
+      instructions: data.instructions, version: 1, instructionVersion: 1 });
+    assert.equal(await loadWatchProfile('another-workspace'), null);
+    await query('UPDATE agents SET archived=true WHERE id=$1', [agentId]);
+    assert.equal(await loadWatchProfile(workspace.id), null);
+    await query('UPDATE agents SET archived=false,data=$2 WHERE id=$1',
+      [agentId, JSON.stringify({ ...data, instructions: 'x'.repeat(4001) })]);
+    assert.equal(await loadWatchProfile(workspace.id), null);
+  } finally {
+    const database = await getDatabase();
+    if (database.kind === 'pglite') await database.db.close();
+  }
 });

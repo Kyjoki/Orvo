@@ -16,13 +16,13 @@ export async function POST(request: Request) {
     }
     await consumeRateLimit('watch-events-address', clientAddress(request), 120, 60);
     const workspace = await getWorkspace();
-    await requireWatchConnection(workspace.id, request.headers.get('authorization'));
+    const connectionGeneration = await requireWatchConnection(workspace.id, request.headers.get('authorization'));
     if (!watchEventsEnabled()) {
       return Response.json({ accepted: false, status: 'disabled' }, { headers });
     }
     await consumeRateLimit('watch-events-workspace', workspace.id, 180, 3600);
     const input = watchEventSchema.parse(await readJson(request, 8192));
-    const result = await processWatchEvent(workspace.id, input);
+    const result = await processWatchEvent(workspace.id, input, connectionGeneration);
     return Response.json(result, { status: result.accepted ? 202 : 200, headers });
   } catch (error) { return rateLimitFailure(error) ?? failure(error); }
 }

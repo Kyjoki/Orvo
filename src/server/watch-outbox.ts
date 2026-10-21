@@ -2,7 +2,9 @@ import { createCipheriv, createDecipheriv, hkdfSync, randomBytes, randomUUID } f
 import { query, transaction } from './db';
 import { sendTelegramAlert } from './telegram';
 import { watchPeriod } from './watch-budget';
+import { loadWatchProfile } from './watch-profile';
 import { DomainError } from '../shared/types';
+import { watchConnectionGeneration, watchConnectionGenerationIsCurrent } from './watch-connection-generation';
 
 const MAX_ATTEMPTS = 3;
 const LEASE_SECONDS = 30;
@@ -10,7 +12,7 @@ const MAX_BATCH = 4;
 const MAX_ALERT_BYTES = 3500;
 
 type AlertRow = {
-  workspace_id: string; event_id: string; ciphertext: string; nonce: string;
+  workspace_id: string; event_id: string; agent_id: string; agent_version: number; connection_generation: string; ciphertext: string; nonce: string;
   auth_tag: string; attempts: number; lease_token: string; expires_at: Date;
 };
 
@@ -50,13 +52,22 @@ export function decryptWatchAlert(workspaceId: string, eventId: string, encrypte
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
 }
 
-export async function enqueueWatchAlert(workspaceId: string, eventId: string, message: string, expiresAt: Date) {
+export async function enqueueWatchAlert(workspaceId: string, eventId: string, message: string, expiresAt: Date,
+  agent: { id: string; version: number }, connectionGeneration: string) {
   if (!Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) return false;
+  if (!agent.id || !Number.isSafeInteger(agent.version) || agent.version < 1) return false;
   const encrypted = encryptWatchAlert(workspaceId, eventId, message);
-  const inserted = await query(`INSERT INTO watch_alert_outbox(workspace_id,event_id,ciphertext,nonce,auth_tag,expires_at)
-    VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING RETURNING event_id`,
-  [workspaceId, eventId, encrypted.ciphertext.toString('base64'), encrypted.nonce.toString('base64'), encrypted.authTag.toString('base64'), expiresAt]);
-  return inserted.rows.length > 0;
+  return transaction(async (db) => {
+    // A credential replacement waits for this shared row lock before it can invalidate the queue.
+    const connection = (await db.query<{ token_hash: string }>(
+      'SELECT token_hash FROM watch_connections WHERE workspace_id=$1 FOR SHARE', [workspaceId],
+    )).rows[0];
+    if (!connection || watchConnectionGeneration(connection.token_hash) !== connectionGeneration) return false;
+    const inserted = await db.query(`INSERT INTO watch_alert_outbox(workspace_id,event_id,agent_id,agent_version,connection_generation,ciphertext,nonce,auth_tag,expires_at)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT DO NOTHING RETURNING event_id`,
+    [workspaceId, eventId, agent.id, agent.version, connectionGeneration, encrypted.ciphertext.toString('base64'), encrypted.nonce.toString('base64'), encrypted.authTag.toString('base64'), expiresAt]);
+    return inserted.rows.length > 0;
+  });
 }
 
 export async function expireWatchAlerts() {
@@ -137,6 +148,16 @@ export async function deliverWatchAlert(workspaceId?: string, eventId?: string,
   catch { await markWatchAlertFailure(row, true); return 'failed'; }
   // Recheck the switch and expiry immediately before the external side effect.
   if (process.env.ORVO_WATCH_EVENTS_ENABLED !== '1' || new Date(row.expires_at).getTime() <= Date.now()) {
+    await markWatchAlertExpired(row);
+    return 'failed';
+  }
+  // Only the exact profile revision that produced the decision may send it.
+  const profile = await loadWatchProfile(row.workspace_id);
+  if (!profile || profile.id !== row.agent_id || profile.version !== row.agent_version) {
+    await markWatchAlertExpired(row);
+    return 'failed';
+  }
+  if (!(await watchConnectionGenerationIsCurrent(row.workspace_id, row.connection_generation))) {
     await markWatchAlertExpired(row);
     return 'failed';
   }
