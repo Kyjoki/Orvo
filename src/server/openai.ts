@@ -1,19 +1,19 @@
 import { APICallError } from 'ai';
 
 const RESPONSES_URL='https://api.openai.com/v1/responses';
-type GenerateOptions={model:string;system:string;prompt:string;maxOutputTokens:number;signal?:AbortSignal;fetch?:typeof fetch};
+type GenerateOptions={model:string;system:string;prompt:string;maxOutputTokens:number;reasoningEffort?:'none'|'low';signal?:AbortSignal;fetch?:typeof fetch};
 type ResponseData={status?:unknown;output?:unknown;usage?:unknown};
 
 function usageTokens(value:unknown):number|undefined{
   return Number.isSafeInteger(value)&&typeof value==='number'&&value>=0?value:undefined;
 }
 
-export async function generateOpenAI({model,system,prompt,maxOutputTokens,signal,fetch:fetchImpl=fetch}:GenerateOptions){
+export async function generateOpenAI({model,system,prompt,maxOutputTokens,reasoningEffort,signal,fetch:fetchImpl=fetch}:GenerateOptions){
   const key=process.env.OPENAI_API_KEY;
   if(!key)throw new Error('OpenAI API is not configured.');
   if(typeof model!=='string'||!model.trim()||!Number.isInteger(maxOutputTokens)||maxOutputTokens<16)throw new Error('Invalid OpenAI request configuration.');
   const body={model,instructions:system,input:prompt,max_output_tokens:maxOutputTokens,store:false,
-    ...(/^gpt-[56](?:[.-]|$)/.test(model)?{reasoning:{effort:'low' as const}}:{})};
+    ...(/^gpt-[56](?:[.-]|$)/.test(model)?{reasoning:{effort:reasoningEffort??'low'}}:{})};
   const combinedSignal=AbortSignal.any(signal?[signal,AbortSignal.timeout(60_000)]:[AbortSignal.timeout(60_000)]);
   let response:Response;
   try{

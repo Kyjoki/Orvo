@@ -18,6 +18,9 @@ export type WatchDecision = z.infer<typeof decisionSchema>;
 // The model and Telegram only need the issue, not contact details or invite links.
 export function redactWatchText(value: string) {
   return value
+    .replace(/\b(?:sk-[A-Za-z0-9_-]{20,}|orvo_watch_[A-Za-z0-9_-]{20,})\b/gu, '[секрет скрыт]')
+    .replace(/\bBearer\s+\S+/giu, '[секрет скрыт]')
+    .replace(/\b\d{6,12}:[A-Za-z0-9_-]{30,}\b/gu, '[секрет скрыт]')
     .replace(/https?:\/\/\S+/giu, '[ссылка скрыта]')
     .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/giu, '[email скрыт]')
     .replace(/(?:\+?\d[\d\s()-]{8,}\d)/gu, '[номер скрыт]')

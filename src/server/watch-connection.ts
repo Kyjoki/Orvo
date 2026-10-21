@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { query } from './db';
 import { DomainError } from '../shared/types';
+import { cancelWatchAlerts } from './watch-outbox';
 
 const tokenPattern = /^orvo_watch_[A-Za-z0-9_-]{43}$/;
 
@@ -28,6 +29,7 @@ export async function createWatchConnection(workspaceId: string) {
 }
 
 export async function revokeWatchConnection(workspaceId: string) {
+  await cancelWatchAlerts(workspaceId);
   await query('DELETE FROM watch_connections WHERE workspace_id=$1', [workspaceId]);
   return watchConnectionStatus(workspaceId);
 }

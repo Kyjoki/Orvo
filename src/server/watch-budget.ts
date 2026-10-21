@@ -3,12 +3,12 @@ import { DomainError } from '../shared/types';
 
 export const WATCH_MONTHLY_EVENT_LIMIT = 3000;
 export const WATCH_MONTHLY_BUDGET_MICRO_USD = 5_000_000;
-export const WATCH_ANALYSIS_MODEL = 'gpt-5.4-nano';
+export const WATCH_ANALYSIS_MODEL = 'gpt-6-luna';
 export const WATCH_MAX_OUTPUT_TOKENS = 300;
 
 // Official standard API prices on 2026-10-21, in micro-USD per token.
-const INPUT_MICRO_USD_PER_TOKEN = 0.2;
-const OUTPUT_MICRO_USD_PER_TOKEN = 1.25;
+const INPUT_MICRO_USD_PER_TOKEN = 0.1;
+const OUTPUT_MICRO_USD_PER_TOKEN = 0.5;
 
 export function watchActualMicroUsd(inputTokens: number, outputTokens: number) {
   if (![inputTokens, outputTokens].every((value) => Number.isSafeInteger(value) && value >= 0)) {

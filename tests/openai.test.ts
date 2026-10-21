@@ -31,6 +31,14 @@ test('direct Responses request uses fixed host, no storage, low reasoning and fu
   assert.deepEqual(result.usage,{inputTokens:14,outputTokens:23});
 });
 
+test('triage can request no reasoning without changing other model calls',async()=>{
+  await generateOpenAI({...options,model:'gpt-6-luna',reasoningEffort:'none',fetch:async(_url,init)=>{
+    const body=JSON.parse(String(init?.body));
+    assert.deepEqual(body.reasoning,{effort:'none'});
+    return Response.json(completed);
+  }});
+});
+
 test('incomplete or empty output is rejected without leaking provider details',async()=>{
   await assert.rejects(generateOpenAI({...options,fetch:async()=>Response.json({...completed,status:'incomplete',error:{message:'private-provider-detail'}})}),error=>{
     assert(!String(error).includes('private-provider-detail'));return true;

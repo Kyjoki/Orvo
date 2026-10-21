@@ -31,4 +31,6 @@ test('ответ модели строго ограничен схемой, ча
   assert.throws(() => parseWatchDecision(JSON.stringify({ priority: 'urgent', confidence: 1, summary: 'Проблема', reason: '', tool: 'sendWhatsapp' })));
   assert.match(WATCH_AGENT_INSTRUCTIONS, /не пиши в рабочие чаты/u);
   assert.equal(redactWatchText('https://chat.whatsapp.com/abc'), '[ссылка скрыта]');
+  assert.equal(redactWatchText('Bearer abcdefghijklmnopqrstuvwxyz123456'), '[секрет скрыт]');
+  assert.equal(redactWatchText('sk-abcdefghijklmnopqrstuvwxyz123456'), '[секрет скрыт]');
 });

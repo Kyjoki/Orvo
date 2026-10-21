@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
-type Status = { connected: boolean; createdAt: string | null };
+type Status = { connected: boolean; createdAt: string | null; dataTransferEnabled: boolean; usage: {
+  period: string; analyzed: number; eventLimit: number; accountedMicroUsd: number; budgetMicroUsd: number;
+}; alerts: { pending: number; delivered: number; expired: number; dead: number } };
 
 export default function WatchSettings() {
   const [status, setStatus] = useState<Status | null>(null);
@@ -30,7 +32,7 @@ export default function WatchSettings() {
       const response = await fetch('/api/watch/connection', { method });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error?.message || 'Не удалось изменить подключение.');
-      setStatus({ connected: data.connected, createdAt: data.createdAt });
+      setStatus(data);
       if (method === 'POST') setToken(data.token);
     } catch (cause) { setError((cause as Error).message); }
     finally { setBusy(false); }
@@ -41,7 +43,11 @@ export default function WatchSettings() {
     <div>
       <strong>Наблюдение за чатами</strong>
       <p>Отдельный отзывной ключ для расширения. Пароль Orvo и ключи ИИ ему не выдаются.</p>
-      <p className="subtle">Передача рабочих сообщений и автоматические уведомления пока выключены. Ключ создавайте при подключении новой версии расширения.</p>
+      <p className="subtle">{status?.dataTransferEnabled
+        ? 'Приём включён и основные настройки найдены. Доступность модели и доставка Telegram подтвердятся только проверочным событием. Передачу нужно отдельно включить в расширении.'
+        : 'Передача рабочих сообщений и автоматические уведомления выключены. Ключ создавайте при подключении новой версии расширения.'}</p>
+      {status?.usage && <p className="subtle">Анализов за {status.usage.period}: {status.usage.analyzed} из {status.usage.eventLimit}. Учтено с резервом: ${(status.usage.accountedMicroUsd / 1_000_000).toFixed(3)} из ${(status.usage.budgetMicroUsd / 1_000_000).toFixed(0)}.</p>}
+      {status?.alerts && <p className="subtle">Telegram за месяц: доставлено {status.alerts.delivered}, ожидает {status.alerts.pending}, не доставлено {status.alerts.dead + status.alerts.expired}.</p>}
       <div className="inline">
         <button type="button" className="button secondary" disabled={busy} onClick={() => act('POST')}>
           {status?.connected ? 'Заменить ключ' : 'Создать ключ расширения'}
