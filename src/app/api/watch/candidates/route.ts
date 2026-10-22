@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     assertOrigin(request);
     const { workspace, session } = await requireOwner(request);
     await consumeRateLimit('watch-candidates-rate', session.user.id, 120, 3600);
-    const input = watchCandidateRatingInput.parse(await readJson(request, 256));
-    return Response.json(await rateWatchCandidate(workspace.id, input.eventId, input.label), { headers });
+    const input = watchCandidateRatingInput.parse(await readJson(request, 1024));
+    return Response.json(await rateWatchCandidate(workspace.id, input.eventId, input.label, input.explanation), { headers });
   } catch (error) { return rateLimitFailure(error) ?? failure(error); }
 }

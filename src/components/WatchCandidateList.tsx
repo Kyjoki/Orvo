@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 type Candidate = {
   eventId: string; observedAt: string; chatTitle: string; excerpts: string[]; pinned: boolean;
-  reason: string; status: string; label: 'important' | 'noise' | null;
+  reason: string; status: string; label: 'important' | 'noise' | null; explanation?: string;
 };
 
 const statusLabels: Record<string, string> = {
@@ -23,15 +23,21 @@ const demoCandidate: Candidate = {
 
 function CandidateCard({ item, busy, demo = false, onRate }: {
   item: Candidate; busy: boolean; demo?: boolean;
-  onRate: (label: 'important' | 'noise') => void;
+  onRate: (label: 'important' | 'noise', explanation: string) => void;
 }) {
+  const [explanation, setExplanation] = useState(item.explanation || '');
+  useEffect(() => { setExplanation(item.explanation || ''); }, [item.explanation]);
   return <article className="watch-candidate">
     <div className="watch-candidate-meta"><strong>{item.chatTitle}</strong><time dateTime={item.observedAt}>{new Date(item.observedAt).toLocaleString('ru-RU', { timeZone: 'Asia/Qyzylorda', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time></div>
     <p className="subtle">{demo ? 'Пример · не отправлялся в Telegram' : `${item.reason === 'mention' ? 'Вас упомянули' : item.pinned ? 'Закреплённый чат' : 'Новый кандидат'} · ${statusLabels[item.status] || item.status}`}</p>
     {item.excerpts.map((part, index) => <p className="watch-candidate-text" key={index}>{part}</p>)}
+    <label className="field watch-candidate-note"><span>Почему так считаешь? (необязательно)</span>
+      <textarea value={explanation} onChange={(event) => setExplanation(event.target.value)} maxLength={400} rows={2} placeholder="Например: клиент ждёт помощи, вопрос ещё не решён"/>
+      <small>Опиши обстоятельства без имён и номеров. Пояснение сохранится при нажатии на оценку.</small>
+    </label>
     <div className="watch-candidate-actions">
-      <button type="button" className={`button secondary ${item.label === 'important' ? 'selected' : ''}`} aria-pressed={item.label === 'important'} disabled={busy} onClick={() => onRate('important')}>Стоило уведомить</button>
-      <button type="button" className={`button secondary ${item.label === 'noise' ? 'selected' : ''}`} aria-pressed={item.label === 'noise'} disabled={busy} onClick={() => onRate('noise')}>Не стоило</button>
+      <button type="button" className={`button secondary ${item.label === 'important' ? 'selected' : ''}`} aria-pressed={item.label === 'important'} disabled={busy} onClick={() => onRate('important', explanation)}>Стоило уведомить</button>
+      <button type="button" className={`button secondary ${item.label === 'noise' ? 'selected' : ''}`} aria-pressed={item.label === 'noise'} disabled={busy} onClick={() => onRate('noise', explanation)}>Не стоило</button>
     </div>
     {demo && <p className="subtle">Нажатие на кнопки здесь показывает выбор, но не сохраняет оценку и не обучает агента.</p>}
   </article>;
@@ -60,17 +66,18 @@ export default function WatchCandidateList() {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function rate(eventId: string, label: Candidate['label']) {
+  async function rate(eventId: string, label: Candidate['label'], explanation: string) {
     if (!label) return;
     setBusy(true); setError('');
     try {
       const response = await fetch('/api/watch/candidates', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, label }),
+        body: JSON.stringify({ eventId, label, explanation }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error?.message || 'Не удалось сохранить оценку.');
-      setItems((previous) => previous.map((item) => item.eventId === eventId ? { ...item, label } : item));
+      setItems((previous) => previous.map((item) => item.eventId === eventId ?
+        { ...item, label, explanation: data.explanation } : item));
     } catch (cause) { setError((cause as Error).message); }
     finally { setBusy(false); }
   }
@@ -84,7 +91,7 @@ export default function WatchCandidateList() {
     {loaded && items.length === 0 && <p className="subtle">Пока кандидатов нет. Запись начнётся 24 октября по времени рабочего пространства, если передача расширения включена.</p>}
     <div className="watch-candidates-list">
       {loaded && items.length === 0 && <CandidateCard item={{ ...demoCandidate, label: demoLabel }} busy={false} demo onRate={setDemoLabel}/>}
-      {items.map((item) => <CandidateCard key={item.eventId} item={item} busy={busy} onRate={(label) => void rate(item.eventId, label)}/>)}
+      {items.map((item) => <CandidateCard key={item.eventId} item={item} busy={busy} onRate={(label, explanation) => void rate(item.eventId, label, explanation)}/>)}
     </div>
     {hasMore && <button type="button" className="button secondary" disabled={busy} onClick={() => void load(items.length)}>Показать ещё</button>}
   </section>;

@@ -12,6 +12,7 @@ const { getWorkspace } = await import('../src/server/domain');
 const { getDatabase, query } = await import('../src/server/db');
 const { recordWatchCandidate, finishWatchCandidate, listWatchCandidates, rateWatchCandidate,
   watchReviewActive, reviewedWatchExamples } = await import('../src/server/watch-candidate-review');
+const { watchFeedbackInstructions } = await import('../src/server/watch-feedback');
 const workspace = await getWorkspace();
 
 after(async () => { const database = await getDatabase(); if (database.kind === 'pglite') await database.db.close(); });
@@ -45,8 +46,21 @@ test('candidate is encrypted, redacted, deduplicated, rated and scoped to owner 
   assert.match(page.items[0].chatTitle, /\[номер скрыт\]/);
   assert.match(page.items[0].excerpts[0], /\[ссылка скрыта\]/);
   assert.equal(page.items[0].excerpts[0].includes('example.com'), false);
-  await rateWatchCandidate(workspace.id, candidate.eventId, 'important');
-  assert.equal((await reviewedWatchExamples(workspace.id))[0].label, 'important');
+  const rated = await rateWatchCandidate(workspace.id, candidate.eventId, 'important',
+    'Клиент ждёт, проблема с оплатой ещё не решена; звонить +7 777 111 22 33');
+  assert.match(rated.explanation, /\[номер скрыт\]/);
+  const encryptedAfterRating = (await query<{ ciphertext: string }>(
+    'SELECT ciphertext FROM watch_candidate_reviews WHERE workspace_id=$1 AND event_id=$2',
+    [workspace.id, candidate.eventId])).rows[0];
+  assert.equal(encryptedAfterRating.ciphertext.includes('Клиент ждёт'), false);
+  const reviewed = (await reviewedWatchExamples(workspace.id))[0];
+  assert.equal(reviewed.label, 'important');
+  assert.match(reviewed.explanation, /проблема с оплатой/);
+  const instructions = await watchFeedbackInstructions(workspace.id, {
+    chatTitle: 'Другая компания', pinned: false, excerpts: ['У стойки очередь, экран замер'],
+  });
+  assert.match(instructions, /почему владелец так решил: Клиент ждёт/);
+  assert.equal(instructions.includes('777 111'), false);
   assert.equal((await listWatchCandidates('other-workspace', 0, inDay)).items.length, 0);
 });
 

@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { query } from './db';
+import { query, transaction } from './db';
 import { redactWatchText } from './watch-triage';
 import type { WatchEvent, WatchEventStatus } from './watch-events';
 import { DomainError } from '../shared/types';
@@ -8,9 +8,10 @@ import { DomainError } from '../shared/types';
 export const WATCH_REVIEW_DAY = '2026-10-24';
 const RETENTION_DAYS = 7;
 const PAGE_SIZE = 100;
-const MAX_PAYLOAD_BYTES = 5000;
+const MAX_PAYLOAD_BYTES = 6500;
 
-type CandidateContent = { chatTitle: string; excerpts: string[]; pinned: boolean; level: WatchEvent['level'] };
+type CandidateContent = { chatTitle: string; excerpts: string[]; pinned: boolean;
+  level: WatchEvent['level']; explanation?: string };
 type CandidateRow = { event_id: string; observed_at: Date; reason: WatchEvent['reason']; status: string;
   ciphertext: string; nonce: string; auth_tag: string; label: 'important' | 'noise' | null };
 
@@ -96,20 +97,32 @@ export async function listWatchCandidates(workspaceId: string, offset: number, n
 }
 
 export const watchCandidateRatingInput = z.object({ eventId: z.string().regex(/^[a-f0-9]{64}$/),
-  label: z.enum(['important', 'noise']) }).strict();
+  label: z.enum(['important', 'noise']), explanation: z.string().trim().max(400).default('') }).strict();
 
-export async function rateWatchCandidate(workspaceId: string, eventId: string, label: 'important' | 'noise') {
-  const result = await query(`UPDATE watch_candidate_reviews SET label=$3
-    WHERE workspace_id=$1 AND event_id=$2 AND capture_day=$4 AND expires_at>now()
-    RETURNING event_id`, [workspaceId, eventId, label, WATCH_REVIEW_DAY]);
-  if (!result.rows.length) throw new DomainError('WATCH_REVIEW_NOT_FOUND', 'Кандидат не найден или срок хранения истёк.', 404);
-  return { eventId, label };
+export async function rateWatchCandidate(workspaceId: string, eventId: string,
+  label: 'important' | 'noise', explanation = '') {
+  return transaction(async (db) => {
+    const row = (await db.query<CandidateRow>(`SELECT event_id,observed_at,reason,status,ciphertext,nonce,auth_tag,label
+      FROM watch_candidate_reviews WHERE workspace_id=$1 AND event_id=$2 AND capture_day=$3
+      AND expires_at>now() FOR UPDATE`, [workspaceId, eventId, WATCH_REVIEW_DAY])).rows[0];
+    if (!row) throw new DomainError('WATCH_REVIEW_NOT_FOUND', 'Кандидат не найден или срок хранения истёк.', 404);
+    const note = redactWatchText(explanation).slice(0, 400);
+    const encrypted = encrypt(workspaceId, eventId, { ...decrypt(workspaceId, row), explanation: note });
+    await db.query(`UPDATE watch_candidate_reviews SET label=$3,ciphertext=$4,nonce=$5,auth_tag=$6
+      WHERE workspace_id=$1 AND event_id=$2`, [workspaceId, eventId, label,
+      encrypted.ciphertext, encrypted.nonce, encrypted.authTag]);
+    return { eventId, label, explanation: note };
+  });
 }
 
 /** Reviewed candidates inform later model decisions without copying them into agent memory. */
-export async function reviewedWatchExamples(workspaceId: string): Promise<{ label: 'important' | 'noise'; example: string }[]> {
+export async function reviewedWatchExamples(workspaceId: string): Promise<{ label: 'important' | 'noise'; example: string; explanation: string }[]> {
   const rows = (await query<CandidateRow>(`SELECT event_id,observed_at,reason,status,ciphertext,nonce,auth_tag,label
     FROM watch_candidate_reviews WHERE workspace_id=$1 AND label IS NOT NULL AND expires_at>now()
     ORDER BY observed_at DESC LIMIT 200`, [workspaceId])).rows;
-  return rows.map((row) => ({ label: row.label!, example: decrypt(workspaceId, row).excerpts.at(-1)?.slice(0, 240) || '' })).filter((item) => item.example);
+  return rows.map((row) => {
+    const content = decrypt(workspaceId, row);
+    return { label: row.label!, example: content.excerpts.at(-1)?.slice(0, 240) || '',
+      explanation: content.explanation || '' };
+  }).filter((item) => item.example);
 }
