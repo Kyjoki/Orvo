@@ -12,6 +12,7 @@ export default function WatchSettings() {
   const [token, setToken] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [testResult, setTestResult] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -39,6 +40,29 @@ export default function WatchSettings() {
     finally { setBusy(false); }
   }
 
+  async function testWatch() {
+    setBusy(true);
+    setError('');
+    setTestResult('');
+    try {
+      const response = await fetch('/api/watch/test', { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || 'Проверка не удалась.');
+      const outcomes: Record<string, string> = {
+        delivered: 'Вымышленное обращение обработано, Telegram подтвердил отправку уведомления.',
+        queued: 'Вымышленное обращение обработано, уведомление ожидает доставки.',
+        ignored: 'Модель обработала вымышленное обращение, но не выбрала уведомление.',
+        failed: 'Модель обработала вымышленное обращение, но доставка не удалась.',
+      };
+      setTestResult(outcomes[data.status] || `Проверка завершилась со статусом: ${data.status}.`);
+      try {
+        const latest = await fetch('/api/watch/connection', { cache: 'no-store' });
+        if (latest.ok) setStatus(await latest.json());
+      } catch { /* The completed test result remains authoritative if counters cannot refresh. */ }
+    } catch (cause) { setError((cause as Error).message); }
+    finally { setBusy(false); }
+  }
+
   return <div className="integration-row">
     <span className="tool-icon" aria-hidden="true">◎</span>
     <div>
@@ -58,7 +82,12 @@ export default function WatchSettings() {
         </button>
         {status?.connected && <button type="button" className="button secondary" disabled={busy} onClick={() => act('DELETE')}>Отозвать ключ</button>}
       </div>
+      {status?.dataTransferEnabled && <>
+        <p className="subtle">Проверка использует только вымышленное обращение, один анализ из месячного лимита и ваш привязанный Telegram.</p>
+        <button type="button" className="button secondary" disabled={busy} onClick={testWatch}>Проверить анализ и Telegram</button>
+      </>}
       {token && <><p className="subtle">Ключ показывается только сейчас. Не отправляйте его в чат.</p><input aria-label="Ключ расширения" value={token} readOnly onFocus={event => event.currentTarget.select()}/></>}
+      {testResult && <p role="status">{testResult}</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
     </div>
     <span className="chip setup">{status?.connected ? 'Ключ создан' : 'Не подключено'}</span>
