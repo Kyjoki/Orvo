@@ -125,6 +125,29 @@ test('one fresh event can notify; duplicate never calls the model twice', async 
   assert.deepEqual(calls, ['reserve', 'model', 'settle', 'enqueue', 'telegram', 'reserve']);
 });
 
+test('watch analysis includes owner feedback before reserving model budget', async () => {
+  let sawFeedback = false;
+  const deps = {
+    isTelegramReady: async () => true,
+    loadProfile: async () => profile,
+    loadFeedback: async () => '\n\nВажный пример: терминал не принимает оплату',
+    isConnectionCurrent: async () => true,
+    isOutboxReady: () => true,
+    reserve: async (_workspaceId: string, _eventId: string, system: string) => {
+      sawFeedback = system.includes('Важный пример: терминал не принимает оплату');
+      return 'duplicate' as const;
+    },
+    generate: async () => { throw new Error('A duplicate must not call the model'); },
+    settle: async () => {},
+    enqueue: async () => true,
+    deliver: async () => 'none' as const,
+  };
+  const result = await processWatchEvent('workspace', event, generation, deps,
+    new Date('2026-10-21T06:01:00Z'));
+  assert.deepEqual(result, { accepted: false, status: 'duplicate' });
+  assert.equal(sawFeedback, true);
+});
+
 test('notification level suppresses unpinned routine tasks', () => {
   const action = { priority: 'action' as const, confidence: 0.9, summary: 'Проверить меню', reason: 'Просьба' };
   assert.equal(watchDecisionMatchesLevel(action, { ...event, level: 'urgent' }), false);

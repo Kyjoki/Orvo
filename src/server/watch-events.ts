@@ -8,6 +8,7 @@ import { loadWatchProfile, watchSystemInstructions, type WatchProfile } from './
 import { telegramStatus } from './telegram';
 import { DomainError } from '../shared/types';
 import { watchConnectionGenerationIsCurrent } from './watch-connection-generation';
+import { watchFeedbackInstructions } from './watch-feedback';
 
 export const watchEventSchema = z.object({
   // Generated randomly by the extension, and kept stable when retrying this event.
@@ -60,6 +61,7 @@ export function watchDecisionMatchesLevel(decision: WatchDecision, event: WatchE
 type WatchServices = {
   isTelegramReady(workspaceId: string): Promise<boolean>;
   loadProfile(workspaceId: string): Promise<WatchProfile | null>;
+  loadFeedback?(workspaceId: string, candidate: WatchCandidate): Promise<string>;
   isConnectionCurrent(workspaceId: string, generation: string): Promise<boolean>;
   reserve(workspaceId: string, eventId: string, system: string, prompt: string): Promise<'reserved' | 'duplicate' | 'limit-reached'>;
   claimMention?(workspaceId: string, eventId: string, date: Date): Promise<boolean>;
@@ -77,6 +79,7 @@ const services: WatchServices = {
     return status.paired && status.tested;
   },
   loadProfile: loadWatchProfile,
+  loadFeedback: watchFeedbackInstructions,
   isConnectionCurrent: watchConnectionGenerationIsCurrent,
   reserve: reserveWatchBudget,
   claimMention: reserveWatchMention,
@@ -141,7 +144,7 @@ export async function processWatchEvent(
     return { accepted: true, status: !watchEventsEnabled() ? 'disabled' : delivery === 'none' ? 'queued' : delivery };
   }
   const prompt = watchPrompt(candidate);
-  const system = watchSystemInstructions(profile);
+  const system = watchSystemInstructions(profile) + (deps.loadFeedback ? await deps.loadFeedback(workspaceId, candidate) : '');
   const claim = await deps.reserve(workspaceId, event.eventId, system, prompt);
   if (claim !== 'reserved') return { accepted: false, status: claim };
   // Retain the reservation on a failed or unknown provider call, so a retry cannot bill twice.

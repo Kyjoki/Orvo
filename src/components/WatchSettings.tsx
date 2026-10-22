@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 
 type Status = { connected: boolean; createdAt: string | null; dataTransferEnabled: boolean; mentionTransferEnabled: boolean; usage: {
   period: string; analyzed: number; eventLimit: number; accountedMicroUsd: number; budgetMicroUsd: number;
 }; alerts: { pending: number; delivered: number; expired: number; dead: number };
 agent: { id: string; name: string; instructionVersion: number } | null };
+type Feedback = { id: string; label: 'important' | 'noise'; example: string; createdAt: string };
 
 export default function WatchSettings() {
   const [status, setStatus] = useState<Status | null>(null);
@@ -13,6 +14,18 @@ export default function WatchSettings() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [testResult, setTestResult] = useState('');
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [feedbackBusy, setFeedbackBusy] = useState(false);
+  const [feedbackError, setFeedbackError] = useState('');
+  const [feedbackNote, setFeedbackNote] = useState('');
+  const [feedbackLabel, setFeedbackLabel] = useState<Feedback['label']>('important');
+
+  const loadFeedback = useCallback(async () => {
+    const response = await fetch('/api/watch/feedback', { cache: 'no-store' });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'Не удалось загрузить оценки.');
+    setFeedback(data.examples);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -25,6 +38,39 @@ export default function WatchSettings() {
       .catch((cause) => { if (active) setError((cause as Error).message); });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => { loadFeedback().catch((cause) => setFeedbackError((cause as Error).message)); }, [loadFeedback]);
+
+  async function saveFeedback(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFeedbackBusy(true);
+    setFeedbackError('');
+    try {
+      const response = await fetch('/api/watch/feedback', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: feedbackLabel, example: feedbackNote.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || 'Не удалось сохранить оценку.');
+      setFeedbackNote('');
+      await loadFeedback();
+    } catch (cause) { setFeedbackError((cause as Error).message); }
+    finally { setFeedbackBusy(false); }
+  }
+
+  async function removeFeedback(id: string) {
+    setFeedbackBusy(true);
+    setFeedbackError('');
+    try {
+      const response = await fetch('/api/watch/feedback', {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || 'Не удалось удалить оценку.');
+      await loadFeedback();
+    } catch (cause) { setFeedbackError((cause as Error).message); }
+    finally { setFeedbackBusy(false); }
+  }
 
   async function act(method: 'POST' | 'DELETE') {
     setBusy(true);
@@ -99,6 +145,22 @@ export default function WatchSettings() {
       {token && <><p className="subtle">Ключ показывается только сейчас. Не отправляйте его в чат.</p><input aria-label="Ключ расширения" value={token} readOnly onFocus={event => event.currentTarget.select()}/></>}
       {testResult && <p role="status">{testResult}</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
+      <div className="watch-feedback">
+        <h3>Учить на примерах</h3>
+        <p className="subtle">Опиши короткий пример без имён и номеров и отметь, стоило ли уведомлять. Следующие проверки ИИ учтут до трёх наиболее похожих оценок каждого типа. Явные упоминания отправляются отдельно от ИИ.</p>
+        <form onSubmit={saveFeedback}>
+          <label className="field"><span>Оценка</span><select value={feedbackLabel} onChange={(event) => setFeedbackLabel(event.target.value as Feedback['label'])}>
+            <option value="important">Важно — уведомлять</option><option value="noise">Лишнее — не уведомлять</option>
+          </select></label>
+          <label className="field"><span>Пример ситуации</span><textarea value={feedbackNote} onChange={(event) => setFeedbackNote(event.target.value)} minLength={12} maxLength={1000} rows={3} placeholder="Например: клиент просит срочно проверить терминал, оплата не проходит" required/></label>
+          <button type="submit" className="button secondary" disabled={feedbackBusy || feedback.length >= 100}>Сохранить оценку</button>
+        </form>
+        {feedbackError && <p className="form-error" role="alert">{feedbackError}</p>}
+        {feedback.length > 0 && <ul>{feedback.map((item) => <li key={item.id}>
+          <strong>{item.label === 'important' ? 'Важно' : 'Лишнее'}</strong> · {item.example}{' '}
+          <button type="button" className="button secondary" disabled={feedbackBusy} onClick={() => removeFeedback(item.id)}>Удалить</button>
+        </li>)}</ul>}
+      </div>
     </div>
     <span className="chip setup">{status?.connected ? 'Ключ создан' : 'Не подключено'}</span>
   </div>;
