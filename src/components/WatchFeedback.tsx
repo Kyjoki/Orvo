@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import WatchCandidateList from './WatchCandidateList';
 
 type Feedback = { id: string; label: 'important' | 'noise'; example: string; createdAt: string };
 
@@ -52,6 +53,7 @@ export default function WatchFeedback() {
   }
 
   return <section className="panel-section watch-feedback">
+    <WatchCandidateList/>
     <h3>Учить на примерах</h3>
     <p className="subtle">Опиши короткий пример без имён и номеров и отметь, стоило ли уведомлять. Следующие проверки ИИ учтут до трёх наиболее похожих оценок каждого типа. Явные упоминания отправляются отдельно от ИИ.</p>
     <form onSubmit={save}>

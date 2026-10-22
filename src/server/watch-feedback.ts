@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { query, transaction } from './db';
 import { redactWatchText, type WatchCandidate } from './watch-triage';
 import { DomainError } from '../shared/types';
+import { reviewedWatchExamples } from './watch-candidate-review';
 
 export const watchFeedbackInput = z.object({
   label: z.enum(['important', 'noise']),
@@ -56,9 +57,11 @@ export async function watchFeedbackInstructions(workspaceId: string, candidate?:
     `SELECT label,example FROM watch_feedback WHERE workspace_id=$1
      ORDER BY created_at DESC,id DESC LIMIT 100`, [workspaceId],
   )).rows;
-  if (!rows.length) return '';
+  const reviewed = await reviewedWatchExamples(workspaceId);
+  const examples = [...rows, ...reviewed];
+  if (!examples.length) return '';
   const inputTerms = terms(candidate ? `${candidate.chatTitle} ${candidate.excerpts.join(' ')}` : '');
-  const ranked = rows.map((row, index) => ({ ...row, index,
+  const ranked = examples.map((row, index) => ({ ...row, index,
     score: [...terms(row.example)].filter((term) => inputTerms.has(term)).length }));
   ranked.sort((a, b) => b.score - a.score || a.index - b.index);
   const selected = ranked.filter((row, _index, all) =>

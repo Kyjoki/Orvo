@@ -3,6 +3,8 @@ import { getWorkspace } from '@/server/domain';
 import { clientAddress, consumeRateLimit, rateLimitFailure } from '@/server/rate-limit';
 import { requireWatchConnection } from '@/server/watch-connection';
 import { processWatchEvent, watchEventSchema, watchEventsEnabled, watchOriginAllowed } from '@/server/watch-events';
+import { finishWatchCandidate, recordWatchCandidate } from '@/server/watch-candidate-review';
+import { watchConnectionGenerationIsCurrent } from '@/server/watch-connection-generation';
 import { DomainError } from '@/shared/types';
 
 export const runtime = 'nodejs';
@@ -22,7 +24,15 @@ export async function POST(request: Request) {
     }
     await consumeRateLimit('watch-events-workspace', workspace.id, 180, 3600);
     const input = watchEventSchema.parse(await readJson(request, 8192));
-    const result = await processWatchEvent(workspace.id, input, connectionGeneration);
-    return Response.json(result, { status: result.accepted ? 202 : 200, headers });
+    const current = await watchConnectionGenerationIsCurrent(workspace.id, connectionGeneration);
+    const recorded = current && await recordWatchCandidate(workspace.id, input);
+    try {
+      const result = await processWatchEvent(workspace.id, input, connectionGeneration);
+      if (recorded) await finishWatchCandidate(workspace.id, input.eventId, result.status);
+      return Response.json(result, { status: result.accepted ? 202 : 200, headers });
+    } catch (error) {
+      if (recorded) await finishWatchCandidate(workspace.id, input.eventId, 'error');
+      throw error;
+    }
   } catch (error) { return rateLimitFailure(error) ?? failure(error); }
 }
