@@ -1,7 +1,7 @@
 import { assertOrigin, failure, requireOwner } from '@/server/http';
 import { consumeRateLimit, rateLimitFailure } from '@/server/rate-limit';
 import { createWatchConnection, revokeWatchConnection, watchConnectionStatus } from '@/server/watch-connection';
-import { watchEventsReady } from '@/server/watch-events';
+import { watchEventsReady, watchMentionsReady } from '@/server/watch-events';
 import { watchUsageStatus } from '@/server/watch-usage';
 import { watchAlertCounts } from '@/server/watch-outbox';
 import { loadWatchProfile } from '@/server/watch-profile';
@@ -13,6 +13,7 @@ const headers = { 'Cache-Control': 'no-store' };
 async function details(workspaceId: string, connection: Awaited<ReturnType<typeof watchConnectionStatus>>) {
   const profile = await loadWatchProfile(workspaceId);
   return { ...connection, dataTransferEnabled: connection.connected && await watchEventsReady(workspaceId),
+    mentionTransferEnabled: connection.connected && await watchMentionsReady(workspaceId),
     agent: profile ? { id: profile.id, name: profile.name, instructionVersion: profile.instructionVersion } : null,
     usage: await watchUsageStatus(workspaceId), alerts: await watchAlertCounts(workspaceId) };
 }

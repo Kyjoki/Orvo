@@ -39,6 +39,22 @@ export function watchPeriod(date: Date) {
 
 export type WatchBudgetResult = 'reserved' | 'duplicate' | 'limit-reached';
 
+/** Claims a mention without an AI charge; the opaque row also anchors its encrypted outbox alert. */
+export async function reserveWatchMention(workspaceId: string, eventId: string, date = new Date()) {
+  if (!/^[a-f0-9]{64}$/.test(eventId)) {
+    throw new DomainError('INVALID_WATCH_EVENT', 'Некорректное событие наблюдения.', 400);
+  }
+  return transaction(async (db) => {
+    await db.query(`INSERT INTO watch_analysis_events(workspace_id,event_id,period,reserved_micro_usd,actual_micro_usd)
+      VALUES($1,$2,$3,0,0) ON CONFLICT DO NOTHING`, [workspaceId, eventId, watchPeriod(date)]);
+    const available = (await db.query<{ event_id: string }>(`SELECT e.event_id FROM watch_analysis_events e
+      LEFT JOIN watch_alert_outbox o ON o.workspace_id=e.workspace_id AND o.event_id=e.event_id
+      WHERE e.workspace_id=$1 AND e.event_id=$2 AND e.reserved_micro_usd=0 AND e.actual_micro_usd=0
+        AND o.event_id IS NULL`, [workspaceId, eventId])).rows;
+    return available.length === 1;
+  });
+}
+
 /** Atomically claims an opaque event and reserves its maximum expected API cost. */
 export async function reserveWatchBudget(
   workspaceId: string, eventId: string, system: string, prompt: string, date = new Date(),

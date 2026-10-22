@@ -48,6 +48,8 @@ test('server switch is off by default; origin and payload have narrow boundaries
   assert.equal(watchOriginAllowed('https://whatsapp.ailillu.kz'), false);
   assert.throws(() => watchEventSchema.parse({ ...event, eventId: 'a'.repeat(8) }));
   assert.throws(() => watchEventSchema.parse({ ...event, excerpts: Array(6).fill('text') }));
+  assert.doesNotThrow(() => watchEventSchema.parse({ ...event, reason: 'mention', excerpts: ['Вопрос '.repeat(110)] }));
+  assert.throws(() => watchEventSchema.parse({ ...event, reason: 'chat-update', excerpts: ['Вопрос '.repeat(110)] }));
 });
 
 test('stale changes and an unpaired Telegram make no model call', async () => {
@@ -128,6 +130,39 @@ test('notification level suppresses unpinned routine tasks', () => {
   assert.equal(watchDecisionMatchesLevel(action, { ...event, level: 'urgent' }), false);
   assert.equal(watchDecisionMatchesLevel(action, { ...event, level: 'balanced', pinned: false }), false);
   assert.equal(watchDecisionMatchesLevel(action, { ...event, level: 'broad', pinned: false }), true);
+});
+
+test('explicit mention bypasses AI filtering and the notification level', async () => {
+  const mention = { ...event, reason: 'mention' as const, level: 'urgent' as const,
+    excerpts: ['Ирина: Как вернуть одно блюдо в меню?'], };
+  const calls: string[] = [];
+  const deps = {
+    isTelegramReady: async () => true,
+    loadProfile: async () => profile,
+    isConnectionCurrent: async () => true,
+    isOutboxReady: () => true,
+    reserve: async () => { calls.push('reserve'); return 'reserved' as const; },
+    claimMention: async () => { calls.push('claim'); return true; },
+    generate: async () => { calls.push('model'); return { text: '{}', usage: { inputTokens: 0, outputTokens: 0 } }; },
+    settle: async () => { calls.push('settle'); },
+    enqueue: async (_workspace: string, _id: string, text: string) => {
+      calls.push('enqueue');
+      assert.match(text, /Вас упомянули/);
+      assert.match(text, /Как вернуть одно блюдо/);
+      return true;
+    },
+    deliver: async () => { calls.push('telegram'); return 'delivered' as const; },
+  };
+  const oldKey = process.env.ORVO_WATCH_OPENAI_API_KEY;
+  delete process.env.ORVO_WATCH_OPENAI_API_KEY;
+  try {
+    assert.deepEqual(await processWatchEvent('workspace', mention, generation, deps, new Date('2026-10-21T06:01:00Z')),
+      { accepted: true, status: 'delivered' });
+    assert.deepEqual(calls, ['claim', 'enqueue', 'telegram']);
+  } finally {
+    if (oldKey === undefined) delete process.env.ORVO_WATCH_OPENAI_API_KEY;
+    else process.env.ORVO_WATCH_OPENAI_API_KEY = oldKey;
+  }
 });
 
 test('unknown model outcome retains claim and never sends Telegram', async () => {

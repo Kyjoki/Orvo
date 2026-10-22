@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { generateOpenAI } from './openai';
-import { reserveWatchBudget, settleWatchBudget, WATCH_ANALYSIS_MODEL, WATCH_MAX_OUTPUT_TOKENS, WATCH_MONTHLY_BUDGET_MICRO_USD, WATCH_MONTHLY_EVENT_LIMIT } from './watch-budget';
+import { reserveWatchBudget, reserveWatchMention, settleWatchBudget, WATCH_ANALYSIS_MODEL, WATCH_MAX_OUTPUT_TOKENS, WATCH_MONTHLY_BUDGET_MICRO_USD, WATCH_MONTHLY_EVENT_LIMIT } from './watch-budget';
 import { watchUsageStatus } from './watch-usage';
 import { deliverWatchAlert, enqueueWatchAlert, watchOutboxConfigured, type WatchDeliveryStatus } from './watch-outbox';
-import { formatWatchTelegram, parseWatchDecision, shouldNotifyWatch, watchPrompt, type WatchCandidate, type WatchDecision } from './watch-triage';
+import { formatWatchMentionTelegram, formatWatchTelegram, parseWatchDecision, shouldNotifyWatch, watchPrompt, type WatchCandidate, type WatchDecision } from './watch-triage';
 import { loadWatchProfile, watchSystemInstructions, type WatchProfile } from './watch-profile';
 import { telegramStatus } from './telegram';
 import { DomainError } from '../shared/types';
@@ -14,17 +14,25 @@ export const watchEventSchema = z.object({
   eventId: z.string().regex(/^[a-f0-9]{64}$/),
   chatTitle: z.string().trim().min(1).max(120),
   pinned: z.boolean(),
-  excerpts: z.array(z.string().trim().min(1).max(500)).min(1).max(5),
-  reason: z.enum(['urgent', 'pinned-request', 'chat-update']),
+  excerpts: z.array(z.string().trim().min(1).max(1200)).min(1).max(5),
+  reason: z.enum(['urgent', 'pinned-request', 'chat-update', 'mention']),
   observedAt: z.iso.datetime({ offset: true }),
   level: z.enum(['urgent', 'balanced', 'broad']),
-}).strict();
+}).strict().refine((event) => event.reason === 'mention'
+  ? event.excerpts.length === 1 : event.excerpts.every((part) => part.length <= 500));
 
 export type WatchEvent = z.infer<typeof watchEventSchema>;
 export type WatchEventStatus = 'delivered' | 'queued' | 'failed' | 'ignored' | 'duplicate' | 'limit-reached' | 'stale' | 'disabled';
 
 export function watchEventsEnabled() {
   return process.env.ORVO_WATCH_EVENTS_ENABLED === '1';
+}
+
+export async function watchMentionsReady(workspaceId: string) {
+  if (!watchEventsEnabled() || !watchOutboxConfigured()) return false;
+  if (!(await loadWatchProfile(workspaceId))) return false;
+  const status = await telegramStatus(workspaceId);
+  return status.paired && status.tested;
 }
 
 export async function watchEventsReady(workspaceId: string) {
@@ -54,6 +62,7 @@ type WatchServices = {
   loadProfile(workspaceId: string): Promise<WatchProfile | null>;
   isConnectionCurrent(workspaceId: string, generation: string): Promise<boolean>;
   reserve(workspaceId: string, eventId: string, system: string, prompt: string): Promise<'reserved' | 'duplicate' | 'limit-reached'>;
+  claimMention?(workspaceId: string, eventId: string, date: Date): Promise<boolean>;
   generate(system: string, prompt: string): Promise<{ text: string; usage: { inputTokens: number; outputTokens: number } }>;
   settle(workspaceId: string, eventId: string, usage: { inputTokens: number; outputTokens: number }): Promise<void>;
   isOutboxReady(): boolean;
@@ -70,6 +79,7 @@ const services: WatchServices = {
   loadProfile: loadWatchProfile,
   isConnectionCurrent: watchConnectionGenerationIsCurrent,
   reserve: reserveWatchBudget,
+  claimMention: reserveWatchMention,
   generate: (system, prompt) => generateOpenAI({
     model: WATCH_ANALYSIS_MODEL,
     apiKey: process.env.ORVO_WATCH_OPENAI_API_KEY,
@@ -95,7 +105,7 @@ export async function processWatchEvent(
   const age = now.getTime() - new Date(event.observedAt).getTime();
   if (age > 10 * 60_000 || age < -60_000) return { accepted: false, status: 'stale' };
   if (!watchEventsEnabled()) return { accepted: false, status: 'disabled' };
-  if (!process.env.ORVO_WATCH_OPENAI_API_KEY) {
+  if (event.reason !== 'mention' && !process.env.ORVO_WATCH_OPENAI_API_KEY) {
     throw new DomainError('WATCH_MODEL_UNAVAILABLE', 'Модель наблюдения не настроена.', 503);
   }
   if (!(await deps.isTelegramReady(workspaceId))) {
@@ -116,6 +126,20 @@ export async function processWatchEvent(
     pinned: event.pinned,
     excerpts: event.excerpts,
   };
+  if (event.reason === 'mention') {
+    const alert = formatWatchMentionTelegram(candidate);
+    if (!alert) return { accepted: false, status: 'ignored' };
+    const expiresAt = new Date(new Date(event.observedAt).getTime() + 15 * 60_000);
+    if (expiresAt.getTime() <= now.getTime()) return { accepted: false, status: 'stale' };
+    if (!(await (deps.claimMention ?? reserveWatchMention)(workspaceId, event.eventId, now))) {
+      return { accepted: false, status: 'duplicate' };
+    }
+    const enqueued = await deps.enqueue(workspaceId, event.eventId, alert, expiresAt,
+      { id: profile.id, version: profile.version }, connectionGeneration);
+    if (!enqueued) return { accepted: false, status: 'duplicate' };
+    const delivery = await deps.deliver(workspaceId, event.eventId);
+    return { accepted: true, status: !watchEventsEnabled() ? 'disabled' : delivery === 'none' ? 'queued' : delivery };
+  }
   const prompt = watchPrompt(candidate);
   const system = watchSystemInstructions(profile);
   const claim = await deps.reserve(workspaceId, event.eventId, system, prompt);

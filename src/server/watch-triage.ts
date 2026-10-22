@@ -60,3 +60,10 @@ export function formatWatchTelegram(candidate: WatchCandidate, decision: WatchDe
   const summary = redactWatchText(decision.summary).slice(0, 240);
   return `Orvo · ${decision.priority === 'urgent' ? 'Срочно' : 'Нужно внимание'}\nЧат: ${title}\n${summary}`;
 }
+
+export function formatWatchMentionTelegram(candidate: WatchCandidate) {
+  const title = redactWatchText(candidate.chatTitle).slice(0, 120);
+  const message = redactWatchText(candidate.excerpts.at(-1) || '').slice(0, 1200);
+  if (!title || !message) return null;
+  return `Orvo · Вас упомянули\nЧат: ${title}\n${message}`;
+}

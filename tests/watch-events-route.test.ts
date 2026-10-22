@@ -97,7 +97,7 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
       telegramCalls++;
       const body = JSON.parse(String(init?.body));
       assert.equal(body.chat_id, '1234567');
-      assert.match(body.text, /Нужен специалист/);
+      assert.match(body.text, /Нужен специалист|Вас упомянули/);
       return Response.json({ ok: true, result: { message_id: 7 } });
     }
     throw new Error('Unexpected network destination');
@@ -119,6 +119,23 @@ test('enabled ingest reserves once, classifies synthetic text and sends one encr
     assert.deepEqual(await second.json(), { accepted: false, status: 'duplicate' });
     assert.equal(modelCalls, 1);
     assert.equal(telegramCalls, 1);
+    const mention = { ...payload, eventId: randomBytes(32).toString('hex'),
+      excerpts: ['Как вернуть одно блюдо в меню?'], reason: 'mention' };
+    const mentionResult = await POST(new Request('https://orvo-office.vercel.app/api/watch/events', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, Origin: `chrome-extension://${'a'.repeat(32)}`,
+        'Content-Type': 'application/json' }, body: JSON.stringify(mention),
+    }));
+    const mentionBody = await mentionResult.json();
+    assert.equal(mentionResult.status, 202, JSON.stringify(mentionBody));
+    assert.deepEqual(mentionBody, { accepted: true, status: 'delivered' });
+    assert.equal(modelCalls, 1);
+    assert.equal(telegramCalls, 2);
+    const repeatedMention = await POST(new Request('https://orvo-office.vercel.app/api/watch/events', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, Origin: `chrome-extension://${'a'.repeat(32)}`,
+        'Content-Type': 'application/json' }, body: JSON.stringify(mention),
+    }));
+    assert.deepEqual(await repeatedMention.json(), { accepted: false, status: 'duplicate' });
+    assert.equal(telegramCalls, 2);
     const outbox = (await query<{ state: string; ciphertext: string | null }>(
       'SELECT state,ciphertext FROM watch_alert_outbox WHERE workspace_id=$1 AND event_id=$2', [workspace.id, eventId],
     )).rows[0];

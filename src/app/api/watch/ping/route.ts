@@ -2,7 +2,7 @@ import { failure } from '@/server/http';
 import { getWorkspace } from '@/server/domain';
 import { consumeRateLimit, clientAddress, rateLimitFailure } from '@/server/rate-limit';
 import { requireWatchConnection } from '@/server/watch-connection';
-import { watchEventsReady } from '@/server/watch-events';
+import { watchEventsReady, watchMentionsReady } from '@/server/watch-events';
 
 export const runtime = 'nodejs';
 export async function POST(request: Request) {
@@ -13,7 +13,10 @@ export async function POST(request: Request) {
     await consumeRateLimit('watch-ping', clientAddress(request), 180, 60);
     const workspace = await getWorkspace();
     await requireWatchConnection(workspace.id, request.headers.get('authorization'));
-    return Response.json({ connected: true, dataTransferEnabled: await watchEventsReady(workspace.id) }, {
+    const [dataTransferEnabled, mentionTransferEnabled] = await Promise.all([
+      watchEventsReady(workspace.id), watchMentionsReady(workspace.id),
+    ]);
+    return Response.json({ connected: true, dataTransferEnabled, mentionTransferEnabled }, {
       headers: { 'Cache-Control': 'no-store' },
     });
   } catch (error) { return rateLimitFailure(error) ?? failure(error); }
