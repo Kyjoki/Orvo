@@ -10,9 +10,11 @@ const RETENTION_DAYS = 7;
 const PAGE_SIZE = 100;
 const MAX_PAYLOAD_BYTES = 6500;
 
+export type WatchObservation = Omit<WatchEvent, 'reason'> & { reason: 'observation' };
+type ReviewEvent = WatchEvent | WatchObservation;
 type CandidateContent = { chatTitle: string; excerpts: string[]; pinned: boolean;
   level: WatchEvent['level']; explanation?: string };
-type CandidateRow = { event_id: string; observed_at: Date; reason: WatchEvent['reason']; status: string;
+type CandidateRow = { event_id: string; observed_at: Date; reason: ReviewEvent['reason']; status: string;
   ciphertext: string; nonce: string; auth_tag: string; label: 'important' | 'noise' | null };
 
 export function watchReviewDay(date: Date) {
@@ -54,8 +56,8 @@ async function purgeExpired(workspaceId: string, now: Date) {
   await query('DELETE FROM watch_candidate_reviews WHERE workspace_id=$1 AND expires_at<=$2', [workspaceId, now]);
 }
 
-/** Only extension-selected, fresh candidates received on the requested local day are recorded. */
-export async function recordWatchCandidate(workspaceId: string, event: WatchEvent, now = new Date()) {
+/** Fresh visible changes and selected candidates share the encrypted owner journal. */
+export async function recordWatchCandidate(workspaceId: string, event: ReviewEvent, now = new Date()) {
   if (!watchReviewActive(now)) return false;
   const age = now.getTime() - new Date(event.observedAt).getTime();
   if (age > 10 * 60_000 || age < -60_000) return false;
@@ -67,10 +69,11 @@ export async function recordWatchCandidate(workspaceId: string, event: WatchEven
   const encrypted = encrypt(workspaceId, event.eventId, content);
   await purgeExpired(workspaceId, now);
   const result = await query(`INSERT INTO watch_candidate_reviews
-    (workspace_id,event_id,capture_day,observed_at,reason,ciphertext,nonce,auth_tag,expires_at)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT DO NOTHING RETURNING event_id`,
+    (workspace_id,event_id,capture_day,observed_at,reason,status,ciphertext,nonce,auth_tag,expires_at)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT DO NOTHING RETURNING event_id`,
   [workspaceId, event.eventId, WATCH_REVIEW_DAY, event.observedAt, event.reason,
-    encrypted.ciphertext, encrypted.nonce, encrypted.authTag, new Date(now.getTime() + RETENTION_DAYS * 86400_000)]);
+    event.reason === 'observation' ? 'observed' : 'processing', encrypted.ciphertext, encrypted.nonce,
+    encrypted.authTag, new Date(now.getTime() + RETENTION_DAYS * 86400_000)]);
   return result.rows.length > 0;
 }
 

@@ -74,3 +74,16 @@ test('expired candidates cannot be reviewed and are purged on access', async () 
   assert.equal((await listWatchCandidates(workspace.id, 0, later)).items.length, 0);
   await assert.rejects(rateWatchCandidate(workspace.id, candidate.eventId, 'noise'));
 });
+
+test('unselected preview is encrypted in the journal without an AI processing status', async () => {
+  const observation = { ...event(), reason: 'observation' as const, excerpts: ['Спасибо'] };
+  assert.equal(await recordWatchCandidate(workspace.id, observation, inDay), true);
+  const stored = (await query<{ status: string; ciphertext: string }>(
+    'SELECT status,ciphertext FROM watch_candidate_reviews WHERE workspace_id=$1 AND event_id=$2',
+    [workspace.id, observation.eventId])).rows[0];
+  assert.equal(stored.status, 'observed');
+  assert.equal(stored.ciphertext.includes('Спасибо'), false);
+  const page = await listWatchCandidates(workspace.id, 0, inDay);
+  assert.equal(page.items[0].reason, 'observation');
+  assert.equal(page.items[0].status, 'observed');
+});

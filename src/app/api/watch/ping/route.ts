@@ -2,7 +2,8 @@ import { failure } from '@/server/http';
 import { getWorkspace } from '@/server/domain';
 import { consumeRateLimit, clientAddress, rateLimitFailure } from '@/server/rate-limit';
 import { requireWatchConnection } from '@/server/watch-connection';
-import { watchEventsReady, watchMentionsReady } from '@/server/watch-events';
+import { watchEventsEnabled, watchEventsReady, watchMentionsReady } from '@/server/watch-events';
+import { watchReviewActive } from '@/server/watch-candidate-review';
 
 export const runtime = 'nodejs';
 export async function POST(request: Request) {
@@ -16,7 +17,8 @@ export async function POST(request: Request) {
     const [dataTransferEnabled, mentionTransferEnabled] = await Promise.all([
       watchEventsReady(workspace.id), watchMentionsReady(workspace.id),
     ]);
-    return Response.json({ connected: true, dataTransferEnabled, mentionTransferEnabled }, {
+    return Response.json({ connected: true, dataTransferEnabled, mentionTransferEnabled,
+      journalTransferEnabled: watchEventsEnabled() && watchReviewActive() }, {
       headers: { 'Cache-Control': 'no-store' },
     });
   } catch (error) { return rateLimitFailure(error) ?? failure(error); }

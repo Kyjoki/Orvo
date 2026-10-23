@@ -12,6 +12,7 @@ const statusLabels: Record<string, string> = {
   ignored: 'Без уведомления', duplicate: 'Повтор', 'limit-reached': 'Лимит анализа',
   failed: 'Ошибка доставки', error: 'Ошибка обработки', processing: 'Обрабатывается',
   stale: 'Устарело', disabled: 'Передача выключена',
+  observed: 'Только в журнале · без ИИ и Telegram',
 };
 
 const demoCandidate: Candidate = {
@@ -29,7 +30,7 @@ function CandidateCard({ item, busy, demo = false, onRate }: {
   useEffect(() => { setExplanation(item.explanation || ''); }, [item.explanation]);
   return <article className="watch-candidate">
     <div className="watch-candidate-meta"><strong>{item.chatTitle}</strong><time dateTime={item.observedAt}>{new Date(item.observedAt).toLocaleString('ru-RU', { timeZone: 'Asia/Qyzylorda', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time></div>
-    <p className="subtle">{demo ? 'Пример · не отправлялся в Telegram' : `${item.reason === 'mention' ? 'Вас упомянули' : item.pinned ? 'Закреплённый чат' : 'Новый кандидат'} · ${statusLabels[item.status] || item.status}`}</p>
+    <p className="subtle">{demo ? 'Пример · не отправлялся в Telegram' : `${item.reason === 'observation' ? 'Изменение видимого превью' : item.reason === 'mention' ? 'Вас упомянули' : item.pinned ? 'Закреплённый чат' : 'Отобранный кандидат'} · ${statusLabels[item.status] || item.status}`}</p>
     {item.excerpts.map((part, index) => <p className="watch-candidate-text" key={index}>{part}</p>)}
     <label className="field watch-candidate-note"><span>Почему так считаешь? (необязательно)</span>
       <textarea value={explanation} onChange={(event) => setExplanation(event.target.value)} maxLength={400} rows={2} placeholder="Например: клиент ждёт помощи, вопрос ещё не решён"/>
@@ -86,14 +87,14 @@ export default function WatchCandidateList() {
 
   return <section className="watch-candidates">
     <div className="watch-candidates-heading">
-      <div><h3>Кандидаты за 23 октября</h3><p className="subtle">Только новые события, которые расширение отберёт и передаст в Orvo. Доступны семь дней, затем удаляются. Оценки помогают следующим проверкам ИИ.</p></div>
+      <div><h3>Журнал изменений за 23 октября</h3><p className="subtle">Новые изменения видимого списка чатов и отобранные кандидаты. Изменения вне фильтра сохраняются без ИИ и Telegram. Доступны семь дней, затем удаляются. Оценки помогают следующим проверкам ИИ.</p></div>
       <button type="button" className="button secondary" disabled={busy} onClick={() => void load()}>Обновить</button>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    {loaded && <p className="subtle" role="status">Всего кандидатов: {total}. Показано: {items.length}.</p>}
-    {loaded && items.length === 0 && <p className="subtle">Пока кандидатов нет. Запись идёт сегодня по времени рабочего пространства, если передача расширения включена.</p>}
+    {loaded && <p className="subtle" role="status">Всего записей: {total}. Показано: {items.length}.</p>}
+    {loaded && items.length === 0 && <p className="subtle">Пока изменений нет. Запись идёт сегодня по времени рабочего пространства, если передача расширения включена.</p>}
     {loaded && items.length === 0 && <CandidateCard item={{ ...demoCandidate, label: demoLabel }} busy={false} demo onRate={setDemoLabel}/>}
-    {items.length > 0 && <ol className="watch-candidates-list" aria-label="Список отобранных кандидатов">
+    {items.length > 0 && <ol className="watch-candidates-list" aria-label="Журнал изменений чатов">
       {items.map((item) => <li key={item.eventId}>
         <details className="watch-candidate-list-item" open={items.length === 1}>
           <summary>
