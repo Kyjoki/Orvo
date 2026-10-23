@@ -15,7 +15,7 @@ const statusLabels: Record<string, string> = {
 };
 
 const demoCandidate: Candidate = {
-  eventId: 'demo', observedAt: '2026-10-24T04:15:00.000Z',
+  eventId: 'demo', observedAt: '2026-10-23T04:15:00.000Z',
   chatTitle: 'Тестовый чат — вымышленный',
   excerpts: ['Терминал не принимает оплату, клиенты ждут. Нужен специалист для проверки.'],
   pinned: true, reason: 'urgent', status: 'ignored', label: null,
@@ -84,11 +84,11 @@ export default function WatchCandidateList() {
 
   return <section className="watch-candidates">
     <div className="watch-candidates-heading">
-      <div><h3>Кандидаты за 24 октября</h3><p className="subtle">Только новые события, которые расширение отберёт и передаст в Orvo. Доступны семь дней, затем удаляются. Оценки помогают следующим проверкам ИИ.</p></div>
+      <div><h3>Кандидаты за 23 октября</h3><p className="subtle">Только новые события, которые расширение отберёт и передаст в Orvo. Доступны семь дней, затем удаляются. Оценки помогают следующим проверкам ИИ.</p></div>
       <button type="button" className="button secondary" disabled={busy} onClick={() => void load()}>Обновить</button>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    {loaded && items.length === 0 && <p className="subtle">Пока кандидатов нет. Запись начнётся 24 октября по времени рабочего пространства, если передача расширения включена.</p>}
+    {loaded && items.length === 0 && <p className="subtle">Пока кандидатов нет. Запись идёт сегодня по времени рабочего пространства, если передача расширения включена.</p>}
     <div className="watch-candidates-list">
       {loaded && items.length === 0 && <CandidateCard item={{ ...demoCandidate, label: demoLabel }} busy={false} demo onRate={setDemoLabel}/>}
       {items.map((item) => <CandidateCard key={item.eventId} item={item} busy={busy} onRate={(label, explanation) => void rate(item.eventId, label, explanation)}/>)}

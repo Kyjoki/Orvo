@@ -17,17 +17,17 @@ const workspace = await getWorkspace();
 
 after(async () => { const database = await getDatabase(); if (database.kind === 'pglite') await database.db.close(); });
 
-const inDay = new Date('2026-10-24T05:00:00.000Z');
+const inDay = new Date('2026-10-23T05:00:00.000Z');
 const event = () => ({ eventId: randomBytes(32).toString('hex'), chatTitle: 'Клиент +7 777 111 22 33',
   pinned: true, excerpts: ['Терминал не работает, помощь нужна сейчас https://example.com/private'],
   reason: 'pinned-request' as const, observedAt: inDay.toISOString(), level: 'balanced' as const });
 
 test('the review window follows the work timezone and ignores other days', async () => {
-  assert.equal(watchReviewActive(new Date('2026-10-23T18:59:59Z')), false);
-  assert.equal(watchReviewActive(new Date('2026-10-23T19:00:00Z')), true);
-  assert.equal(watchReviewActive(new Date('2026-10-24T18:59:59Z')), true);
-  assert.equal(watchReviewActive(new Date('2026-10-24T19:00:00Z')), false);
-  assert.equal(await recordWatchCandidate(workspace.id, event(), new Date('2026-10-23T05:00:00Z')), false);
+  assert.equal(watchReviewActive(new Date('2026-10-22T18:59:59Z')), false);
+  assert.equal(watchReviewActive(new Date('2026-10-22T19:00:00Z')), true);
+  assert.equal(watchReviewActive(new Date('2026-10-23T18:59:59Z')), true);
+  assert.equal(watchReviewActive(new Date('2026-10-23T19:00:00Z')), false);
+  assert.equal(await recordWatchCandidate(workspace.id, event(), new Date('2026-10-22T05:00:00Z')), false);
 });
 
 test('candidate is encrypted, redacted, deduplicated, rated and scoped to owner workspace', async () => {

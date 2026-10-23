@@ -5,7 +5,7 @@ import { redactWatchText } from './watch-triage';
 import type { WatchEvent, WatchEventStatus } from './watch-events';
 import { DomainError } from '../shared/types';
 
-export const WATCH_REVIEW_DAY = '2026-10-24';
+export const WATCH_REVIEW_DAY = '2026-10-23';
 const RETENTION_DAYS = 7;
 const PAGE_SIZE = 100;
 const MAX_PAYLOAD_BYTES = 6500;
