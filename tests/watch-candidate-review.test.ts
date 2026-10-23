@@ -42,6 +42,7 @@ test('candidate is encrypted, redacted, deduplicated, rated and scoped to owner 
   assert.equal(stored.ciphertext.includes('Терминал'), false);
   const page = await listWatchCandidates(workspace.id, 0, inDay);
   assert.equal(page.items.length, 1);
+  assert.equal(page.total, 1);
   assert.equal(page.items[0].status, 'ignored');
   assert.match(page.items[0].chatTitle, /\[номер скрыт\]/);
   assert.match(page.items[0].excerpts[0], /\[ссылка скрыта\]/);
@@ -61,7 +62,9 @@ test('candidate is encrypted, redacted, deduplicated, rated and scoped to owner 
   });
   assert.match(instructions, /почему владелец так решил: Клиент ждёт/);
   assert.equal(instructions.includes('777 111'), false);
-  assert.equal((await listWatchCandidates('other-workspace', 0, inDay)).items.length, 0);
+  const otherPage = await listWatchCandidates('other-workspace', 0, inDay);
+  assert.equal(otherPage.items.length, 0);
+  assert.equal(otherPage.total, 0);
 });
 
 test('expired candidates cannot be reviewed and are purged on access', async () => {

@@ -81,6 +81,9 @@ export async function finishWatchCandidate(workspaceId: string, eventId: string,
 
 export async function listWatchCandidates(workspaceId: string, offset: number, now = new Date()) {
   await purgeExpired(workspaceId, now);
+  const count = await query<{ total: number }>(`SELECT COUNT(*)::integer AS total
+    FROM watch_candidate_reviews WHERE workspace_id=$1 AND capture_day=$2 AND expires_at>$3`,
+  [workspaceId, WATCH_REVIEW_DAY, now]);
   const rows = (await query<CandidateRow>(`SELECT r.event_id,r.observed_at,r.reason,
     CASE WHEN o.state='delivered' THEN 'delivered' WHEN o.state IN ('dead','expired') THEN 'failed'
       WHEN o.state IN ('pending','leased') THEN 'queued' ELSE r.status END AS status,
@@ -93,7 +96,7 @@ export async function listWatchCandidates(workspaceId: string, offset: number, n
   return { items: rows.slice(0, PAGE_SIZE).map((row) => ({
     eventId: row.event_id, observedAt: new Date(row.observed_at).toISOString(), reason: row.reason,
     status: row.status, label: row.label, ...decrypt(workspaceId, row),
-  })), hasMore: rows.length > PAGE_SIZE };
+  })), hasMore: rows.length > PAGE_SIZE, total: count.rows[0]?.total ?? 0 };
 }
 
 export const watchCandidateRatingInput = z.object({ eventId: z.string().regex(/^[a-f0-9]{64}$/),

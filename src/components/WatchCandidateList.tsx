@@ -47,6 +47,7 @@ export default function WatchCandidateList() {
   const [items, setItems] = useState<Candidate[]>([]);
   const [demoLabel, setDemoLabel] = useState<Candidate['label']>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [loaded, setLoaded] = useState(false);
@@ -59,6 +60,7 @@ export default function WatchCandidateList() {
       if (!response.ok) throw new Error(data.error?.message || 'Не удалось загрузить кандидатов.');
       setItems((previous) => offset ? [...previous, ...data.items] : data.items);
       setHasMore(data.hasMore);
+      setTotal(data.total);
       setLoaded(true);
     } catch (cause) { setError((cause as Error).message); }
     finally { setBusy(false); }
@@ -88,11 +90,21 @@ export default function WatchCandidateList() {
       <button type="button" className="button secondary" disabled={busy} onClick={() => void load()}>Обновить</button>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
+    {loaded && <p className="subtle" role="status">Всего кандидатов: {total}. Показано: {items.length}.</p>}
     {loaded && items.length === 0 && <p className="subtle">Пока кандидатов нет. Запись идёт сегодня по времени рабочего пространства, если передача расширения включена.</p>}
-    <div className="watch-candidates-list">
-      {loaded && items.length === 0 && <CandidateCard item={{ ...demoCandidate, label: demoLabel }} busy={false} demo onRate={setDemoLabel}/>}
-      {items.map((item) => <CandidateCard key={item.eventId} item={item} busy={busy} onRate={(label, explanation) => void rate(item.eventId, label, explanation)}/>)}
-    </div>
+    {loaded && items.length === 0 && <CandidateCard item={{ ...demoCandidate, label: demoLabel }} busy={false} demo onRate={setDemoLabel}/>}
+    {items.length > 0 && <ol className="watch-candidates-list" aria-label="Список отобранных кандидатов">
+      {items.map((item) => <li key={item.eventId}>
+        <details className="watch-candidate-list-item" open={items.length === 1}>
+          <summary>
+            <span className="watch-candidate-list-top"><strong>{item.chatTitle}</strong><time dateTime={item.observedAt}>{new Date(item.observedAt).toLocaleString('ru-RU', { timeZone: 'Asia/Qyzylorda', hour: '2-digit', minute: '2-digit' })}</time></span>
+            <span className="watch-candidate-list-preview">{item.excerpts.at(-1)}</span>
+            <span className="watch-candidate-list-status">{item.label === 'important' ? 'Стоило уведомить' : item.label === 'noise' ? 'Не стоило' : 'Не оценено'} · {statusLabels[item.status] || item.status}</span>
+          </summary>
+          <CandidateCard item={item} busy={busy} onRate={(label, explanation) => void rate(item.eventId, label, explanation)}/>
+        </details>
+      </li>)}
+    </ol>}
     {hasMore && <button type="button" className="button secondary" disabled={busy} onClick={() => void load(items.length)}>Показать ещё</button>}
   </section>;
 }
