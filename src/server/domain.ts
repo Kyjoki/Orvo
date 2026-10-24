@@ -34,7 +34,93 @@ export async function getWorkspace(){
   await query('INSERT INTO workspaces(id,name,settings) VALUES($1,$2,$3) ON CONFLICT(id) DO NOTHING',[workspaceId,'Orvo',json(settings)]);
   const row=(await query('SELECT * FROM workspaces WHERE id=$1',[workspaceId])).rows[0];return {id:row.id,name:row.name,ownerId:row.settings.ownerId||null,version:row.version,settings:safeSettings(row.settings)};
 }
-export async function bindWorkspaceOwner(ownerId:string,email:string){const w=await getWorkspace();return transaction(async db=>{const row=await workspaceLock(db,w.id);assert(!row.settings.ownerId||row.settings.ownerId===ownerId,'OWNER_ALREADY_CONFIGURED','Владелец пространства уже настроен.');await db.query('INSERT INTO owners(id,workspace_id,email) VALUES($1,$2,$3) ON CONFLICT(id) DO NOTHING',[ownerId,w.id,email]);await db.query('UPDATE workspaces SET settings=$1,version=version+1 WHERE id=$2',[json({...row.settings,ownerId}),w.id]);return{id:w.id,ownerId};});}
+function workspaceRecord(row:any,ownerId:string){return{id:row.id,name:row.name,ownerId,version:row.version,officeDesign:row.settings?.officeDesign==='studio'?'studio':'classic',settings:safeSettings(row.settings||{})};}
+export async function getWorkspaceForOwner(ownerId:string,requestedId?:string|null){
+  const result=await query(`SELECT w.* FROM workspace_owners wo JOIN workspaces w ON w.id=wo.workspace_id WHERE wo.owner_id=$1 AND w.archived_at IS NULL AND ($2::text IS NULL OR w.id=$2) ORDER BY wo.created_at ASC LIMIT 1`,[ownerId,requestedId||null]);
+  let row=result.rows[0];
+  if(!row){const primary=(await query('SELECT w.* FROM owners o JOIN workspaces w ON w.id=o.workspace_id WHERE o.id=$1 AND w.archived_at IS NULL',[ownerId])).rows[0];if(primary&&(!requestedId||requestedId===primary.id))row=primary;}
+  assert(row,'FORBIDDEN','Нет доступа к этому офису.',403);return workspaceRecord(row,ownerId);
+}
+export async function listOwnerWorkspaces(ownerId:string){
+  const result=await query(`SELECT w.id,w.name,w.settings->>'officeDesign' AS office_design,w.created_at FROM workspace_owners wo JOIN workspaces w ON w.id=wo.workspace_id WHERE wo.owner_id=$1 AND w.archived_at IS NULL ORDER BY wo.created_at ASC`,[ownerId]);
+  if(result.rows.length)return result.rows.map((row:any)=>({id:row.id,name:row.name,officeDesign:row.office_design==='studio'?'studio':'classic',createdAt:row.created_at}));
+  const primary=(await query('SELECT w.id,w.name,w.settings->>\'officeDesign\' AS office_design,w.created_at FROM owners o JOIN workspaces w ON w.id=o.workspace_id WHERE o.id=$1 AND w.archived_at IS NULL',[ownerId])).rows;
+  return primary.map((row:any)=>({id:row.id,name:row.name,officeDesign:row.office_design==='studio'?'studio':'classic',createdAt:row.created_at}));
+}
+export async function listArchivedOwnerWorkspaces(ownerId:string){
+  const rows=(await query(`SELECT w.id,w.name,w.settings->>'officeDesign' AS office_design,w.created_at
+    FROM workspace_owners wo JOIN workspaces w ON w.id=wo.workspace_id
+    WHERE wo.owner_id=$1 AND w.archived_at IS NOT NULL ORDER BY w.archived_at DESC`,[ownerId])).rows;
+  return rows.map((row:any)=>({id:row.id,name:row.name,officeDesign:row.office_design==='studio'?'studio':'classic',createdAt:row.created_at}));
+}
+export async function createOwnerWorkspace(ownerId:string,name:string){
+  const cleanName=text(name.trim(),60);const newId=id();
+  await transaction(async db=>{
+    const owner=(await db.query('SELECT * FROM owners WHERE id=$1 FOR UPDATE',[ownerId])).rows[0];assert(owner,'FORBIDDEN','Владелец не найден.',403);
+    const count=(await db.query('SELECT count(*)::int AS count FROM workspace_owners WHERE owner_id=$1',[ownerId])).rows[0]?.count||0;assert(count<20,'OFFICE_LIMIT','Можно создать не больше 20 офисов.',400);
+    const source=(await db.query('SELECT w.settings FROM workspaces w WHERE w.id=$1',[owner.workspace_id])).rows[0]?.settings||{};
+    const settings={...source,ownerId,officeDesign:'studio',model:'',checkedModels:[],modelChecked:false,modelCheckAt:null,modelCheckError:null};
+    await db.query('INSERT INTO workspaces(id,name,settings) VALUES($1,$2,$3)',[newId,cleanName,json(settings)]);
+    await db.query('INSERT INTO workspace_owners(owner_id,workspace_id) VALUES($1,$2)',[ownerId,newId]);
+  });
+  return getWorkspaceForOwner(ownerId,newId);
+}
+export async function renameOwnerWorkspace(ownerId:string,workspaceId:string,name:string){
+  const cleanName=text(name.trim(),60);
+  await transaction(async db=>{const membership=await db.query('SELECT 1 FROM workspace_owners WHERE owner_id=$1 AND workspace_id=$2 FOR UPDATE',[ownerId,workspaceId]);assert(membership.rows[0],'FORBIDDEN','Нет доступа к этому офису.',403);await db.query('UPDATE workspaces SET name=$1,version=version+1 WHERE id=$2',[cleanName,workspaceId]);});
+  return getWorkspaceForOwner(ownerId,workspaceId);
+}
+export async function archiveOwnerWorkspace(ownerId:string,workspaceId:string,confirmName:string){
+  return transaction(async db=>{
+    const owner=(await db.query('SELECT workspace_id FROM owners WHERE id=$1 FOR UPDATE',[ownerId])).rows[0];
+    assert(owner,'FORBIDDEN','Владелец не найден.',403);
+    const membership=await db.query('SELECT 1 FROM workspace_owners WHERE owner_id=$1 AND workspace_id=$2 FOR UPDATE',[ownerId,workspaceId]);
+    assert(membership.rows[0],'FORBIDDEN','Нет доступа к этому офису.',403);
+    assert(owner.workspace_id!==workspaceId,'PRIMARY_OFFICE','Основной офис владельца нельзя убрать в архив.',409);
+    const offices=(await db.query(`SELECT w.id FROM workspace_owners wo JOIN workspaces w ON w.id=wo.workspace_id
+      WHERE wo.owner_id=$1 AND w.archived_at IS NULL FOR UPDATE OF w`,[ownerId])).rows;
+    assert(offices.length>1,'LAST_OFFICE','Нельзя убрать последний офис.',409);
+    const office=(await db.query('SELECT name,archived_at FROM workspaces WHERE id=$1 FOR UPDATE',[workspaceId])).rows[0];
+    assert(office,'NOT_FOUND','Офис не найден.',404);
+    assert(!office.archived_at,'OFFICE_ALREADY_ARCHIVED','Этот офис уже в архиве.',409);
+    assert(confirmName===office.name,'OFFICE_NAME_MISMATCH','Название не совпадает. Офис не перемещён.',400);
+    await db.query('UPDATE workspaces SET archived_at=now(),version=version+1 WHERE id=$1',[workspaceId]);
+  });
+}
+export async function restoreOwnerWorkspace(ownerId:string,workspaceId:string){
+  await transaction(async db=>{
+    const owner=(await db.query('SELECT id FROM owners WHERE id=$1 FOR UPDATE',[ownerId])).rows[0];
+    assert(owner,'FORBIDDEN','Владелец не найден.',403);
+    const membership=await db.query('SELECT 1 FROM workspace_owners WHERE owner_id=$1 AND workspace_id=$2 FOR UPDATE',[ownerId,workspaceId]);
+    assert(membership.rows[0],'FORBIDDEN','Нет доступа к этому офису.',403);
+    const result=await db.query('UPDATE workspaces SET archived_at=NULL,version=version+1 WHERE id=$1 AND archived_at IS NOT NULL',[workspaceId]);
+    assert(result.rowCount,'NOT_FOUND','Архивный офис не найден.',404);
+  });
+  return getWorkspaceForOwner(ownerId,workspaceId);
+}
+export async function permanentlyDeleteArchivedWorkspace(ownerId:string,workspaceId:string,confirmName:string){
+  await transaction(async db=>{
+    const owner=(await db.query('SELECT workspace_id FROM owners WHERE id=$1 FOR UPDATE',[ownerId])).rows[0];
+    assert(owner,'FORBIDDEN','Владелец не найден.',403);
+    const membership=await db.query('SELECT 1 FROM workspace_owners WHERE owner_id=$1 AND workspace_id=$2 FOR UPDATE',[ownerId,workspaceId]);
+    assert(membership.rows[0],'FORBIDDEN','Нет доступа к этому офису.',403);
+    assert(owner.workspace_id!==workspaceId,'PRIMARY_OFFICE','Основной офис удалить нельзя.',409);
+    const office=(await db.query('SELECT name,archived_at FROM workspaces WHERE id=$1 FOR UPDATE',[workspaceId])).rows[0];
+    assert(office,'NOT_FOUND','Офис не найден.',404);
+    assert(office.archived_at,'OFFICE_NOT_ARCHIVED','Сначала переместите офис в архив.',409);
+    assert(confirmName===office.name,'OFFICE_NAME_MISMATCH','Название не совпадает. Офис не удалён.',400);
+    const running=(await db.query('SELECT count(*)::int AS count FROM tasks WHERE workspace_id=$1 AND status=ANY($2::text[])',[workspaceId,active])).rows[0]?.count||0;
+    assert(running===0,'OFFICE_HAS_ACTIVE_TASKS','В архивном офисе ещё есть активные задачи. Завершите или отмените их перед удалением.',409);
+
+    // Permanent purge is restricted to archived, owner-scoped offices and runs atomically.
+    for(const table of ['runtime_controls','task_runs','task_steps','messages','approvals','artifacts','usage_entries','attachments','notifications','audit_events','watch_alert_outbox','watch_candidate_reviews','watch_feedback','watch_analysis_events','watch_analysis_usage','watch_connections','telegram_connections','command_requests','model_checks','instruction_versions','memories','tasks','projects','agents']){
+      await db.query(`DELETE FROM ${table} WHERE workspace_id=$1`,[workspaceId]);
+    }
+    await db.query('DELETE FROM workspace_owners WHERE owner_id=$1 AND workspace_id=$2',[ownerId,workspaceId]);
+    await db.query('DELETE FROM workspaces WHERE id=$1',[workspaceId]);
+  });
+}
+export async function bindWorkspaceOwner(ownerId:string,email:string){const w=await getWorkspace();return transaction(async db=>{const row=await workspaceLock(db,w.id);assert(!row.settings.ownerId||row.settings.ownerId===ownerId,'OWNER_ALREADY_CONFIGURED','Владелец пространства уже настроен.');await db.query('INSERT INTO owners(id,workspace_id,email) VALUES($1,$2,$3) ON CONFLICT(id) DO NOTHING',[ownerId,w.id,email]);await db.query('UPDATE workspaces SET settings=$1,version=version+1 WHERE id=$2',[json({...row.settings,ownerId}),w.id]);await db.query('INSERT INTO workspace_owners(owner_id,workspace_id) VALUES($1,$2) ON CONFLICT DO NOTHING',[ownerId,w.id]);return{id:w.id,ownerId};});}
 export async function recordModelCheck(workspaceId:string,result:{ok:boolean;model:string;error?:string}){return transaction(async db=>{const w=await workspaceLock(db,workspaceId);const checkedModels=new Set<string>(w.settings.checkedModels||[]);if(result.ok)checkedModels.add(result.model);else checkedModels.delete(result.model);const settings={...w.settings,checkedModels:[...checkedModels],modelChecked:result.ok,modelCheckAt:now(),modelCheckError:result.ok?null:'Подключение модели не подтверждено. Проверьте серверные настройки.'};await db.query('UPDATE workspaces SET settings=$1,version=version+1 WHERE id=$2',[json(settings),workspaceId]);await audit(db,workspaceId,'model.checked',{ok:result.ok,model:result.model});return safeSettings(settings);});}
 export async function getSnapshot(workspaceId:string){
   const w=(await query('SELECT * FROM workspaces WHERE id=$1',[workspaceId])).rows[0];assert(w,'NOT_FOUND','Пространство не найдено.',404);
@@ -43,7 +129,9 @@ export async function getSnapshot(workspaceId:string){
   const rows=Object.fromEntries(tables.map((table,index)=>[table,results[index].rows]));
   const tasks=rows.tasks.map((row:any)=>({...serialize(row),steps:rows.task_steps.filter((s:any)=>s.task_id===row.id).map((s:any)=>{const v=serialize(s);delete v.text;return v;})}));
   const agents=rows.agents.map((row:any)=>{const a=serialize(row);const current=currentAgentTask(tasks,a.id);return {...a,status:a.archived?'archived':current?.status||(!configured(w.settings,a)?'requires_setup':'idle'),currentTask:current?.id||null,queueLength:tasks.filter((t:any)=>t.agentId===a.id&&t.status==='queued').length};});
-  return {workspace:{id:w.id,name:w.name,version:w.version},settings:safeSettings(w.settings),agents,tasks,memories:rows.memories.filter((r:any)=>r.active).map(serialize),messages:rows.messages.map(serialize),approvals:rows.approvals.map((r:any)=>({...serialize(r),params:r.params,status:r.state,state:r.state,taskVersion:r.task_version,expiresAt:r.expires_at,tool:'memory.publish'})),artifacts:rows.artifacts.map(serialize),notifications:rows.notifications.map((r:any)=>({...serialize(r),kind:r.kind,readAt:r.read_at,read:!!r.read_at})),events:rows.audit_events.map((r:any)=>({...serialize(r),type:r.type})),usage:rows.usage_entries.map((r:any)=>({...serialize(r),state:r.state,reservedTokens:r.reserved_tokens,inputTokens:r.input_tokens,outputTokens:r.output_tokens,tokens:r.input_tokens+r.output_tokens,totalTokens:r.input_tokens+r.output_tokens,costMicrousd:r.cost_microusd})),attachments:rows.attachments.map(serialize),projects:rows.projects.map(serialize),syncedAt:now()};
+  const ownerId=w.settings.ownerId||(await query('SELECT id FROM owners WHERE workspace_id=$1',[workspaceId])).rows[0]?.id||'';
+  const offices=await listOwnerWorkspaces(ownerId);
+  return {workspace:{id:w.id,name:w.name,version:w.version,officeDesign:w.settings.officeDesign==='studio'?'studio':'classic'},offices,archivedOffices:await listArchivedOwnerWorkspaces(ownerId),settings:safeSettings(w.settings),agents,tasks,memories:rows.memories.filter((r:any)=>r.active).map(serialize),messages:rows.messages.map(serialize),approvals:rows.approvals.map((r:any)=>({...serialize(r),params:r.params,status:r.state,state:r.state,taskVersion:r.task_version,expiresAt:r.expires_at,tool:'memory.publish'})),artifacts:rows.artifacts.map(serialize),notifications:rows.notifications.map((r:any)=>({...serialize(r),kind:r.kind,readAt:r.read_at,read:!!r.read_at})),events:rows.audit_events.map((r:any)=>({...serialize(r),type:r.type})),usage:rows.usage_entries.map((r:any)=>({...serialize(r),state:r.state,reservedTokens:r.reserved_tokens,inputTokens:r.input_tokens,outputTokens:r.output_tokens,tokens:r.input_tokens+r.output_tokens,totalTokens:r.input_tokens+r.output_tokens,costMicrousd:r.cost_microusd})),attachments:rows.attachments.map(serialize),projects:rows.projects.map(serialize),syncedAt:now()};
 }
 async function updateTask(db:Queryable,row:any,status:string,patch:any={}){
   assert(status===row.status||transitions[row.status]?.includes(status),'INVALID_TRANSITION',`Недопустимый переход задачи: ${row.status} → ${status}.`);

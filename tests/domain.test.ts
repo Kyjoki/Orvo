@@ -74,3 +74,22 @@ test('an unknown runtime send cannot be restarted by an owner command',async()=>
   await query("UPDATE tasks SET status='waiting_for_input',data=data || $2::jsonb WHERE id=$1",[start.id,JSON.stringify({workflowRunId:'uncertain-run',runtimeDispatchUncertainId:'uncertain-run'})]);
   await assert.rejects(cmd('task.start',{id:start.id}),(error:any)=>error.code==='RUNTIME_RECONCILIATION_REQUIRED');
 });
+
+test('owner can create, switch and rename an isolated startup office',async()=>{
+  const ownerId=`owner-${randomUUID()}`;
+  await query('INSERT INTO owners(id,workspace_id,email) VALUES($1,$2,$3)',[ownerId,workspace.id,`${ownerId}@example.test`]);
+  await query('INSERT INTO workspace_owners(owner_id,workspace_id) VALUES($1,$2)',[ownerId,workspace.id]);
+  const before=await domain.getSnapshot(workspace.id);
+  const created=await domain.createOwnerWorkspace(ownerId,'Моя студия');
+  assert.equal(created.name,'Моя студия');
+  assert.equal(created.officeDesign,'studio');
+  assert.notEqual(created.id,workspace.id);
+  assert.deepEqual((await domain.getSnapshot(created.id)).agents,[]);
+  await query('INSERT INTO agents(id,workspace_id,role_key,data) VALUES($1,$2,$3,$4)',[randomUUID(),created.id,'startup-test',JSON.stringify({name:'Тестовый агент'})]);
+  assert.equal((await domain.getSnapshot(created.id)).agents.length,1);
+  assert.equal((await domain.getSnapshot(workspace.id)).agents.length,before.agents.length);
+  const renamed=await domain.renameOwnerWorkspace(ownerId,created.id,'Название стартапа');
+  assert.equal(renamed.name,'Название стартапа');
+  assert.deepEqual((await domain.listOwnerWorkspaces(ownerId)).map((office:any)=>office.name),[workspace.name,'Название стартапа']);
+  await assert.rejects(domain.getWorkspaceForOwner(ownerId,'not-this-owners-office'),(error:any)=>error.code==='FORBIDDEN');
+});

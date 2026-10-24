@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {validWorkspaceId} from '../src/server/runtime-queue';
-import {validReconcileRequest} from '../src/app/ops/reconcile/route';
+import {validReconcileRequest} from '../src/server/reconcile-auth';
 import {POST as queueCallback} from '../src/app/api/queues/runtime/route';
 
 test('queue payload is scoped to a simple workspace identifier',()=>{

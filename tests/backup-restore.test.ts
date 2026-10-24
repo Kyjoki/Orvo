@@ -26,6 +26,9 @@ test('encrypted archive rejects tampering and restores isolated PGlite data with
     const content = Buffer.from('# Accepted source attachment\n' + 'Restored bytes remain unchanged.');
     const oldKey = `orvo/${workspace}/${attachment}/sealed.md`;
     await source.query('INSERT INTO workspaces(id,name,settings) VALUES($1,$2,$3)', [workspace, 'Orvo', JSON.stringify({ modelChecked: true, checkedModels: ['live-model'] })]);
+    const owner=`owner-${randomUUID()}`;
+    await source.query('INSERT INTO owners(id,workspace_id,email) VALUES($1,$2,$3)',[owner,workspace,`${owner}@example.test`]);
+    await source.query('INSERT INTO workspace_owners(owner_id,workspace_id) VALUES($1,$2)',[owner,workspace]);
     await source.query('INSERT INTO agents(id,workspace_id,role_key,data) VALUES($1,$2,$3,$4)', [agent, workspace, 'writer', JSON.stringify({ name: 'Writer' })]);
     await source.query('INSERT INTO tasks(id,workspace_id,agent_id,status,data,claimed) VALUES($1,$2,$3,$4,$5,true)', [task, workspace, agent, 'running', JSON.stringify({ workflowRunId: 'old-runtime', runtimeDispatchSentId: 'old-runtime', claimedOwner: 'old-runtime' })]);
     await source.query('INSERT INTO attachments(id,workspace_id,data) VALUES($1,$2,$3)', [attachment, workspace, JSON.stringify({ name: 'source.md', mime: 'text/plain', storage: 'blob', key: oldKey, status: 'ready', size: content.length })]);
@@ -38,7 +41,7 @@ test('encrypted archive rejects tampering and restores isolated PGlite data with
     await source.query('INSERT INTO "session"(id,user_id) VALUES($1,$2)', ['old-session', 'owner']);
     await source.query('INSERT INTO "verification"(id,token) VALUES($1,$2)', ['challenge', 'synthetic-challenge']);
 
-    const tableNames = ['workspaces', 'agents', 'tasks', 'attachments', 'usage_entries', 'runtime_controls', 'mfa_session_grants', 'user', 'account', 'twoFactor', 'session', 'verification'];
+    const tableNames = ['workspaces', 'owners', 'workspace_owners', 'agents', 'tasks', 'attachments', 'usage_entries', 'runtime_controls', 'mfa_session_grants', 'user', 'account', 'twoFactor', 'session', 'verification'];
     const fixture = { tables: [] as { name: string; rows: Record<string, unknown>[] }[] };
     for (const name of tableNames) fixture.tables.push({ name, rows: (await source.query<Record<string, unknown>>(`SELECT * FROM "${name}"`)).rows });
     const dbPath = path.join(root, 'fixture.json'), filePath = path.join(root, 'attachment.bin'), archive = path.join(root, 'backup.orvobak');

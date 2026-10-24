@@ -154,7 +154,7 @@ export async function reconcileTargetBlobObjects(staged: StagedBackup, token: st
 export async function restoreLogicalFixture(db: Queryable, staged: StagedBackup, quarantine = true) {
   if (process.env.ORVO_TEST_MODE !== '1' || process.env.VERCEL || staged.manifest.database.format !== 'pglite-logical') throw new Error('Logical restore is only available in isolated test mode.');
   const fixture = JSON.parse(await readFile(staged.databasePath, 'utf8')) as { tables?: { name: string; rows: Record<string, unknown>[] }[] };
-  const allowed = new Set(['workspaces', 'agents', 'tasks', 'attachments', 'usage_entries', 'runtime_controls', 'approvals', 'model_checks', 'mfa_session_grants', 'mfa_totp_replay', 'user', 'account', 'twoFactor', 'session', 'verification']);
+  const allowed = new Set(['workspaces', 'owners', 'workspace_owners', 'agents', 'tasks', 'attachments', 'usage_entries', 'runtime_controls', 'approvals', 'model_checks', 'mfa_session_grants', 'mfa_totp_replay', 'user', 'account', 'twoFactor', 'session', 'verification']);
   if (!Array.isArray(fixture.tables) || fixture.tables.length > allowed.size) throw new Error('Invalid logical fixture.');
   await db.query('BEGIN');
   try {

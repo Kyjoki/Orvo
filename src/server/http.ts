@@ -1,13 +1,18 @@
 import { getAuth } from './auth';
-import { getWorkspace } from './domain';
+import { getWorkspaceForOwner } from './domain';
 import {DomainError} from '../shared/types';
 import { appOrigin } from './app-origin';
 import { mfaStatus } from './mfa';
 export async function requireOwnerSession(request: Request) {
   const session = await (await getAuth()).api.getSession({headers:request.headers});
   if (!session) throw Object.assign(new Error('Войдите в пространство Orvo.'), {code:'UNAUTHENTICATED',status:401});
-  const workspace = await getWorkspace();
-  if (workspace.ownerId !== session.user.id) throw Object.assign(new Error('Нет доступа к пространству.'), {code:'FORBIDDEN',status:403});
+  const cookie=request.headers.get('cookie')||'';
+  const selected=cookie.split(';').map(part=>part.trim()).find(part=>part.startsWith('orvo-office='))?.slice('orvo-office='.length);
+  let requestedId:string|null=null;
+  if(selected){try{const value=decodeURIComponent(selected);if(value.length<=100)requestedId=value;}catch{}}
+  let workspace:Awaited<ReturnType<typeof getWorkspaceForOwner>>;
+  try{workspace=await getWorkspaceForOwner(session.user.id,requestedId);}
+  catch(error){if(!requestedId||(error as {code?:string}).code!=='FORBIDDEN')throw error;workspace=await getWorkspaceForOwner(session.user.id);}
   return {session,workspace};
 }
 export async function requireOwner(request: Request) {
